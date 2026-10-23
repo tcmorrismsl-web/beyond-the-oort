@@ -8,7 +8,7 @@ import { readKey, writeKey, type StorageResult } from './storage';
  *    is the most valuable thing in the game.
  *  - Every load is validated. A corrupt save is reported, never half-loaded.
  */
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 const SAVE_KEY = 'game.save';
 
 export const SaveSchema = z.object({
@@ -24,9 +24,25 @@ export const SaveSchema = z.object({
     y: z.number(),
     angle: z.number(),
   }),
-  fuel: z.number().int().nonnegative(),
   visited: z.array(z.string().min(1)),
   landedAt: z.string().min(1).nullable(),
+  /** Who you are (character creation). Null for saves from before it existed. */
+  captain: z
+    .object({
+      name: z.string().min(1).max(40),
+      pronouns: z.enum(['she', 'he', 'they']),
+      origin: z.string().min(1),
+      moment: z.string().min(1),
+      motive: z.string().min(1),
+    })
+    .nullable(),
+  shipName: z.string().min(1).max(40),
+  /** Upgrade tiers owned, by track id (0 or missing = stock). */
+  upgrades: z.record(z.string(), z.number().int().nonnegative()),
+  /** Trade goods in the hold, by commodity id. */
+  cargo: z.record(z.string(), z.number().int().positive()),
+  /** Mission items, artifacts and discoveries — unlimited. */
+  locker: z.record(z.string(), z.number().int().positive()),
 });
 export type SaveData = z.infer<typeof SaveSchema>;
 
@@ -41,6 +57,23 @@ const migrations: Record<number, Migration> = {
     visited: typeof old['systemId'] === 'string' ? [old['systemId']] : [],
     landedAt: null,
   }),
+  // v2 → v3 (Milestone 3: captain & ship): fuel removed (free everywhere);
+  // one legendary ship ("prototype") replaces the shuttle/corvette; captain,
+  // ship name, upgrades, cargo hold and locker added. Credits are kept.
+  2: (old) => {
+    const rest: Record<string, unknown> = { ...old };
+    delete rest['fuel'];
+    const ship = typeof old['ship'] === 'object' && old['ship'] !== null ? (old['ship'] as Record<string, unknown>) : {};
+    return {
+      ...rest,
+      ship: { ...ship, defId: 'prototype' },
+      captain: null,
+      shipName: 'Wayfarer',
+      upgrades: {},
+      cargo: {},
+      locker: {},
+    };
+  },
 };
 
 export type LoadResult =

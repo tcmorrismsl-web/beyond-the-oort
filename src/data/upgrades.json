@@ -1,0 +1,64 @@
+[
+  {
+    "id": "engines",
+    "name": "Main engines",
+    "description": "More thrust and a higher top speed.",
+    "tiers": [
+      { "name": "Tuned thrusters", "cost": 1800, "effect": { "thrust": 1.1, "maxSpeed": 1.06 } },
+      { "name": "Fusion boosters", "cost": 6000, "effect": { "thrust": 1.2, "maxSpeed": 1.12 } },
+      { "name": "Antimatter injectors", "cost": 16000, "effect": { "thrust": 1.32, "maxSpeed": 1.18 } }
+    ]
+  },
+  {
+    "id": "maneuvering",
+    "name": "Maneuvering jets",
+    "description": "Turn faster.",
+    "tiers": [
+      { "name": "Vectored nozzles", "cost": 1200, "effect": { "turnRate": 1.08 } },
+      { "name": "Gyro-stabilized jets", "cost": 4500, "effect": { "turnRate": 1.16 } },
+      { "name": "Reactionless trim", "cost": 12000, "effect": { "turnRate": 1.25 } }
+    ]
+  },
+  {
+    "id": "cruise",
+    "name": "Cruise drive",
+    "description": "Faster travel when you hold the stick at the edge.",
+    "tiers": [
+      { "name": "Tuned cruise drive", "cost": 2500, "effect": { "cruiseMultiplier": 2.9 } },
+      { "name": "Overdriven cruise", "cost": 8000, "effect": { "cruiseMultiplier": 3.2 } },
+      { "name": "Long-haul cruise core", "cost": 20000, "effect": { "cruiseMultiplier": 3.6 } }
+    ]
+  },
+  {
+    "id": "cargo",
+    "name": "Cargo hold",
+    "description": "More room for trade goods. (Mission items and finds always go in your locker, which never fills up.)",
+    "tiers": [
+      { "name": "Racked hold", "cost": 1000, "effect": { "cargo": 10 } },
+      { "name": "Expanded bay", "cost": 4000, "effect": { "cargo": 25 } },
+      { "name": "Compressed-space hold", "cost": 11000, "effect": { "cargo": 45 } }
+    ]
+  },
+  {
+    "id": "hull",
+    "name": "Hull plating",
+    "description": "Toughness in a fight.",
+    "note": "Matters once space combat arrives.",
+    "tiers": [
+      { "name": "Reinforced plating", "cost": 2000, "effect": { "hull": 50 } },
+      { "name": "Ablative armor", "cost": 7000, "effect": { "hull": 120 } },
+      { "name": "Crystal-lattice hull", "cost": 18000, "effect": { "hull": 220 } }
+    ]
+  },
+  {
+    "id": "shields",
+    "name": "Shield generator",
+    "description": "Shields that soak hits and recharge.",
+    "note": "Matters once space combat arrives.",
+    "tiers": [
+      { "name": "Military surplus emitters", "cost": 2500, "effect": { "shields": 40 } },
+      { "name": "Layered barrier", "cost": 8000, "effect": { "shields": 100 } },
+      { "name": "Phase-lock shielding", "cost": 20000, "effect": { "shields": 180 } }
+    ]
+  }
+]

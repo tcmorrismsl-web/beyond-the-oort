@@ -1,14 +1,18 @@
 import { z } from 'zod';
 import shipsJson from './ships.json';
 import systemsJson from './systems.json';
+import upgradesJson from './upgrades.json';
+import commoditiesJson from './commodities.json';
+import originsJson from './origins.json';
 
 /**
  * All game content lives in JSON and is validated here, including
- * cross-references (a system that names a missing ship is a build error,
- * not a crash on the player's phone).
+ * cross-references (a market that names a missing commodity is a build
+ * error, not a crash on the player's phone).
  */
 const id = z.string().regex(/^[a-z0-9-]+$/, 'ids are lowercase-kebab');
 
+/** Your one-of-a-kind ship's stock stats. Upgrades scale these (see systems/ship.ts). */
 export const ShipDefSchema = z.object({
   id,
   name: z.string().min(1),
@@ -20,29 +24,32 @@ export const ShipDefSchema = z.object({
   drag: z.number().nonnegative(),
   cruiseMultiplier: z.number().min(1).max(5).default(1), // 1 = no cruise boost
   cargo: z.number().int().nonnegative(),
-  fuel: z.number().int().positive().default(3), // jumps on a full tank
-  price: z.number().int().nonnegative(),
 });
 export type ShipDef = z.infer<typeof ShipDefSchema>;
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'colors are #rrggbb');
 
 /** What a landing site offers. Each site lists only what it actually has. */
-export const SERVICES = ['refuel', 'trade', 'shipyard', 'outfitter', 'missions', 'bar', 'repair'] as const;
+export const SERVICES = ['trade', 'drydock', 'missions', 'bar', 'repair'] as const;
 export type Service = (typeof SERVICES)[number];
 
+export const SITE_KINDS = ['city', 'spaceport', 'settlement', 'outpost', 'station', 'waystation', 'mining', 'research', 'ruins'] as const;
+export type SiteKind = (typeof SITE_KINDS)[number];
+
 /**
- * A place you can land: a city spaceport, a mining camp, a fuel depot...
+ * A place you can land: a city spaceport, a mining camp, a waystation...
  * A planet can have several (pick one when landing); a station usually has
- * one or two decks. `notes` gives each service its own local flavor.
+ * one or two decks. `notes` gives each service its own local flavor;
+ * `market` overrides which goods are cheap or dear here.
  */
 export const SiteSchema = z.object({
   id,
   name: z.string().min(1),
-  kind: z.enum(['city', 'spaceport', 'settlement', 'outpost', 'station', 'depot', 'mining', 'research', 'ruins']),
+  kind: z.enum(SITE_KINDS),
   description: z.string().min(1),
   services: z.array(z.enum(SERVICES)),
   notes: z.partialRecord(z.enum(SERVICES), z.string().min(1)).default({}),
+  market: z.object({ cheap: z.array(id).default([]), dear: z.array(id).default([]) }).optional(),
 });
 export type Site = z.infer<typeof SiteSchema>;
 
@@ -71,10 +78,58 @@ export const StarSystemSchema = z.object({
   description: z.string().default(''),
   star: z.object({ color: hexColor, radius: z.number().positive().max(400) }).default({ color: '#ffd27a', radius: 90 }),
   links: z.array(id),
-  shipyard: z.array(id),
   bodies: z.array(BodySchema).default([]),
 });
 export type StarSystem = z.infer<typeof StarSystemSchema>;
+
+/** One upgrade track for your ship (engines, cargo hold...), bought tier by tier at drydocks. */
+export const UpgradeEffectSchema = z.object({
+  thrust: z.number().min(1).optional(), // multipliers on stock values
+  maxSpeed: z.number().min(1).optional(),
+  turnRate: z.number().min(1).optional(),
+  cruiseMultiplier: z.number().min(1).max(5).optional(), // absolute value
+  cargo: z.number().int().nonnegative().optional(), // added
+  hull: z.number().nonnegative().optional(), // added
+  shields: z.number().nonnegative().optional(), // added
+});
+export type UpgradeEffect = z.infer<typeof UpgradeEffectSchema>;
+
+export const UpgradeTrackSchema = z.object({
+  id,
+  name: z.string().min(1),
+  description: z.string().min(1),
+  note: z.string().optional(),
+  tiers: z.array(z.object({ name: z.string().min(1), cost: z.number().int().positive(), effect: UpgradeEffectSchema })).min(1),
+});
+export type UpgradeTrack = z.infer<typeof UpgradeTrackSchema>;
+
+export const CommoditySchema = z.object({
+  id,
+  name: z.string().min(1),
+  basePrice: z.number().int().positive(),
+  cheapAt: z.array(z.enum(SITE_KINDS)).default([]),
+  dearAt: z.array(z.enum(SITE_KINDS)).default([]),
+});
+export type Commodity = z.infer<typeof CommoditySchema>;
+
+const ChoiceSchema = z.object({
+  id,
+  name: z.string().min(1),
+  blurb: z.string().min(1),
+  text: z.string().min(1),
+  credits: z.number().int().default(0),
+  shipStory: z.string().optional(),
+});
+export type CreationChoice = z.infer<typeof ChoiceSchema>;
+
+/** Character-creation options (Mass Effect-inspired, original content). */
+export const OriginsSchema = z.object({
+  origins: z.array(ChoiceSchema),
+  moments: z.array(ChoiceSchema),
+  motives: z.array(ChoiceSchema),
+  ship: z.object({ intro: z.string(), nameSuggestions: z.array(z.string().min(1)) }),
+});
+export type Origins = z.infer<typeof OriginsSchema>;
 
 export function isLandable(body: Body): boolean {
   return body.sites.length > 0;
@@ -87,6 +142,9 @@ export interface GameData {
   bodies: ReadonlyMap<string, { body: Body; systemId: string }>;
   /** Every landing site by id, with its body and system. */
   sites: ReadonlyMap<string, { site: Site; body: Body; systemId: string }>;
+  upgrades: readonly UpgradeTrack[];
+  commodities: ReadonlyMap<string, Commodity>;
+  creation: Origins;
 }
 
 /** Bodies must sit clear of their star by at least this much (so nobody spawns inside the sun). */
@@ -101,12 +159,28 @@ function indexById<T extends { id: string }>(items: T[], kind: string, errors: s
   return map;
 }
 
-export function buildGameData(rawShips: unknown, rawSystems: unknown): GameData {
-  const ships = z.array(ShipDefSchema).parse(rawShips);
-  const systems = z.array(StarSystemSchema).parse(rawSystems);
+const EMPTY_ORIGINS = { origins: [], moments: [], motives: [], ship: { intro: '', nameSuggestions: [] } };
+
+export interface RawContent {
+  ships: unknown;
+  systems: unknown;
+  upgrades?: unknown;
+  commodities?: unknown;
+  origins?: unknown;
+}
+
+export function buildGameData(raw: RawContent): GameData {
+  const ships = z.array(ShipDefSchema).parse(raw.ships);
+  const systems = z.array(StarSystemSchema).parse(raw.systems);
+  const upgrades = z.array(UpgradeTrackSchema).parse(raw.upgrades ?? []);
+  const commodities = z.array(CommoditySchema).parse(raw.commodities ?? []);
+  const creation = OriginsSchema.parse(raw.origins ?? EMPTY_ORIGINS);
   const errors: string[] = [];
   const shipMap = indexById(ships, 'ship', errors);
   const systemMap = indexById(systems, 'system', errors);
+  const commodityMap = indexById(commodities, 'commodity', errors);
+  indexById(upgrades, 'upgrade', errors);
+  for (const list of [creation.origins, creation.moments, creation.motives]) indexById(list, 'creation choice', errors);
   const bodyMap = new Map<string, { body: Body; systemId: string }>();
   const siteMap = new Map<string, { site: Site; body: Body; systemId: string }>();
 
@@ -116,9 +190,6 @@ export function buildGameData(rawShips: unknown, rawSystems: unknown): GameData 
       if (!other) errors.push(`system "${sys.id}" links to missing system "${link}"`);
       else if (!other.links.includes(sys.id)) errors.push(`jump link "${sys.id}" -> "${link}" is one-way`);
       if (link === sys.id) errors.push(`system "${sys.id}" links to itself`);
-    }
-    for (const shipId of sys.shipyard) {
-      if (!shipMap.has(shipId)) errors.push(`system "${sys.id}" sells missing ship "${shipId}"`);
     }
     for (const body of sys.bodies) {
       if (bodyMap.has(body.id)) errors.push(`duplicate body id "${body.id}"`);
@@ -133,13 +204,33 @@ export function buildGameData(rawShips: unknown, rawSystems: unknown): GameData 
           if (!site.services.includes(noted as Service)) errors.push(`site "${site.id}" has a note for "${noted}" but doesn't offer it`);
         }
         if (new Set(site.services).size !== site.services.length) errors.push(`site "${site.id}" lists a service twice`);
+        if (site.market) {
+          if (!site.services.includes('trade')) errors.push(`site "${site.id}" has market prices but no trade service`);
+          for (const c of [...site.market.cheap, ...site.market.dear]) {
+            if (!commodityMap.has(c)) errors.push(`site "${site.id}" market names missing commodity "${c}"`);
+          }
+        }
       }
     }
-    const refuels = sys.bodies.some((b) => b.sites.some((st) => st.services.includes('refuel')));
-    if (!refuels) errors.push(`system "${sys.id}" has nowhere to refuel (add a fuel depot)`);
+  }
+  for (const track of upgrades) {
+    let lastCost = 0;
+    for (const tier of track.tiers) {
+      if (tier.cost <= lastCost) errors.push(`upgrade "${track.id}" tier "${tier.name}" must cost more than the tier before`);
+      lastCost = tier.cost;
+    }
+  }
+  for (const c of commodities) {
+    if (c.cheapAt.some((k) => c.dearAt.includes(k))) errors.push(`commodity "${c.id}" is both cheap and dear at the same kind of site`);
   }
   if (errors.length > 0) throw new Error(`Game data invalid:\n- ${errors.join('\n- ')}`);
-  return { ships: shipMap, systems: systemMap, bodies: bodyMap, sites: siteMap };
+  return { ships: shipMap, systems: systemMap, bodies: bodyMap, sites: siteMap, upgrades, commodities: commodityMap, creation };
 }
 
-export const gameData: GameData = buildGameData(shipsJson, systemsJson);
+export const gameData: GameData = buildGameData({
+  ships: shipsJson,
+  systems: systemsJson,
+  upgrades: upgradesJson,
+  commodities: commoditiesJson,
+  origins: originsJson,
+});

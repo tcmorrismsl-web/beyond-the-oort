@@ -6,9 +6,11 @@
 import { EventBus } from './events';
 import { transition, type GameMode, type TransitionResult } from './flow';
 import { backupCorruptSave, loadGame, saveGame, type LoadResult } from './save';
-import { fromSave, maxFuel, newGame, repairAgainstContent, toSave, type GameState } from './state';
+import { fromSave, newGame, repairAgainstContent, toSave, type GameState, type NewCareer } from './state';
 import { gameData } from '../data/schema';
 import { canJump, depart, jump, land, type JumpCheck } from '../systems/travel';
+import { buy, sell, type TradeResult } from '../systems/market';
+import { canUpgrade, upgrade, type UpgradeCheck } from '../systems/ship';
 import type { StorageResult } from './storage';
 
 export interface SaveBackend {
@@ -68,10 +70,41 @@ export class Session {
     return result;
   }
 
-  /** Throw away the current playthrough and start fresh (saved immediately). */
-  restart(seed: number, now: number): void {
-    this.state = newGame(seed, now);
+  /** Throw away the current playthrough and start a new captain's career (saved immediately). */
+  startCareer(seed: number, now: number, career: NewCareer): void {
+    this.state = newGame(seed, now, career);
     this.save(now);
+  }
+
+  /** Buy trade goods at the current site's market. Saves. */
+  buyGoods(commodityId: string, qty: number, now: number): TradeResult {
+    const r = buy(this.state, commodityId, qty, gameData);
+    if (r.ok) this.applyTrade(r.state, commodityId, qty, now);
+    return r;
+  }
+
+  /** Sell trade goods at the current site's market. Saves. */
+  sellGoods(commodityId: string, qty: number, now: number): TradeResult {
+    const r = sell(this.state, commodityId, qty, gameData);
+    if (r.ok) this.applyTrade(r.state, commodityId, -qty, now);
+    return r;
+  }
+
+  private applyTrade(next: GameState, commodityId: string, qty: number, now: number): void {
+    const delta = next.credits - this.state.credits;
+    this.state = next;
+    this.bus.emit('traded', { commodityId, qty, credits: delta });
+    this.save(now);
+  }
+
+  /** Buy the next tier of an upgrade at a drydock. Saves. */
+  upgradeShip(trackId: string, now: number): UpgradeCheck {
+    const check = canUpgrade(this.state, trackId, gameData);
+    if (!check.ok) return check;
+    this.state = upgrade(this.state, trackId, gameData);
+    this.bus.emit('upgraded', { trackId, tier: check.tier });
+    this.save(now);
+    return check;
   }
 
   /** Jump to a linked system (after the scene's charge-up). Saves on arrival. */
@@ -85,12 +118,12 @@ export class Session {
     return check;
   }
 
-  /** Land at a site in this system: refuel if sold there, switch to the port. Saves. */
+  /** Land at a site in this system and switch to the port. Saves. */
   landOn(siteId: string, now: number): boolean {
     if (this.state.mode !== 'flight') return false;
     let next: GameState;
     try {
-      next = land(this.state, siteId, gameData, maxFuel(this.state.ship.defId));
+      next = land(this.state, siteId, gameData);
     } catch {
       return false;
     }
@@ -109,7 +142,7 @@ export class Session {
     const here = this.state.landedAt === null ? undefined : gameData.sites.get(this.state.landedAt);
     const there = gameData.sites.get(siteId);
     if (!here || !there || here.body.id !== there.body.id || siteId === this.state.landedAt) return false;
-    this.state = land(this.state, siteId, gameData, maxFuel(this.state.ship.defId));
+    this.state = land(this.state, siteId, gameData);
     this.bus.emit('landed', { siteId });
     this.save(now);
     return true;

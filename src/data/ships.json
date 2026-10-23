@@ -1,30 +1,14 @@
 [
   {
-    "id": "shuttle",
-    "name": "Shuttle",
+    "id": "prototype",
+    "name": "Prototype long-range explorer",
     "hull": 100,
     "shields": 50,
     "thrust": 440,
     "maxSpeed": 340,
     "turnRate": 5.0,
     "drag": 0.9,
-    "cargo": 20,
-    "price": 0,
     "cruiseMultiplier": 2.6,
-    "fuel": 4
-  },
-  {
-    "id": "corvette",
-    "name": "Corvette",
-    "hull": 220,
-    "shields": 160,
-    "thrust": 520,
-    "maxSpeed": 440,
-    "turnRate": 5.6,
-    "drag": 0.8,
-    "cargo": 15,
-    "price": 48000,
-    "cruiseMultiplier": 2.8,
-    "fuel": 5
+    "cargo": 20
   }
 ]

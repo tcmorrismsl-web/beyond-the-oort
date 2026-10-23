@@ -9,9 +9,13 @@ const sample: SaveData = {
   credits: 1500,
   systemId: 'sol',
   ship: { defId: 'shuttle', x: 10, y: -5, angle: 1.2 },
-  fuel: 3,
   visited: ['sol'],
   landedAt: null,
+  captain: { name: 'Ada Kell', pronouns: 'they', origin: 'freighter-born', moment: 'the-debt', motive: 'running' },
+  shipName: 'Kestrel',
+  upgrades: { engines: 2 },
+  cargo: { ore: 5 },
+  locker: {},
 };
 
 describe('save system', () => {
@@ -26,13 +30,24 @@ describe('save system', () => {
     }
   });
 
-  it('upgrades a v1 save: keeps progress, adds fuel, visited and landed fields', () => {
+  it('upgrades a v1 save all the way: keeps place, credits and ship position', () => {
     const v1 = { version: 1, createdAt: 1, updatedAt: 2, rngSeed: 5, credits: 2500, systemId: 'sol', ship: { defId: 'shuttle', x: 120.5, y: -48, angle: 1.57 } };
     const r = deserialize(JSON.stringify(v1));
     expect(r.status).toBe('ok');
     if (r.status !== 'ok') return;
-    expect(r.data).toMatchObject({ version: SAVE_VERSION, credits: 2500, systemId: 'sol', fuel: 3, visited: ['sol'], landedAt: null });
-    expect(r.data.ship).toEqual(v1.ship);
+    expect(r.data).toMatchObject({ version: SAVE_VERSION, credits: 2500, systemId: 'sol', visited: ['sol'], landedAt: null, captain: null });
+    expect(r.data.ship).toEqual({ ...v1.ship, defId: 'prototype' });
+    expect('fuel' in r.data).toBe(false);
+  });
+
+  it('upgrades a v2 save: drops fuel, keeps landing site, becomes the one legendary ship', () => {
+    const v2 = { version: 2, createdAt: 1, updatedAt: 2, rngSeed: 5, credits: 900, systemId: 'alpha-centauri', ship: { defId: 'corvette', x: 1, y: 2, angle: 0 }, fuel: 1, visited: ['sol', 'alpha-centauri'], landedAt: 'terminator-city' };
+    const r = deserialize(JSON.stringify(v2));
+    expect(r.status).toBe('ok');
+    if (r.status !== 'ok') return;
+    expect(r.data).toMatchObject({ credits: 900, landedAt: 'terminator-city', shipName: 'Wayfarer', upgrades: {}, cargo: {}, locker: {}, captain: null });
+    expect(r.data.ship.defId).toBe('prototype');
+    expect('fuel' in r.data).toBe(false);
   });
 
   it('round-trips', () => {

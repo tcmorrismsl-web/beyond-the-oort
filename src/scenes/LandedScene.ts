@@ -1,20 +1,18 @@
 import Phaser from 'phaser';
 import { gameData, type Service, type Site } from '../data/schema';
 import type { Session } from '../core/session';
-import { maxFuel } from '../core/state';
-import { button, createLayer, el, fuelPips, type Layer } from '../ui/dom';
+import { button, createLayer, credits, el, type Layer } from '../ui/dom';
+import { openSheet, renderDrydock, renderMarket } from '../ui/panels';
 import { getSession } from './sessionAccess';
 import { addStarBackdrop, onScreenResize } from './resize';
 import { ensureBodyTexture } from './systemTextures';
 
 /** Display name for each service, and which update brings it to life. */
 const SERVICE_INFO: Record<Service, { label: string; arrives: string | null }> = {
-  refuel: { label: 'Fuel', arrives: null },
-  trade: { label: 'Market', arrives: 'Economy update' },
-  shipyard: { label: 'Shipyard', arrives: 'Economy update' },
-  outfitter: { label: 'Outfitter', arrives: 'Economy update' },
+  trade: { label: 'Market', arrives: null },
+  drydock: { label: 'Drydock', arrives: null },
   repair: { label: 'Repairs', arrives: 'Combat update' },
-  missions: { label: 'Jobs', arrives: 'Missions update' },
+  missions: { label: 'Jobs', arrives: 'Story update' },
   bar: { label: 'Bar', arrives: 'Crew update' },
 };
 
@@ -24,7 +22,7 @@ const SITE_KIND: Record<Site['kind'], string> = {
   settlement: 'Settlement',
   outpost: 'Outpost',
   station: 'Station deck',
-  depot: 'Fuel depot',
+  waystation: 'Waystation',
   mining: 'Mining camp',
   research: 'Research base',
   ruins: 'Ruins',
@@ -41,6 +39,7 @@ export class LandedScene extends Phaser.Scene {
   private art!: Phaser.GameObjects.Image;
   private backdrop!: { far: Phaser.GameObjects.TileSprite; near: Phaser.GameObjects.TileSprite };
   private leaving = false;
+  private creditsLine!: HTMLDivElement;
 
   constructor() {
     super('landed');
@@ -81,6 +80,8 @@ export class LandedScene extends Phaser.Scene {
       el('div', 'sub', `${SITE_KIND[site.kind]} · ${body.name} · ${system?.name ?? spot.systemId}`),
       el('p', '', site.description),
     );
+    this.creditsLine = el('div', 'chip', credits(state.credits));
+    head.append(this.creditsLine);
     const card = el('div', 'card port', head);
 
     // Services: only what this site has, in its own words.
@@ -89,16 +90,26 @@ export class LandedScene extends Phaser.Scene {
       const info = SERVICE_INFO[svc];
       const note = site.notes[svc] ?? '';
       const row = el('div', 'svc', el('b', '', info.label));
-      if (svc === 'refuel') {
-        row.append(' ', fuelPips(state.fuel, maxFuel(state.ship.defId)), el('div', 'svc-note', note || 'Tank topped up.'));
-      } else {
-        if (note) row.append(el('div', 'svc-note', note));
-        if (info.arrives) row.append(el('div', 'svc-soon', `Opens with the ${info.arrives}`));
+      if (note) row.append(el('div', 'svc-note', note));
+      if (svc === 'trade' || svc === 'drydock') {
+        const open = button(svc === 'trade' ? 'Open market' : 'Open drydock', () => {
+          openSheet(this.ui.root, (sheetCard, close) => {
+            const refresh = (): void => {
+              this.creditsLine.textContent = credits(this.session.state.credits);
+            };
+            if (svc === 'trade') renderMarket(sheetCard, this.session, close, refresh);
+            else renderDrydock(sheetCard, this.session, close, refresh);
+          });
+        }, 'small');
+        open.style.marginTop = '8px';
+        row.append(open);
+      } else if (info.arrives) {
+        row.append(el('div', 'svc-soon', `Opens with the ${info.arrives}`));
       }
       list.append(row);
     }
-    if (!site.services.includes('refuel')) {
-      list.append(el('div', 'svc svc-dim', el('b', '', 'No fuel here'), el('div', 'svc-note', 'Fuel is sold elsewhere in this system.')));
+    if (site.services.length === 0) {
+      list.append(el('div', 'svc svc-dim', el('b', '', 'A quiet dock'), el('div', 'svc-note', 'Nothing for sale and nobody home. Just you, the hum of the station, and the names on the wall.')));
     }
     card.append(list);
 

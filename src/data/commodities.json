@@ -1,0 +1,108 @@
+[
+  {
+    "id": "food",
+    "name": "Food",
+    "basePrice": 24,
+    "cheapAt": [
+      "settlement"
+    ],
+    "dearAt": [
+      "mining",
+      "research",
+      "outpost",
+      "station"
+    ]
+  },
+  {
+    "id": "water",
+    "name": "Water ice",
+    "basePrice": 18,
+    "cheapAt": [
+      "mining"
+    ],
+    "dearAt": [
+      "city",
+      "station",
+      "research"
+    ]
+  },
+  {
+    "id": "ore",
+    "name": "Raw ore",
+    "basePrice": 30,
+    "cheapAt": [
+      "mining"
+    ],
+    "dearAt": [
+      "city",
+      "spaceport"
+    ]
+  },
+  {
+    "id": "metals",
+    "name": "Refined metals",
+    "basePrice": 55,
+    "cheapAt": [
+      "spaceport",
+      "station"
+    ],
+    "dearAt": [
+      "settlement",
+      "outpost"
+    ]
+  },
+  {
+    "id": "machinery",
+    "name": "Machinery",
+    "basePrice": 90,
+    "cheapAt": [
+      "city",
+      "spaceport"
+    ],
+    "dearAt": [
+      "settlement",
+      "mining",
+      "outpost"
+    ]
+  },
+  {
+    "id": "medicine",
+    "name": "Medicine",
+    "basePrice": 95,
+    "cheapAt": [
+      "city",
+      "research"
+    ],
+    "dearAt": [
+      "settlement",
+      "mining",
+      "outpost"
+    ]
+  },
+  {
+    "id": "electronics",
+    "name": "Electronics",
+    "basePrice": 110,
+    "cheapAt": [
+      "city"
+    ],
+    "dearAt": [
+      "outpost",
+      "settlement",
+      "research",
+      "mining"
+    ]
+  },
+  {
+    "id": "luxuries",
+    "name": "Luxury goods",
+    "basePrice": 120,
+    "cheapAt": [
+      "settlement"
+    ],
+    "dearAt": [
+      "city",
+      "station"
+    ]
+  }
+]

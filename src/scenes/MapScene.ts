@@ -1,9 +1,8 @@
 import Phaser from 'phaser';
 import { gameData, type StarSystem } from '../data/schema';
 import type { Session } from '../core/session';
-import { maxFuel } from '../core/state';
 import { canJump, jumpBlockText } from '../systems/travel';
-import { button, createLayer, el, fuelPips, type Layer } from '../ui/dom';
+import { button, createLayer, el, type Layer } from '../ui/dom';
 import { getSession } from './sessionAccess';
 import { addStarBackdrop, onScreenResize } from './resize';
 import { hexToNumber } from './systemTextures';
@@ -251,8 +250,7 @@ export class MapScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.ui.destroy();
     });
-    const state = this.session.state;
-    const header = el('div', 'chip hud-tl', el('b', '', 'Star chart'), ' ', fuelPips(state.fuel, maxFuel(state.ship.defId)));
+    const header = el('div', 'chip hud-tl', el('b', '', 'Star chart'));
     const center = button('Center', () => {
       this.fit(true);
     });

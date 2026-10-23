@@ -9,9 +9,20 @@
  *    (on-foot is never resumed mid-scene; it resumes landed/flight).
  *  - ship velocity: resuming at rest avoids drifting into danger on load.
  */
-import { gameData } from '../data/schema';
+import { gameData, type GameData } from '../data/schema';
 import { SAVE_VERSION, type SaveData } from './save';
 import type { GameMode } from './flow';
+
+export type Pronouns = 'she' | 'he' | 'they';
+
+/** Who you are, from character creation. Ids point into data/origins.json. */
+export interface Captain {
+  name: string;
+  pronouns: Pronouns;
+  origin: string;
+  moment: string;
+  motive: string;
+}
 
 export interface GameState {
   createdAt: number;
@@ -27,34 +38,65 @@ export interface GameState {
     vy: number;
     angle: number;
   };
-  fuel: number;
   /** System ids the player has been to (shown as charted on the map). */
   visited: string[];
   /** Landing-site id the player is at, or null in space. */
   landedAt: string | null;
+  captain: Captain | null;
+  shipName: string;
+  /** Upgrade tiers owned, by track id (missing = stock). */
+  upgrades: Record<string, number>;
+  /** Trade goods in the hold, by commodity id (capped by hold size). */
+  cargo: Record<string, number>;
+  /** Mission items, artifacts and discoveries — never fills up. */
+  locker: Record<string, number>;
 }
 
 export const STARTING_CREDITS = 1000;
+/** Nobody starts with less than this, whatever their story (you can always afford a first cargo). */
+export const MIN_STARTING_CREDITS = 200;
 export const STARTING_SYSTEM = 'sol';
-export const STARTING_SHIP = 'shuttle';
+export const STARTING_SHIP = 'prototype';
+export const DEFAULT_SHIP_NAME = 'Wayfarer';
+export const MAX_NAME_LENGTH = 40;
+/** New games start just off Earth, in landing range, so the first thing you see is somewhere to go. */
+const START_POS = { x: 780, y: -200 };
 
-/** Full-tank fuel for a ship type (content data), with a safe fallback. */
-export function maxFuel(defId: string): number {
-  return gameData.ships.get(defId)?.fuel ?? 3;
+export interface NewCareer {
+  captain: Captain;
+  shipName: string;
 }
 
-export function newGame(seed: number, now: number): GameState {
+/** Starting credits from your story: base + origin + defining moment, with a floor. */
+export function startingCredits(captain: Captain | null, data: GameData = gameData): number {
+  if (!captain) return STARTING_CREDITS;
+  const origin = data.creation.origins.find((o) => o.id === captain.origin)?.credits ?? 0;
+  const moment = data.creation.moments.find((m) => m.id === captain.moment)?.credits ?? 0;
+  return Math.max(MIN_STARTING_CREDITS, STARTING_CREDITS + origin + moment);
+}
+
+/** Trim and clamp a typed name; empty becomes the fallback. */
+export function cleanName(raw: string, fallback: string): string {
+  const name = raw.replace(/\s+/g, ' ').trim().slice(0, MAX_NAME_LENGTH);
+  return name.length > 0 ? name : fallback;
+}
+
+export function newGame(seed: number, now: number, career?: NewCareer): GameState {
+  const captain = career?.captain ?? null;
   return {
     createdAt: now,
     rngSeed: seed >>> 0,
-    credits: STARTING_CREDITS,
+    credits: startingCredits(captain),
     systemId: STARTING_SYSTEM,
     mode: 'flight',
-    // Start just off Earth so the first thing you see is somewhere to land.
-    ship: { defId: STARTING_SHIP, x: 780, y: -200, vx: 0, vy: 0, angle: -Math.PI / 2 },
-    fuel: maxFuel(STARTING_SHIP),
+    ship: { defId: STARTING_SHIP, x: START_POS.x, y: START_POS.y, vx: 0, vy: 0, angle: -Math.PI / 2 },
     visited: [STARTING_SYSTEM],
     landedAt: null,
+    captain,
+    shipName: career ? cleanName(career.shipName, DEFAULT_SHIP_NAME) : DEFAULT_SHIP_NAME,
+    upgrades: {},
+    cargo: {},
+    locker: {},
   };
 }
 
@@ -66,9 +108,13 @@ export function fromSave(save: SaveData): GameState {
     systemId: save.systemId,
     mode: save.landedAt === null ? 'flight' : 'landed',
     ship: { defId: save.ship.defId, x: save.ship.x, y: save.ship.y, vx: 0, vy: 0, angle: save.ship.angle },
-    fuel: save.fuel,
     visited: [...save.visited],
     landedAt: save.landedAt,
+    captain: save.captain ? { ...save.captain } : null,
+    shipName: save.shipName,
+    upgrades: { ...save.upgrades },
+    cargo: { ...save.cargo },
+    locker: { ...save.locker },
   };
 }
 
@@ -81,42 +127,52 @@ export function toSave(state: GameState, now: number): SaveData {
     credits: state.credits,
     systemId: state.systemId,
     ship: { defId: state.ship.defId, x: state.ship.x, y: state.ship.y, angle: state.ship.angle },
-    fuel: state.fuel,
     visited: [...state.visited],
     landedAt: state.landedAt,
+    captain: state.captain ? { ...state.captain } : null,
+    shipName: state.shipName,
+    upgrades: { ...state.upgrades },
+    cargo: { ...state.cargo },
+    locker: { ...state.locker },
   };
 }
 
 /**
- * Content can change between updates (a station renamed, a system removed).
- * Make a loaded state consistent with the current content instead of
- * crashing: unknown ship → starter ship; unknown system → start system;
- * a landing spot that no longer exists (or isn't in this system) → in flight.
- * Returns the problems it fixed, for logging.
+ * Content can change between updates (a station renamed, a system removed,
+ * an upgrade track rebalanced). Make a loaded state consistent with the
+ * current content instead of crashing. Returns what it fixed, for logging.
+ * Nothing the player owns is silently destroyed: unknown cargo is kept
+ * (it may come back), only clearly impossible values are clamped.
  */
-export function repairAgainstContent(state: GameState): string[] {
+export function repairAgainstContent(state: GameState, data: GameData = gameData): string[] {
   const fixed: string[] = [];
-  if (!gameData.ships.has(state.ship.defId)) {
+  if (!data.ships.has(state.ship.defId)) {
     fixed.push(`unknown ship "${state.ship.defId}"`);
     state.ship.defId = STARTING_SHIP;
   }
-  if (!gameData.systems.has(state.systemId)) {
+  if (!data.systems.has(state.systemId)) {
     fixed.push(`unknown system "${state.systemId}"`);
     state.systemId = STARTING_SYSTEM;
-    state.ship.x = 780;
-    state.ship.y = -200;
+    state.ship.x = START_POS.x;
+    state.ship.y = START_POS.y;
     state.landedAt = null;
   }
   if (state.landedAt !== null) {
-    const spot = gameData.sites.get(state.landedAt);
+    const spot = data.sites.get(state.landedAt);
     if (!spot || spot.systemId !== state.systemId) {
       fixed.push(`unknown landing spot "${state.landedAt}"`);
       state.landedAt = null;
     }
   }
-  state.visited = state.visited.filter((id) => gameData.systems.has(id));
+  for (const track of data.upgrades) {
+    const owned = state.upgrades[track.id] ?? 0;
+    if (owned > track.tiers.length) {
+      fixed.push(`upgrade "${track.id}" tier ${owned} no longer exists`);
+      state.upgrades[track.id] = track.tiers.length;
+    }
+  }
+  state.visited = state.visited.filter((id) => data.systems.has(id));
   if (!state.visited.includes(state.systemId)) state.visited.push(state.systemId);
-  state.fuel = Math.min(Math.max(0, Math.floor(state.fuel)), maxFuel(state.ship.defId));
   state.mode = state.landedAt === null ? 'flight' : 'landed';
   return fixed;
 }

@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
-import { gameData, type Body, type ShipDef, type StarSystem } from '../data/schema';
+import { gameData, type Body, type StarSystem } from '../data/schema';
 import type { Session } from '../core/session';
-import { maxFuel } from '../core/state';
-import { CRUISE_IDLE, consumeSteps, stepShip, STEP, updateCruise, type CruiseState, type ShipKinematics } from '../systems/flight';
+import { CRUISE_IDLE, consumeSteps, stepShip, STEP, updateCruise, type CruiseState, type FlightStats, type ShipKinematics } from '../systems/flight';
+import { statsFor } from '../systems/ship';
 import { canJump, jumpBlockText, JUMP_CHARGE_SECONDS, landingTarget } from '../systems/travel';
 import { IDLE, readStick, type StickReading } from '../ui/joystick';
-import { button, createLayer, el, fuelPips, type Layer } from '../ui/dom';
+import { button, createLayer, credits, el, type Layer } from '../ui/dom';
 import { showToast } from '../ui/toast';
 import { getSession } from './sessionAccess';
 import { onScreenResize, onSceneEvent } from './resize';
@@ -45,7 +45,7 @@ export interface FlightResumeData {
  */
 export class FlightScene extends Phaser.Scene {
   private session!: Session;
-  private def!: ShipDef;
+  private def!: FlightStats;
   private system!: StarSystem;
   private ship!: Phaser.GameObjects.Image;
   private flame!: Phaser.GameObjects.Image;
@@ -86,11 +86,10 @@ export class FlightScene extends Phaser.Scene {
     this.session = getSession(this);
     const state = this.session.state;
     const ship = state.ship;
-    const def = gameData.ships.get(ship.defId);
     const system = gameData.systems.get(state.systemId);
-    if (!def) throw new Error(`ship "${ship.defId}" missing from data`);
     if (!system) throw new Error(`system "${state.systemId}" missing from data`);
-    this.def = def;
+    // Stock stats plus every upgrade you've bought.
+    this.def = statsFor(state, gameData);
     this.system = system;
 
     // Reset per-run fields: Phaser reuses the scene instance on restart.
@@ -192,11 +191,14 @@ export class FlightScene extends Phaser.Scene {
     });
     const state = this.session.state;
 
-    const info = el('div', 'chip hud-tl', el('b', '', this.system.name), ' ', fuelPips(state.fuel, maxFuel(state.ship.defId)));
-    const mapBtn = button('Map', () => {
-      this.openMap();
+    const info = el('div', 'chip hud-tl', el('b', '', this.system.name), el('span', 'dim', `  ·  ${credits(state.credits)}`));
+    const shipBtn = button('Ship', () => {
+      this.openOverlay('ship');
     });
-    const tr = el('div', 'hud-tr', mapBtn);
+    const mapBtn = button('Map', () => {
+      this.openOverlay('map');
+    });
+    const tr = el('div', 'hud-tr', shipBtn, mapBtn);
 
     this.landBtn = button('Land', () => {
       this.tryLand();
@@ -273,12 +275,13 @@ export class FlightScene extends Phaser.Scene {
     }
   }
 
-  private openMap(): void {
+  /** Star chart or ship screen: flight sleeps underneath and wakes when it closes. */
+  private openOverlay(key: 'map' | 'ship'): void {
     if (this.jumpTarget !== null || this.picking) return;
     this.resetStick();
     this.ui.root.style.display = 'none';
     this.scene.sleep();
-    this.scene.launch('map');
+    this.scene.launch(key);
   }
 
   // ------------------------------------------------------------------ jumping

@@ -3,7 +3,7 @@ import { EventBus } from '../src/core/events';
 import { canTransition, transition, type GameMode } from '../src/core/flow';
 import { SaveSchema, type LoadResult, type SaveData } from '../src/core/save';
 import { Session, type SaveBackend } from '../src/core/session';
-import { fromSave, maxFuel, newGame, repairAgainstContent, STARTING_SHIP, STARTING_SYSTEM, toSave } from '../src/core/state';
+import { fromSave, newGame, repairAgainstContent, STARTING_SHIP, STARTING_SYSTEM, toSave } from '../src/core/state';
 import { gameData } from '../src/data/schema';
 import type { StorageResult } from '../src/core/storage';
 
@@ -171,13 +171,13 @@ describe('loading against changed content', () => {
     s.systemId = 'gone-system';
     s.landedAt = 'gone-station';
     s.ship.defId = 'gone-ship';
-    s.fuel = 99;
+    s.upgrades = { engines: 99 };
     s.visited = ['sol', 'gone-system'];
     const fixed = repairAgainstContent(s);
-    expect(fixed).toEqual([`unknown ship "gone-ship"`, `unknown system "gone-system"`]);
+    expect(fixed).toEqual([`unknown ship "gone-ship"`, `unknown system "gone-system"`, `upgrade "engines" tier 99 no longer exists`]);
     expect(s).toMatchObject({ systemId: STARTING_SYSTEM, landedAt: null, mode: 'flight', visited: ['sol'] });
     expect(s.ship.defId).toBe(STARTING_SHIP);
-    expect(s.fuel).toBe(maxFuel(STARTING_SHIP));
+    expect(s.upgrades['engines']).toBe(gameData.upgrades.find((t) => t.id === 'engines')?.tiers.length);
   });
 
   it('resumes landed when the save says so', () => {

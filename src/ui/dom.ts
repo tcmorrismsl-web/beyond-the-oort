@@ -50,10 +50,7 @@ export function button(label: string, onTap: () => void, cls = ''): HTMLButtonEl
   return b;
 }
 
-/** Fuel as pips, e.g. ●●●○ for 3 of 4. */
-export function fuelPips(fuel: number, max: number): HTMLSpanElement {
-  const wrap = el('span', 'fuel');
-  wrap.setAttribute('aria-label', `Fuel ${fuel} of ${max}`);
-  for (let i = 0; i < max; i += 1) wrap.append(i < fuel ? el('i', '', '●') : '○');
-  return wrap;
+/** Credits with thousands separators and a "cr" suffix, e.g. "12,400 cr". */
+export function credits(n: number): string {
+  return `${Math.round(n).toLocaleString('en-US')} cr`;
 }

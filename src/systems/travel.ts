@@ -15,7 +15,7 @@ export const DEPART_CLEARANCE = 70;
 /** Seconds the jump drive charges before the jump happens (scene handles the timer). */
 export const JUMP_CHARGE_SECONDS = 1.5;
 
-export type JumpBlock = 'unknown-system' | 'same-system' | 'not-linked' | 'no-fuel' | 'landed';
+export type JumpBlock = 'unknown-system' | 'same-system' | 'not-linked' | 'landed';
 export type JumpCheck = { ok: true } | { ok: false; reason: JumpBlock };
 
 export function canJump(state: GameState, toId: string, data: GameData): JumpCheck {
@@ -24,7 +24,6 @@ export function canJump(state: GameState, toId: string, data: GameData): JumpChe
   if (toId === state.systemId) return { ok: false, reason: 'same-system' };
   if (state.landedAt !== null) return { ok: false, reason: 'landed' };
   if (!here.links.includes(toId)) return { ok: false, reason: 'not-linked' };
-  if (state.fuel < 1) return { ok: false, reason: 'no-fuel' };
   return { ok: true };
 }
 
@@ -36,8 +35,6 @@ export function jumpBlockText(reason: JumpBlock): string {
       return "You're already here";
     case 'not-linked':
       return 'No jump lane from here';
-    case 'no-fuel':
-      return 'Out of fuel — land to refuel';
     case 'landed':
       return 'Depart before jumping';
   }
@@ -59,7 +56,6 @@ export function jump(state: GameState, toId: string, data: GameData): GameState 
   return {
     ...state,
     systemId: toId,
-    fuel: state.fuel - 1,
     visited: state.visited.includes(toId) ? [...state.visited] : [...state.visited, toId],
     ship: {
       ...state.ship,
@@ -89,11 +85,8 @@ export function landingTarget(state: GameState, data: GameData): Body | null {
   return best;
 }
 
-/**
- * Land at a site in the current system: stop, and refuel to full if the
- * site sells fuel. `landedAt` holds the site id (a planet can have several).
- */
-export function land(state: GameState, siteId: string, data: GameData, fullTank: number): GameState {
+/** Land at a site in the current system. `landedAt` holds the site id (a planet can have several). */
+export function land(state: GameState, siteId: string, data: GameData): GameState {
   const spot = data.sites.get(siteId);
   if (!spot || spot.systemId !== state.systemId) {
     throw new Error(`cannot land at "${siteId}" in "${state.systemId}"`);
@@ -101,7 +94,6 @@ export function land(state: GameState, siteId: string, data: GameData, fullTank:
   return {
     ...state,
     landedAt: siteId,
-    fuel: spot.site.services.includes('refuel') ? fullTank : state.fuel,
     ship: { ...state.ship, x: spot.body.x, y: spot.body.y, vx: 0, vy: 0 },
   };
 }

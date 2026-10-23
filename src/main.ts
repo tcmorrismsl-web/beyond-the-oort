@@ -4,6 +4,8 @@ import { FlightScene } from './scenes/FlightScene';
 import { LandedScene } from './scenes/LandedScene';
 import { MapScene } from './scenes/MapScene';
 import { TitleScene } from './scenes/TitleScene';
+import { CreateScene } from './scenes/CreateScene';
+import { ShipScene } from './scenes/ShipScene';
 import { readKey, requestPersistence, writeKey } from './core/storage';
 import { freshSeed } from './core/rng';
 import { Session } from './core/session';
@@ -25,7 +27,7 @@ const game = new Phaser.Game({
   },
   input: { activePointers: 3 },
   render: { antialias: true, powerPreference: 'high-performance' },
-  scene: [BootScene, TitleScene, FlightScene, MapScene, LandedScene],
+  scene: [BootScene, TitleScene, CreateScene, FlightScene, MapScene, ShipScene, LandedScene],
   callbacks: { preBoot: (g) => g.registry.set(SESSION_KEY, session) },
 });
 
@@ -98,6 +100,9 @@ declare global {
       /** Knocks every camera to a wrong size, as a missed resize would. */
       breakCameras: (w: number, h: number) => void;
       size: () => { game: [number, number]; cameras: [number, number][] };
+      /** Test-only: move the ship (e.g. next to a station) and read the state. */
+      setShip: (x: number, y: number) => void;
+      state: () => string;
     };
   }
 }
@@ -108,6 +113,13 @@ if (new URLSearchParams(window.location.search).has('smoke')) {
     breakCameras: (w, h) => {
       for (const sc of game.scene.getScenes(true)) for (const c of sc.cameras.cameras) c.setSize(w, h);
     },
+    setShip: (x, y) => {
+      session.state.ship.x = x;
+      session.state.ship.y = y;
+      session.state.ship.vx = 0;
+      session.state.ship.vy = 0;
+    },
+    state: () => JSON.stringify(session.state),
     size: () => ({
       game: [game.scale.width, game.scale.height],
       cameras: game.scene.getScenes(true).flatMap((sc) => sc.cameras.cameras.map((c): [number, number] => [c.width, c.height])),

@@ -63,13 +63,13 @@ describe('flight', () => {
 // Feel targets from the first iPhone playtest (handling rated 3/5, "a bit
 // under-responsive"). These keep the starter ship snappy if numbers drift.
 describe('starter ship handling targets', () => {
-  const shuttle = shipDef('shuttle');
+  const stock = shipDef('prototype');
 
   it('reaches 80% of top speed from rest within 1.2 s at full throttle', () => {
     let s: ShipKinematics = { x: 0, y: 0, vx: 0, vy: 0, angle: 0 };
     let t = 0;
-    while (Math.hypot(s.vx, s.vy) < shuttle.maxSpeed * 0.8 && t < 5) {
-      s = stepShip(s, shuttle, { throttle: 1, targetAngle: 0 }, STEP);
+    while (Math.hypot(s.vx, s.vy) < stock.maxSpeed * 0.8 && t < 5) {
+      s = stepShip(s, stock, { throttle: 1, targetAngle: 0 }, STEP);
       t += STEP;
     }
     expect(t).toBeLessThanOrEqual(1.2);
@@ -79,29 +79,29 @@ describe('starter ship handling targets', () => {
     let s: ShipKinematics = { x: 0, y: 0, vx: 0, vy: 0, angle: 0 };
     let t = 0;
     while (Math.abs(angleDelta(s.angle, Math.PI)) > 1e-6 && t < 5) {
-      s = stepShip(s, shuttle, { throttle: 0, targetAngle: Math.PI }, STEP);
+      s = stepShip(s, stock, { throttle: 0, targetAngle: Math.PI }, STEP);
       t += STEP;
     }
     expect(t).toBeLessThanOrEqual(0.7);
   });
 
   it('coasts nearly to a stop within 4 s of letting go', () => {
-    let s: ShipKinematics = { x: 0, y: 0, vx: shuttle.maxSpeed, vy: 0, angle: 0 };
-    for (let t = 0; t < 4; t += STEP) s = stepShip(s, shuttle, { throttle: 0, targetAngle: null }, STEP);
-    expect(Math.hypot(s.vx, s.vy)).toBeLessThan(shuttle.maxSpeed * 0.05);
+    let s: ShipKinematics = { x: 0, y: 0, vx: stock.maxSpeed, vy: 0, angle: 0 };
+    for (let t = 0; t < 4; t += STEP) s = stepShip(s, stock, { throttle: 0, targetAngle: null }, STEP);
+    expect(Math.hypot(s.vx, s.vy)).toBeLessThan(stock.maxSpeed * 0.05);
   });
 });
 
 // Playtest 2: "slow when trying to get somewhere fast". Cruise targets:
 describe('cruise', () => {
-  const shuttle = shipDef('shuttle');
+  const stock = shipDef('prototype');
 
   function fly(seconds: number, throttle: number, s0: ShipKinematics = still, c0: CruiseState = CRUISE_IDLE) {
     let s = s0;
     let c = c0;
     for (let t = 0; t < seconds - 1e-9; t += STEP) {
       c = updateCruise(c, throttle, STEP);
-      s = stepShip(s, shuttle, { throttle, targetAngle: 0, cruise: c.level }, STEP);
+      s = stepShip(s, stock, { throttle, targetAngle: 0, cruise: c.level }, STEP);
     }
     return { s, c };
   }
@@ -112,7 +112,7 @@ describe('cruise', () => {
     let t = 0;
     while (s.x < 3000 && t < 20) {
       c = updateCruise(c, 1, STEP);
-      s = stepShip(s, shuttle, { throttle: 1, targetAngle: 0, cruise: c.level }, STEP);
+      s = stepShip(s, stock, { throttle: 1, targetAngle: 0, cruise: c.level }, STEP);
       t += STEP;
     }
     expect(t).toBeLessThan(6);
@@ -120,8 +120,8 @@ describe('cruise', () => {
 
   it('reaches cruise speed well above normal top speed', () => {
     const { s } = fly(5, 1);
-    expect(Math.hypot(s.vx, s.vy)).toBeGreaterThan(shuttle.maxSpeed * 2);
-    expect(Math.hypot(s.vx, s.vy)).toBeLessThanOrEqual(shuttle.maxSpeed * shuttle.cruiseMultiplier + 1e-6);
+    expect(Math.hypot(s.vx, s.vy)).toBeGreaterThan(stock.maxSpeed * 2);
+    expect(Math.hypot(s.vx, s.vy)).toBeLessThanOrEqual(stock.maxSpeed * stock.cruiseMultiplier + 1e-6);
   });
 
   it('does not engage from a quick flick to the edge', () => {
@@ -135,7 +135,7 @@ describe('cruise', () => {
   it('never engages below the edge threshold', () => {
     const { s, c } = fly(5, CRUISE_THROTTLE - 0.05);
     expect(c.level).toBe(0);
-    expect(Math.hypot(s.vx, s.vy)).toBeLessThanOrEqual(shuttle.maxSpeed + 1e-6);
+    expect(Math.hypot(s.vx, s.vy)).toBeLessThanOrEqual(stock.maxSpeed + 1e-6);
   });
 
   it('eases back to normal top speed within 2 s of leaving cruise, without a sudden stop', () => {
@@ -146,13 +146,13 @@ describe('cruise', () => {
     let biggestDrop = 0;
     for (let t = 0; t < 2; t += STEP) {
       c = updateCruise(c, 0.6, STEP);
-      s = stepShip(s, shuttle, { throttle: 0.6, targetAngle: 0, cruise: c.level }, STEP);
+      s = stepShip(s, stock, { throttle: 0.6, targetAngle: 0, cruise: c.level }, STEP);
       const v = Math.hypot(s.vx, s.vy);
       biggestDrop = Math.max(biggestDrop, prev - v);
       prev = v;
     }
-    expect(prev).toBeLessThanOrEqual(shuttle.maxSpeed * 1.02);
+    expect(prev).toBeLessThanOrEqual(stock.maxSpeed * 1.02);
     // No single frame loses more than 4% of top speed (no invisible wall).
-    expect(biggestDrop).toBeLessThan(shuttle.maxSpeed * shuttle.cruiseMultiplier * 0.04);
+    expect(biggestDrop).toBeLessThan(stock.maxSpeed * stock.cruiseMultiplier * 0.04);
   });
 });

@@ -1,0 +1,96 @@
+{
+  "origins": [
+    {
+      "id": "freighter-born",
+      "name": "Freighter-born",
+      "blurb": "Raised in the cargo decks of a long-haul freighter.",
+      "text": "You grew up in the hold of your family's freighter on the Sol–Centauri run, fixing engines before you could read a star chart. Every port feels a little like home, and none of them quite do.",
+      "credits": 1500
+    },
+    {
+      "id": "frontier-colonist",
+      "name": "Frontier colonist",
+      "blurb": "Grew up on a homestead at the edge of charted space.",
+      "text": "You were raised on a frontier homestead where every season was a fight and every neighbor mattered. You know how to stretch supplies, read people, and keep going when help is light-years away.",
+      "credits": 800
+    },
+    {
+      "id": "sol-undercity",
+      "name": "Sol undercity",
+      "blurb": "Came up hard in the levels beneath New Geneva.",
+      "text": "You came up in the crowded levels under New Geneva, where favors are currency and the wrong friend can get you killed. You know how deals really get made, and who makes them.",
+      "credits": 500
+    },
+    {
+      "id": "academy-legacy",
+      "name": "Academy legacy",
+      "blurb": "Third-generation pilot out of Tranquility Base.",
+      "text": "Your family has flown out of the Tranquility academy for three generations. You had the best training tradition could buy, and a name you're still trying to live up to, or outrun.",
+      "credits": 2000
+    }
+  ],
+  "moments": [
+    {
+      "id": "silent-colony",
+      "name": "The silent colony",
+      "blurb": "You answered a distress call and found everyone gone.",
+      "text": "Years ago you answered a distress call from a small colony and found it empty: meals on tables, lights still on, not a soul anywhere. Nobody believed your report. You never stopped wondering.",
+      "shipStory": "You poured every credit of your hazard pay into her at a bankruptcy auction, because she was the only ship there built to go farther than anyone had looked.",
+      "credits": 500
+    },
+    {
+      "id": "decorated-discharged",
+      "name": "Decorated and discharged",
+      "blurb": "A hero to the people you saved. A problem to your commanders.",
+      "text": "You disobeyed orders to pull civilians off a burning station. The civilians called you a hero. Your commanders gave you a medal and a discharge in the same week.",
+      "shipStory": "A grateful family from that station pooled their savings to buy her out of a scrapyard and hand you the keys. They said you'd know what to do with her.",
+      "credits": 1500
+    },
+    {
+      "id": "the-debt",
+      "name": "The debt",
+      "blurb": "A deal went bad, and you owe the wrong people.",
+      "text": "A deal went wrong and took everything you had with it. The people you owe are patient, polite, and very well armed. You have a ship, a little cash, and a clock running.",
+      "shipStory": "She's the one thing you didn't lose, because the people you owe don't know she's yours. Yet.",
+      "credits": -300
+    },
+    {
+      "id": "the-inheritance",
+      "name": "The inheritance",
+      "blurb": "A relative you barely knew left you a ship, and a question.",
+      "text": "A lawyer found you with a key, a hangar number, and a letter from a relative you'd met twice. The ship in that hangar shouldn't exist. The letter said only: \"Go further than I did.\"",
+      "shipStory": "She was waiting in that hangar under a dust sheet, logs wiped, drive warm, as if she'd only just come back from somewhere.",
+      "credits": 1000
+    }
+  ],
+  "motives": [
+    {
+      "id": "searching",
+      "name": "Searching for someone",
+      "blurb": "Someone you love went past the charts and never came back.",
+      "text": "Someone you love took a ship past the edge of charted space and never came back. Everyone else has given up. You haven't."
+    },
+    {
+      "id": "running",
+      "name": "Running from something",
+      "blurb": "Some things are easier to outfly than to face.",
+      "text": "There's something behind you: a person, a past, a mistake. Out here, with enough distance and enough stars, maybe it can't catch up."
+    },
+    {
+      "id": "the-signal",
+      "name": "Chasing the signal",
+      "blurb": "A faint signal from beyond the Oort Cloud. You might be the only one listening.",
+      "text": "Your receiver picked up a faint, patterned signal from somewhere past the Oort Cloud. It repeats every night at the same hour. As far as you can tell, nobody else has noticed."
+    },
+    {
+      "id": "make-a-name",
+      "name": "Making a name",
+      "blurb": "You want the galaxy to remember yours.",
+      "text": "Ordinary was never going to be enough. You want stories told about you in bars from Sol to Vega, and you intend to earn every one."
+    }
+  ],
+  "ship": {
+    "intro": "She's a one-of-a-kind long-range explorer, built by a research consortium at Lalande 21185 that went bankrupt before she ever flew. Her drive core is older than the rest of her, and nobody can tell you where it came from.",
+    "nameSuggestions": ["Wayfarer", "Second Dawn", "Far Light", "Errant Star", "Kestrel", "Long Dark", "Persephone", "Lantern"]
+  }
+}

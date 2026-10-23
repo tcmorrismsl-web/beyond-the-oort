@@ -17,9 +17,6 @@
       "wolf-359",
       "sirius"
     ],
-    "shipyard": [
-      "shuttle"
-    ],
     "bodies": [
       {
         "id": "earth",
@@ -37,7 +34,6 @@
             "kind": "city",
             "description": "The busiest port in human space: customs queues, glass towers, and contracts signed over lunch.",
             "services": [
-              "refuel",
               "trade",
               "missions",
               "bar"
@@ -46,6 +42,16 @@
               "trade": "Commodity exchange — prices set by half the colonies.",
               "missions": "Contract hall — corporate couriers and government charters.",
               "bar": "The Departure Lounge — overpriced, and everyone who matters drinks there."
+            },
+            "market": {
+              "cheap": [
+                "electronics",
+                "medicine"
+              ],
+              "dear": [
+                "luxuries",
+                "food"
+              ]
             }
           },
           {
@@ -54,7 +60,6 @@
             "kind": "spaceport",
             "description": "A sprawling freight port where crews swap cargo, gossip, and favors at all hours.",
             "services": [
-              "refuel",
               "trade",
               "bar"
             ],
@@ -81,7 +86,6 @@
             "kind": "settlement",
             "description": "A preserved landing site wrapped in a pilot academy. Cadets salute anyone with their own ship.",
             "services": [
-              "refuel",
               "missions"
             ],
             "notes": {
@@ -106,15 +110,12 @@
             "kind": "station",
             "description": "Ring-shaped dry docks where most of Sol's ships are refit.",
             "services": [
-              "refuel",
-              "shipyard",
-              "outfitter",
+              "drydock",
               "repair"
             ],
             "notes": {
-              "shipyard": "Highport Yards — new hulls fresh off the line.",
-              "outfitter": "Parts district — engines, scanners, shields.",
-              "repair": "Dry dock — patched hulls while you wait."
+              "repair": "Dry dock — patched hulls while you wait.",
+              "drydock": "Highport Yards — the best-equipped dry docks in Sol, if you can afford the berth."
             }
           }
         ]
@@ -135,14 +136,11 @@
             "kind": "spaceport",
             "description": "Launch rails up the flank of Olympus Mons, and the loudest engineers in Sol.",
             "services": [
-              "refuel",
-              "shipyard",
-              "outfitter",
+              "drydock",
               "repair"
             ],
             "notes": {
-              "shipyard": "Martian-built hulls — sturdier than they look.",
-              "outfitter": "Red Sands Supply — engine parts by the crate."
+              "drydock": "Martian engineers who'll rebuild your engines and argue with you the whole time."
             }
           },
           {
@@ -190,7 +188,6 @@
             "kind": "research",
             "description": "A drilling station perched over the ice, staffed by researchers who rarely see visitors.",
             "services": [
-              "refuel",
               "missions"
             ],
             "notes": {
@@ -217,10 +214,6 @@
       "sol",
       "barnards-star"
     ],
-    "shipyard": [
-      "shuttle",
-      "corvette"
-    ],
     "bodies": [
       {
         "id": "proxima-b",
@@ -238,7 +231,6 @@
             "kind": "city",
             "description": "Built along the narrow twilight ring between frozen night and burning day. Proud, cramped, and fiercely independent.",
             "services": [
-              "refuel",
               "trade",
               "missions",
               "bar"
@@ -261,6 +253,15 @@
             "notes": {
               "trade": "Ice and volatiles by the ton.",
               "bar": "The Heat Lamp — one room, always full."
+            },
+            "market": {
+              "cheap": [
+                "water"
+              ],
+              "dear": [
+                "food",
+                "medicine"
+              ]
             }
           }
         ]
@@ -281,14 +282,11 @@
             "kind": "station",
             "description": "Endless construction scaffolds and a waiting list for berths.",
             "services": [
-              "refuel",
-              "shipyard",
-              "outfitter",
+              "drydock",
               "repair"
             ],
             "notes": {
-              "shipyard": "Centauri Yards — corvettes, if you can afford one.",
-              "outfitter": "Frontier outfitters — rugged and reliable."
+              "drydock": "Centauri Yards — frontier craftsmanship, and a waiting list they'll skip for cash."
             }
           }
         ]
@@ -312,7 +310,6 @@
       "sol",
       "alpha-centauri"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "barnards-b",
@@ -341,7 +338,6 @@
             "kind": "station",
             "description": "A creaky trading ring where cargo changes hands without paperwork.",
             "services": [
-              "refuel",
               "trade",
               "bar"
             ],
@@ -371,7 +367,6 @@
       "lalande-21185",
       "sol"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "cinder",
@@ -395,6 +390,16 @@
             "notes": {
               "trade": "Ore by the ton, sold fast before the next flare.",
               "missions": "Shift boss — haul ore out before the storm."
+            },
+            "market": {
+              "cheap": [
+                "ore"
+              ],
+              "dear": [
+                "food",
+                "medicine",
+                "machinery"
+              ]
             }
           }
         ]
@@ -415,7 +420,6 @@
             "kind": "station",
             "description": "Heavy shielding, low ceilings, and the best ore prices this side of Sol.",
             "services": [
-              "refuel",
               "repair",
               "bar"
             ],
@@ -444,7 +448,6 @@
       "wolf-359",
       "ross-128"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "lalande-b",
@@ -462,7 +465,6 @@
             "kind": "research",
             "description": "Prefab domes and a dozen surveyors who are very glad to see a new face.",
             "services": [
-              "refuel",
               "missions"
             ],
             "notes": {
@@ -502,9 +504,6 @@
       "kapteyns-star",
       "sol"
     ],
-    "shipyard": [
-      "corvette"
-    ],
     "bodies": [
       {
         "id": "sirius-gate",
@@ -522,15 +521,21 @@
             "kind": "station",
             "description": "Marble floors, holo-ads, and security drones that know your name before you do.",
             "services": [
-              "refuel",
               "trade",
-              "shipyard",
-              "outfitter"
+              "drydock"
             ],
             "notes": {
               "trade": "Corporate exchange — fixed prices, no haggling.",
-              "shipyard": "Sirius Dynamics showroom — corvettes in every color.",
-              "outfitter": "Premium outfitting — top quality, top price."
+              "drydock": "Sirius Dynamics refit bay — premium parts, premium prices, spotless work."
+            },
+            "market": {
+              "cheap": [
+                "electronics",
+                "machinery"
+              ],
+              "dear": [
+                "luxuries"
+              ]
             }
           },
           {
@@ -579,29 +584,23 @@
       "epsilon-eridani",
       "lacaille-9352"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "luyten-726-8-depot",
-        "name": "Luyten 726-8 Fuel Depot",
+        "name": "Luyten 726-8 Waystation",
         "kind": "station",
         "x": 900,
         "y": 300,
         "radius": 26,
         "color": "#9fb0c8",
-        "description": "An automated fuel depot maintained by the Lanes Authority. Free fuel for any ship.",
+        "description": "An automated waystation kept by the Lanes Authority: a dock, a message board, and a long log of passing ships.",
         "sites": [
           {
             "id": "luyten-726-8-depot-dock",
-            "name": "Depot Dock",
-            "kind": "depot",
-            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
-            "services": [
-              "refuel"
-            ],
-            "notes": {
-              "refuel": "Free — courtesy of the Lanes Authority."
-            }
+            "name": "Waystation Dock",
+            "kind": "waystation",
+            "description": "A quiet automated dock. Someone has scratched names and dates into the bulkhead — captains who passed through, some of them long ago.",
+            "services": []
           }
         ]
       }
@@ -623,29 +622,23 @@
       "barnards-star",
       "wolf-1061"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "ross-154-depot",
-        "name": "Ross 154 Fuel Depot",
+        "name": "Ross 154 Waystation",
         "kind": "station",
         "x": -800,
         "y": 500,
         "radius": 26,
         "color": "#9fb0c8",
-        "description": "An automated fuel depot maintained by the Lanes Authority. Free fuel for any ship.",
+        "description": "An automated waystation kept by the Lanes Authority: a dock, a message board, and a long log of passing ships.",
         "sites": [
           {
             "id": "ross-154-depot-dock",
-            "name": "Depot Dock",
-            "kind": "depot",
-            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
-            "services": [
-              "refuel"
-            ],
-            "notes": {
-              "refuel": "Free — courtesy of the Lanes Authority."
-            }
+            "name": "Waystation Dock",
+            "kind": "waystation",
+            "description": "A quiet automated dock. Someone has scratched names and dates into the bulkhead — captains who passed through, some of them long ago.",
+            "services": []
           }
         ]
       }
@@ -668,29 +661,23 @@
       "kruger-60",
       "61-cygni"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "ross-248-depot",
-        "name": "Ross 248 Fuel Depot",
+        "name": "Ross 248 Waystation",
         "kind": "station",
         "x": 700,
         "y": -600,
         "radius": 26,
         "color": "#9fb0c8",
-        "description": "An automated depot with a hand-painted sign: 'Closest star someday. Be patient.'",
+        "description": "An automated waystation with a hand-painted sign: 'Closest star someday. Be patient.'",
         "sites": [
           {
             "id": "ross-248-depot-dock",
-            "name": "Depot Dock",
-            "kind": "depot",
-            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
-            "services": [
-              "refuel"
-            ],
-            "notes": {
-              "refuel": "Free — courtesy of the Lanes Authority."
-            }
+            "name": "Waystation Dock",
+            "kind": "waystation",
+            "description": "A quiet automated dock. Someone has scratched names and dates into the bulkhead — captains who passed through, some of them long ago.",
+            "services": []
           }
         ]
       }
@@ -714,7 +701,6 @@
       "teegardens-star",
       "gliese-1061"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "epsilon-eridani-b",
@@ -743,7 +729,6 @@
             "kind": "station",
             "description": "Tunnels carved from rock, lit by grow-lamps. The belters are polite, wary, and armed.",
             "services": [
-              "refuel",
               "trade",
               "repair",
               "bar"
@@ -752,6 +737,16 @@
               "trade": "Belter exchange — metals, ice, and rare finds.",
               "repair": "Rock-rat mechanics — they fix anything.",
               "bar": "The Drift — darts, debts, and old songs."
+            },
+            "market": {
+              "cheap": [
+                "metals",
+                "ore"
+              ],
+              "dear": [
+                "food",
+                "electronics"
+              ]
             }
           },
           {
@@ -787,7 +782,6 @@
       "gliese-876",
       "luyten-726-8"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "lacaille-9352-b",
@@ -805,7 +799,6 @@
             "kind": "settlement",
             "description": "Low buildings, strong people, and a landing pad rated for very sturdy ships.",
             "services": [
-              "refuel",
               "trade",
               "missions"
             ],
@@ -834,7 +827,6 @@
       "wolf-359",
       "lalande-21185"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "ross-128-b",
@@ -852,7 +844,6 @@
             "kind": "settlement",
             "description": "A farming town that talks slowly and builds things to last.",
             "services": [
-              "refuel",
               "trade",
               "bar"
             ],
@@ -893,7 +884,6 @@
       "luytens-star",
       "sirius"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "procyon-station",
@@ -911,13 +901,20 @@
             "kind": "station",
             "description": "A cavernous hall of cargo screens and shouting brokers.",
             "services": [
-              "refuel",
               "trade",
               "missions"
             ],
             "notes": {
               "trade": "Bulk exchange — the best prices are for full holds.",
               "missions": "Freight contracts across the eastern lanes."
+            },
+            "market": {
+              "cheap": [
+                "metals"
+              ],
+              "dear": [
+                "luxuries"
+              ]
             }
           }
         ]
@@ -941,7 +938,6 @@
       "ross-248",
       "altair"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "cygni-archive",
@@ -959,7 +955,6 @@
             "kind": "research",
             "description": "Quiet halls of records from every colony. Archivists trade in secrets, not credits.",
             "services": [
-              "refuel",
               "missions"
             ],
             "notes": {
@@ -1001,7 +996,6 @@
       "kruger-60",
       "teegardens-star"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "groombridge-34-ab",
@@ -1016,25 +1010,20 @@
       },
       {
         "id": "groombridge-34-depot",
-        "name": "Groombridge 34 Fuel Depot",
+        "name": "Groombridge 34 Waystation",
         "kind": "station",
         "x": -700,
         "y": -500,
         "radius": 26,
         "color": "#9fb0c8",
-        "description": "An automated fuel depot maintained by the Lanes Authority. Free fuel for any ship.",
+        "description": "An automated waystation kept by the Lanes Authority: a dock, a message board, and a long log of passing ships.",
         "sites": [
           {
             "id": "groombridge-34-depot-dock",
-            "name": "Depot Dock",
-            "kind": "depot",
-            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
-            "services": [
-              "refuel"
-            ],
-            "notes": {
-              "refuel": "Free — courtesy of the Lanes Authority."
-            }
+            "name": "Waystation Dock",
+            "kind": "waystation",
+            "description": "A quiet automated dock. Someone has scratched names and dates into the bulkhead — captains who passed through, some of them long ago.",
+            "services": []
           }
         ]
       }
@@ -1055,7 +1044,6 @@
     "links": [
       "lacaille-9352"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "epsilon-indi-ab",
@@ -1084,7 +1072,6 @@
             "kind": "mining",
             "description": "Everyone owns a share, everyone gets a vote, and the votes are loud.",
             "services": [
-              "refuel",
               "trade",
               "missions"
             ],
@@ -1113,7 +1100,6 @@
       "luyten-726-8",
       "epsilon-eridani"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "tau-ceti-e",
@@ -1131,7 +1117,6 @@
             "kind": "city",
             "description": "A garden city of terraces and markets. Everything smells like rain.",
             "services": [
-              "refuel",
               "trade",
               "missions",
               "bar"
@@ -1140,6 +1125,15 @@
               "trade": "Harvest market — food for the colonies.",
               "missions": "Growers' Guild — fast freight before the harvest spoils.",
               "bar": "The Orchard — cider, music, and pilgrims."
+            },
+            "market": {
+              "cheap": [
+                "food"
+              ],
+              "dear": [
+                "machinery",
+                "electronics"
+              ]
             }
           },
           {
@@ -1148,7 +1142,6 @@
             "kind": "settlement",
             "description": "A simple landing field beside a monastery. The monks don't ask what's in your hold.",
             "services": [
-              "refuel",
               "missions"
             ],
             "notes": {
@@ -1199,7 +1192,6 @@
       "kapteyns-star",
       "epsilon-eridani"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "gliese-1061-d",
@@ -1217,7 +1209,6 @@
             "kind": "settlement",
             "description": "Six families, one landing pad, and a lot of hope.",
             "services": [
-              "refuel",
               "trade"
             ],
             "notes": {
@@ -1244,7 +1235,6 @@
       "procyon",
       "sirius"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "luyten-b",
@@ -1262,13 +1252,20 @@
             "kind": "settlement",
             "description": "A sea-wall town built against storms that never stop.",
             "services": [
-              "refuel",
               "trade",
               "bar"
             ],
             "notes": {
               "trade": "Fish, salt, and storm-glass.",
               "bar": "The Breakwater — loud when the storms are loudest."
+            },
+            "market": {
+              "cheap": [
+                "food"
+              ],
+              "dear": [
+                "electronics"
+              ]
             }
           }
         ]
@@ -1291,7 +1288,6 @@
       "epsilon-eridani",
       "groombridge-34"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "teegarden-b",
@@ -1309,7 +1305,6 @@
             "kind": "settlement",
             "description": "A new colony of people who left everything behind. They're building fast and trusting slowly.",
             "services": [
-              "refuel",
               "trade",
               "missions",
               "bar"
@@ -1318,6 +1313,14 @@
               "trade": "Colony supply exchange — they pay well for tools.",
               "missions": "Colony charter — supplies, settlers, and protection.",
               "bar": "First Light — the colony's only bar, opened last month."
+            },
+            "market": {
+              "cheap": [],
+              "dear": [
+                "machinery",
+                "medicine",
+                "food"
+              ]
             }
           }
         ]
@@ -1351,7 +1354,6 @@
       "gliese-1061",
       "sirius"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "kapteyn-b",
@@ -1379,25 +1381,20 @@
       },
       {
         "id": "kapteyns-star-depot",
-        "name": "Kapteyn Fuel Depot",
+        "name": "Kapteyn Waystation",
         "kind": "station",
         "x": -700,
         "y": -500,
         "radius": 26,
         "color": "#9fb0c8",
-        "description": "An automated fuel depot maintained by the Lanes Authority. Free fuel for any ship.",
+        "description": "An automated waystation kept by the Lanes Authority: a dock, a message board, and a long log of passing ships.",
         "sites": [
           {
             "id": "kapteyns-star-depot-dock",
-            "name": "Depot Dock",
-            "kind": "depot",
-            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
-            "services": [
-              "refuel"
-            ],
-            "notes": {
-              "refuel": "Free — courtesy of the Lanes Authority."
-            }
+            "name": "Waystation Dock",
+            "kind": "waystation",
+            "description": "A quiet automated dock. Someone has scratched names and dates into the bulkhead — captains who passed through, some of them long ago.",
+            "services": []
           }
         ]
       }
@@ -1420,29 +1417,23 @@
       "groombridge-34",
       "61-cygni"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "kruger-60-depot",
-        "name": "Kruger 60 Fuel Depot",
+        "name": "Kruger 60 Waystation",
         "kind": "station",
         "x": 800,
         "y": 400,
         "radius": 26,
         "color": "#9fb0c8",
-        "description": "An automated fuel depot maintained by the Lanes Authority. Free fuel for any ship.",
+        "description": "An automated waystation kept by the Lanes Authority: a dock, a message board, and a long log of passing ships.",
         "sites": [
           {
             "id": "kruger-60-depot-dock",
-            "name": "Depot Dock",
-            "kind": "depot",
-            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
-            "services": [
-              "refuel"
-            ],
-            "notes": {
-              "refuel": "Free — courtesy of the Lanes Authority."
-            }
+            "name": "Waystation Dock",
+            "kind": "waystation",
+            "description": "A quiet automated dock. Someone has scratched names and dates into the bulkhead — captains who passed through, some of them long ago.",
+            "services": []
           }
         ]
       }
@@ -1463,7 +1454,6 @@
     "links": [
       "ross-154"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "wolf-1061-c",
@@ -1481,7 +1471,6 @@
             "kind": "outpost",
             "description": "A sun-shielded outpost on the edge of the western lanes.",
             "services": [
-              "refuel",
               "trade",
               "missions"
             ],
@@ -1510,7 +1499,6 @@
       "lacaille-9352",
       "fomalhaut"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "gliese-876-b",
@@ -1539,7 +1527,6 @@
             "kind": "station",
             "description": "Tired crews, a big window, and the last good coffee before Fomalhaut.",
             "services": [
-              "refuel",
               "bar",
               "repair"
             ],
@@ -1568,29 +1555,23 @@
       "61-cygni",
       "vega"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "altair-depot",
-        "name": "Altair Fuel Depot",
+        "name": "Altair Waystation",
         "kind": "station",
         "x": -1100,
         "y": 600,
         "radius": 26,
         "color": "#9fb0c8",
-        "description": "A hardened depot at the frontier. The fuel is free; the silence is total.",
+        "description": "A hardened waystation at the frontier. The dock is always open; the silence is total.",
         "sites": [
           {
             "id": "altair-depot-dock",
-            "name": "Depot Dock",
-            "kind": "depot",
-            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
-            "services": [
-              "refuel"
-            ],
-            "notes": {
-              "refuel": "Free — courtesy of the Lanes Authority."
-            }
+            "name": "Waystation Dock",
+            "kind": "waystation",
+            "description": "A quiet automated dock. Someone has scratched names and dates into the bulkhead — captains who passed through, some of them long ago.",
+            "services": []
           }
         ]
       }
@@ -1611,7 +1592,6 @@
     "links": [
       "gliese-876"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "fomalhaut-ring",
@@ -1629,7 +1609,6 @@
             "kind": "outpost",
             "description": "A handful of watchers studying the ring, and whatever moves inside it.",
             "services": [
-              "refuel",
               "missions"
             ],
             "notes": {
@@ -1655,29 +1634,23 @@
     "links": [
       "altair"
     ],
-    "shipyard": [],
     "bodies": [
       {
         "id": "vega-depot",
-        "name": "Vega Fuel Depot",
+        "name": "Vega Waystation",
         "kind": "station",
         "x": 1000,
         "y": -800,
         "radius": 26,
         "color": "#9fb0c8",
-        "description": "The last depot before the dark. Its log records every ship that goes out, and every one that comes back.",
+        "description": "The last waystation before the dark. Its log records every ship that goes out, and every one that comes back.",
         "sites": [
           {
             "id": "vega-depot-dock",
-            "name": "Depot Dock",
-            "kind": "depot",
-            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
-            "services": [
-              "refuel"
-            ],
-            "notes": {
-              "refuel": "Free — courtesy of the Lanes Authority."
-            }
+            "name": "Waystation Dock",
+            "kind": "waystation",
+            "description": "A quiet automated dock. Someone has scratched names and dates into the bulkhead — captains who passed through, some of them long ago.",
+            "services": []
           }
         ]
       }

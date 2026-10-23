@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { gameData } from '../data/schema';
 import type { Session } from '../core/session';
-import { freshSeed } from '../core/rng';
 import { button, createLayer, el, type Layer } from '../ui/dom';
 import { getSession } from './sessionAccess';
 import { addStarBackdrop, onScreenResize } from './resize';
@@ -59,7 +58,7 @@ export class TitleScene extends Phaser.Scene {
       const newBtn = button('New game', () => {
         if (!armed) {
           armed = true;
-          newBtn.textContent = 'Tap again — replaces your save';
+          newBtn.textContent = 'Tap again to create a new captain';
           timer = setTimeout(() => {
             armed = false;
             newBtn.textContent = 'New game';
@@ -103,13 +102,12 @@ export class TitleScene extends Phaser.Scene {
     this.backdrop.near.setSize(width, height);
   }
 
+  /** New game goes through character creation; the old save is only replaced at Launch. */
   private startNew(): void {
-    if (this.leaving) return;
-    this.session.restart(freshSeed(), Date.now());
-    this.go('flight');
+    this.go('create');
   }
 
-  private go(key: 'flight' | 'landed'): void {
+  private go(key: 'flight' | 'landed' | 'create'): void {
     if (this.leaving) return; // ignore double taps during the fade
     this.leaving = true;
     this.cameras.main.fadeOut(250, 5, 6, 10);

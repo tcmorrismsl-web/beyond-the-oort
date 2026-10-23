@@ -14,6 +14,8 @@ export interface GameEvents {
   jumped: { from: string; to: string };
   landed: { siteId: string };
   departed: { siteId: string };
+  traded: { commodityId: string; qty: number; credits: number };
+  upgraded: { trackId: string; tier: number };
   saveFailed: { reason: string };
 }
 

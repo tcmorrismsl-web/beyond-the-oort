@@ -2,7 +2,7 @@
 // Navigations go network-first (players get updates when online, the cached
 // shell when offline); everything else is cache-first, which is safe because
 // Vite gives built files content-hashed names.
-const CACHE = 'game-v6';
+const CACHE = 'game-v7';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './index.html', './manifest.webmanifest'])));
