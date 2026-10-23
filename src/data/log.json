@@ -1,0 +1,37 @@
+[
+  {
+    "flag": "core-signal-heard",
+    "title": "The New Horizons signal",
+    "text": "New Horizons, silent for decades, relayed a message from near Sagittarius A*: Wolf 359, Barnard's Star, Alpha Centauri, Sol. \"We have tasted the quiet worlds. We are coming for the loud one.\" It answered a probe launched less than a century ago, from 26,000 light-years away."
+  },
+  {
+    "flag": "core-signal-silent-link",
+    "title": "The first name on the list",
+    "text": "Wolf 359 lost a mining camp last spring: everyone gone, lights still on. It's the first star the core signal named."
+  },
+  {
+    "flag": "two-signals",
+    "title": "Two signals",
+    "text": "The signal from the core is not the one you've been hearing. Yours comes from beyond the Oort Cloud, and it's much closer."
+  },
+  {
+    "flag": "signal-not-alone",
+    "title": "Not the only one listening",
+    "text": "Mara at The Departure Lounge knows about the nightly signal from beyond the Oort. Someone she knows is listening too."
+  },
+  {
+    "flag": "heard-wolf-359-camp",
+    "title": "The empty camp at Wolf 359",
+    "text": "Mara says a mining camp at Wolf 359 was found empty last spring, just like the colony you found."
+  },
+  {
+    "flag": "vega-log-lead",
+    "title": "The Vega log",
+    "text": "The waystation at Vega logs every ship going out past the charts. If they passed through, it'll be there."
+  },
+  {
+    "flag": "archive-lead",
+    "title": "The Bessel Archive",
+    "text": "Mara says the Bessel Archive at 61 Cygni pays captains to recover lost records from wrecks and ruins. Tell the archivists Mara sent you."
+  }
+]

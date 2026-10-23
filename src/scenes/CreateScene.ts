@@ -1,15 +1,16 @@
 import Phaser from 'phaser';
 import { gameData, type CreationChoice } from '../data/schema';
 import type { Session } from '../core/session';
-import { freshSeed } from '../core/rng';
-import { cleanName, DEFAULT_SHIP_NAME, MAX_NAME_LENGTH, startingCredits, type Captain, type Pronouns } from '../core/state';
-import { button, createLayer, credits, el, type Layer } from '../ui/dom';
+import { freshSeed, Rng } from '../core/rng';
+import { cleanName, DEFAULT_LOOK, DEFAULT_PAINT, DEFAULT_SHIP_NAME, MAX_NAME_LENGTH, startingCredits, type Captain, type Look, type Paint, type Pronouns } from '../core/state';
+import { button, chips, createLayer, credits, el, swatches, type Layer } from '../ui/dom';
+import { portraitSvg, setSvg, shipSvg } from '../ui/art';
 import { showToast } from '../ui/toast';
 import { getSession } from './sessionAccess';
 import { addStarBackdrop, onScreenResize } from './resize';
 
-type Step = 'name' | 'origin' | 'moment' | 'motive' | 'ship' | 'summary';
-const STEPS: readonly Step[] = ['name', 'origin', 'moment', 'motive', 'ship', 'summary'];
+type Step = 'name' | 'look' | 'origin' | 'moment' | 'motive' | 'ship' | 'summary';
+const STEPS: readonly Step[] = ['name', 'look', 'origin', 'moment', 'motive', 'ship', 'summary'];
 const PRONOUNS: { id: Pronouns; label: string }[] = [
   { id: 'she', label: 'She / her' },
   { id: 'he', label: 'He / him' },
@@ -26,7 +27,7 @@ export class CreateScene extends Phaser.Scene {
   private ui!: Layer;
   private backdrop!: { far: Phaser.GameObjects.TileSprite; near: Phaser.GameObjects.TileSprite };
   private step: Step = 'name';
-  private draft = { name: '', pronouns: 'they' as Pronouns, origin: '', moment: '', motive: '', shipName: '' };
+  private draft = this.emptyDraft();
   private drift = 0;
   private leaving = false;
 
@@ -34,10 +35,14 @@ export class CreateScene extends Phaser.Scene {
     super('create');
   }
 
+  private emptyDraft(): { name: string; pronouns: Pronouns; origin: string; moment: string; motive: string; shipName: string; look: Look; paint: Paint } {
+    return { name: '', pronouns: 'they', origin: '', moment: '', motive: '', shipName: '', look: { ...DEFAULT_LOOK }, paint: { ...DEFAULT_PAINT } };
+  }
+
   create(): void {
     this.session = getSession(this);
     this.step = 'name';
-    this.draft = { name: '', pronouns: 'they', origin: '', moment: '', motive: '', shipName: '' };
+    this.draft = this.emptyDraft();
     this.drift = 0;
     this.leaving = false;
     this.backdrop = addStarBackdrop(this);
@@ -76,6 +81,9 @@ export class CreateScene extends Phaser.Scene {
     switch (this.step) {
       case 'name':
         this.renderName(card);
+        break;
+      case 'look':
+        this.renderLook(card);
         break;
       case 'origin':
         this.renderChoice(card, 'Where are you from?', gameData.creation.origins, 'origin');
@@ -172,6 +180,57 @@ export class CreateScene extends Phaser.Scene {
     this.nav(card, this.draft.name.trim().length > 0);
   }
 
+  /**
+   * An option row that rebuilds only itself when you pick (the card doesn't
+   * re-render, so the page doesn't jump back to the top on a phone).
+   */
+  private optionRow(label: string, build: (refresh: () => void) => HTMLElement, onChange: () => void): HTMLElement {
+    const holder = el('div', 'opt-row', el('div', 'sub section', label));
+    const slot = el('div');
+    const refresh = (): void => {
+      slot.replaceChildren(build(refresh));
+      onChange();
+    };
+    slot.append(build(refresh));
+    holder.append(slot);
+    return holder;
+  }
+
+  private renderLook(card: HTMLElement): void {
+    const a = gameData.appearance.captain;
+    const look = this.draft.look;
+    card.append(el('h1', '', 'What do you look like?'));
+    const preview = el('div', 'portrait-box');
+    const updatePreview = (): void => {
+      setSvg(preview, portraitSvg(look));
+    };
+    updatePreview();
+    const randomize = button('Surprise me', () => {
+      const rng = new Rng(freshSeed());
+      look.face = rng.pick(a.faces).id;
+      look.skin = rng.pick(a.skinTones);
+      look.hair = rng.pick(a.hairStyles).id;
+      look.hairColor = rng.pick(a.hairColors);
+      look.eyes = rng.pick(a.eyeColors);
+      look.outfit = rng.pick(a.outfits).id;
+      look.outfitColor = rng.pick(a.outfitColors);
+      this.render();
+    }, 'small');
+    const options = el(
+      'div',
+      'look-options',
+      this.optionRow('Face', (r) => chips(a.faces, look.face, (v) => { look.face = v; r(); }), updatePreview),
+      this.optionRow('Skin', (r) => swatches(a.skinTones, look.skin, (v) => { look.skin = v; r(); }, 'Skin tone'), updatePreview),
+      this.optionRow('Hair', (r) => chips(a.hairStyles, look.hair, (v) => { look.hair = v; r(); }), updatePreview),
+      this.optionRow('Hair color', (r) => swatches(a.hairColors, look.hairColor, (v) => { look.hairColor = v; r(); }, 'Hair color'), updatePreview),
+      this.optionRow('Eyes', (r) => swatches(a.eyeColors, look.eyes, (v) => { look.eyes = v; r(); }, 'Eye color'), updatePreview),
+      this.optionRow('Outfit', (r) => chips(a.outfits, look.outfit, (v) => { look.outfit = v; r(); }), updatePreview),
+      this.optionRow('Outfit color', (r) => swatches(a.outfitColors, look.outfitColor, (v) => { look.outfitColor = v; r(); }, 'Outfit color'), updatePreview),
+    );
+    card.append(el('div', 'look-grid', el('div', 'look-preview', preview, randomize), options));
+    this.nav(card, true);
+  }
+
   private renderChoice(card: HTMLElement, title: string, choices: readonly CreationChoice[], key: 'origin' | 'moment' | 'motive'): void {
     card.append(el('h1', '', title));
     const selected = choices.find((c) => c.id === this.draft[key]);
@@ -208,6 +267,25 @@ export class CreateScene extends Phaser.Scene {
       );
     }
     card.append(ideas);
+
+    const a = gameData.appearance.ship;
+    const paint = this.draft.paint;
+    const preview = el('div', 'ship-box');
+    const updatePreview = (): void => {
+      setSvg(preview, shipSvg(paint));
+    };
+    updatePreview();
+    card.append(el('div', 'sub section', 'Paint her'));
+    const options = el(
+      'div',
+      'look-options',
+      this.optionRow('Hull', (r) => swatches(a.hullColors, paint.hull, (v) => { paint.hull = v; r(); }, 'Hull color'), updatePreview),
+      this.optionRow('Accent', (r) => swatches(a.accentColors, paint.accent, (v) => { paint.accent = v; r(); }, 'Accent color'), updatePreview),
+      this.optionRow('Pattern', (r) => chips(a.patterns, paint.pattern, (v) => { paint.pattern = v; r(); }), updatePreview),
+      this.optionRow('Engine glow', (r) => swatches(a.glowColors, paint.glow, (v) => { paint.glow = v; r(); }, 'Engine glow'), updatePreview),
+    );
+    card.append(el('div', 'look-grid', el('div', 'look-preview', preview), options));
+    card.append(el('div', 'note', 'You can repaint her later at any drydock.'));
     this.nav(card, true);
   }
 
@@ -218,6 +296,7 @@ export class CreateScene extends Phaser.Scene {
       origin: this.draft.origin,
       moment: this.draft.moment,
       motive: this.draft.motive,
+      look: { ...this.draft.look },
     };
   }
 
@@ -226,7 +305,11 @@ export class CreateScene extends Phaser.Scene {
     const c = gameData.creation;
     const find = (list: readonly CreationChoice[], id: string): CreationChoice | undefined => list.find((x) => x.id === id);
     const shipName = cleanName(this.draft.shipName, DEFAULT_SHIP_NAME);
-    card.append(el('h1', '', `Captain ${cap.name}`), el('div', 'sub', `of the ${shipName}`));
+    const portrait = el('div', 'portrait-box small');
+    setSvg(portrait, portraitSvg(cap.look));
+    const ship = el('div', 'ship-box small');
+    setSvg(ship, shipSvg(this.draft.paint));
+    card.append(el('div', 'summary-head', portrait, el('div', '', el('h1', '', `Captain ${cap.name}`), el('div', 'sub', `of the ${shipName}`), ship)));
     for (const [label, choice] of [
       ['From', find(c.origins, cap.origin)],
       ['Shaped by', find(c.moments, cap.moment)],
@@ -240,7 +323,7 @@ export class CreateScene extends Phaser.Scene {
     }
     this.nav(card, true, 'Launch', () => {
       if (this.leaving) return;
-      this.session.startCareer(freshSeed(), Date.now(), { captain: cap, shipName });
+      this.session.startCareer(freshSeed(), Date.now(), { captain: cap, shipName, paint: { ...this.draft.paint } });
       showToast(`Welcome aboard the ${shipName}`, 2400);
       this.leave('flight');
     });

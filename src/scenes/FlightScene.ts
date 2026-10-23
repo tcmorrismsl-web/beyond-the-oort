@@ -7,9 +7,12 @@ import { canJump, jumpBlockText, JUMP_CHARGE_SECONDS, landingTarget } from '../s
 import { IDLE, readStick, type StickReading } from '../ui/joystick';
 import { button, createLayer, credits, el, type Layer } from '../ui/dom';
 import { showToast } from '../ui/toast';
+import { openSheet, renderDialogue } from '../ui/panels';
+import { pendingTransmission } from '../systems/dialogue';
 import { getSession } from './sessionAccess';
 import { onScreenResize, onSceneEvent } from './resize';
 import { ensureBodyTexture, ensureStarTexture, hexToNumber } from './systemTextures';
+import { SHIP_DISPLAY, shipTextureFor } from './shipTexture';
 
 const STICK_RADIUS = 60;
 /** How much the star layers move relative to the camera (parallax depth). */
@@ -28,7 +31,6 @@ const LOOK_AHEAD_SECONDS = 0.3;
 /** ...but never more than this fraction of the screen's short side. */
 const LOOK_AHEAD_MAX = 0.25;
 const LOOK_AHEAD_EASE = 0.08;
-const FLAME_NORMAL = { r: 0xff, g: 0xa0, b: 0x40 };
 const FLAME_CRUISE = { r: 0x8f, g: 0xd8, b: 0xff };
 
 /** Data passed when the star chart closes and wakes flight. */
@@ -77,6 +79,9 @@ export class FlightScene extends Phaser.Scene {
   private jumpCharge = 0;
   /** Site picker open: the ship holds still and controls are ignored. */
   private picking = false;
+  private creditsChip!: HTMLSpanElement;
+  /** Engine glow color from your paint job; cruise blends toward blue-white. */
+  private flameNormal = { r: 0xff, g: 0xa0, b: 0x40 };
 
   constructor() {
     super('flight');
@@ -115,7 +120,14 @@ export class FlightScene extends Phaser.Scene {
       this.world(this.add.image(body.x, body.y, ensureBodyTexture(this, body)).setDepth(-5));
     }
     this.flame = this.world(this.add.image(ship.x, ship.y, 'flame').setOrigin(0, 0.5).setVisible(false).setDepth(-1));
-    this.ship = this.world(this.add.image(ship.x, ship.y, 'ship').setRotation(ship.angle));
+    // Your paint job: built from the same art as the menus (placeholder for a moment if new).
+    const shipKey = shipTextureFor(this, state.paint, (key) => {
+      if (this.ship.active) this.ship.setTexture(key).setDisplaySize(SHIP_DISPLAY.width, SHIP_DISPLAY.height);
+    });
+    this.ship = this.world(this.add.image(ship.x, ship.y, shipKey).setRotation(ship.angle));
+    if (shipKey !== 'ship') this.ship.setDisplaySize(SHIP_DISPLAY.width, SHIP_DISPLAY.height);
+    const glow = hexToNumber(state.paint.glow);
+    this.flameNormal = { r: (glow >> 16) & 255, g: (glow >> 8) & 255, b: glow & 255 };
 
     this.homeArrow = this.hud(this.add.image(0, 0, 'home-arrow').setDepth(5).setVisible(false));
     this.portArrows = system.bodies
@@ -138,6 +150,7 @@ export class FlightScene extends Phaser.Scene {
     });
     this.setupInput();
     this.buildHud();
+    this.checkTransmission();
 
     // The star chart puts flight to sleep (no update, no rendering) and wakes
     // it with `{ jumpTo }` if the player chose a jump.
@@ -191,7 +204,8 @@ export class FlightScene extends Phaser.Scene {
     });
     const state = this.session.state;
 
-    const info = el('div', 'chip hud-tl', el('b', '', this.system.name), el('span', 'dim', `  ·  ${credits(state.credits)}`));
+    this.creditsChip = el('span', 'dim', `  ·  ${credits(state.credits)}`);
+    const info = el('div', 'chip hud-tl', el('b', '', this.system.name), this.creditsChip);
     const shipBtn = button('Ship', () => {
       this.openOverlay('ship');
     });
@@ -211,6 +225,39 @@ export class FlightScene extends Phaser.Scene {
     this.chargeBox.style.display = 'none';
 
     this.ui.root.append(info, tr, br, this.chargeBox);
+  }
+
+  /**
+   * Story events that arrive in flight (e.g. the New Horizons signal): a
+   * moment after you're back in space, the ship stops and the transmission
+   * plays. It only counts as heard once you reach the end, so closing the app
+   * mid-way just plays it again next time.
+   */
+  private checkTransmission(): void {
+    const d = pendingTransmission(this.session.state, gameData.dialogues);
+    if (!d) return;
+    this.time.delayedCall(1100, () => {
+      if (this.jumpTarget !== null || this.picking) return;
+      this.picking = true;
+      this.resetStick();
+      const ship = this.session.state.ship;
+      ship.vx = 0;
+      ship.vy = 0;
+      showToast(d.title);
+      this.cameras.main.shake(400, 0.004);
+      openSheet(this.ui.root, (card, close) => {
+        card.classList.add('transmission');
+        renderDialogue(card, this.session, d.id, () => {
+          close();
+          this.picking = false;
+          this.refreshHud();
+        });
+      });
+    });
+  }
+
+  private refreshHud(): void {
+    this.creditsChip.textContent = `  ·  ${credits(this.session.state.credits)}`;
   }
 
   private updateLandingButton(): void {
@@ -366,15 +413,16 @@ export class FlightScene extends Phaser.Scene {
     this.flame.setVisible(visible);
     if (!visible) return;
     const back = this.ship.rotation + Math.PI;
-    const rear = this.ship.width / 2 - 2;
+    const rear = this.ship.displayWidth / 2 - 2;
     this.flame
       .setPosition(this.ship.x + Math.cos(back) * rear, this.ship.y + Math.sin(back) * rear)
       .setRotation(back)
       .setScale(0.35 + throttle * 0.75 + level * 1.4, 0.8 + level * 0.35);
-    // Orange at normal thrust, blue-white at full cruise (no per-frame allocation).
-    const r = Math.round(FLAME_NORMAL.r + (FLAME_CRUISE.r - FLAME_NORMAL.r) * level);
-    const g = Math.round(FLAME_NORMAL.g + (FLAME_CRUISE.g - FLAME_NORMAL.g) * level);
-    const b = Math.round(FLAME_NORMAL.b + (FLAME_CRUISE.b - FLAME_NORMAL.b) * level);
+    // Your glow color at normal thrust, blue-white at full cruise (no per-frame allocation).
+    const base = this.flameNormal;
+    const r = Math.round(base.r + (FLAME_CRUISE.r - base.r) * level);
+    const g = Math.round(base.g + (FLAME_CRUISE.g - base.g) * level);
+    const b = Math.round(base.b + (FLAME_CRUISE.b - base.b) * level);
     this.flame.setTint((r << 16) | (g << 8) | b);
   }
 

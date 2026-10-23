@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { buildGameData, gameData } from '../src/data/schema';
-import { newGame, type Captain, type GameState } from '../src/core/state';
+import { DEFAULT_LOOK, newGame, type Captain, type GameState } from '../src/core/state';
 import { choose, conditionMet, dialoguesAt, fillText, shownChoices } from '../src/systems/dialogue';
 
-const captainOf = (over: Partial<Captain> = {}): Captain => ({ name: 'Rhea Vance', pronouns: 'she', origin: 'frontier-colonist', moment: 'silent-colony', motive: 'the-signal', ...over });
+const captainOf = (over: Partial<Captain> = {}): Captain => ({ name: 'Rhea Vance', pronouns: 'she', origin: 'frontier-colonist', moment: 'silent-colony', motive: 'the-signal', look: DEFAULT_LOOK, ...over });
 const stateFor = (over: Partial<Captain> = {}): GameState => newGame(1, 1, { captain: captainOf(over), shipName: 'Lantern' });
 const mara = gameData.dialogues.get('mara-departure-lounge');
 if (!mara) throw new Error('mara missing');
@@ -87,5 +87,54 @@ describe('dialogue engine', () => {
     expect(conditionMet({ flag: 'met-mara' }, s)).toBe(true);
     expect(conditionMet({ notFlag: 'met-mara' }, s)).toBe(false);
     expect(conditionMet({ minCredits: 600 }, s)).toBe(false);
+  });
+});
+
+describe('the New Horizons signal', () => {
+  const nh = gameData.dialogues.get('new-horizons-signal');
+  if (!nh) throw new Error('new-horizons-signal missing');
+
+  it('waits until you have landed once, then plays once', async () => {
+    const { pendingTransmission } = await import('../src/systems/dialogue');
+    const fresh = stateFor();
+    expect(pendingTransmission(fresh, gameData.dialogues)).toBeNull();
+    const landed = { ...fresh, flags: ['landed-once'] };
+    expect(pendingTransmission(landed, gameData.dialogues)?.id).toBe('new-horizons-signal');
+    const heard = { ...fresh, flags: ['landed-once', 'core-signal-heard'] };
+    expect(pendingTransmission(heard, gameData.dialogues)).toBeNull();
+  });
+
+  it('ends with the recording in your locker and the log entry unlocked, for every background', () => {
+    for (const mo of gameData.creation.motives) {
+      for (const m of gameData.creation.moments) {
+        let s: GameState = { ...stateFor({ moment: m.id, motive: mo.id }), flags: ['landed-once'] };
+        let node: string | null = nh.start;
+        for (let i = 0; node !== null && i < 10; i += 1) {
+          const opts = shownChoices(nh, node, s);
+          const pick = opts[0]; // take the background-specific branch when there is one
+          const r = choose(nh, node, pick?.index ?? -1, s);
+          if (!r.ok) throw new Error(`stuck at ${node}`);
+          s = r.state;
+          node = r.next;
+        }
+        expect(node).toBeNull();
+        expect(s.flags).toContain('core-signal-heard');
+        expect(s.locker['nh-recording']).toBe(1);
+        expect(gameData.log.some((e) => e.flag === 'core-signal-heard')).toBe(true);
+      }
+    }
+  });
+
+  it('names the stars in the order of the message', () => {
+    const text = nh.nodes['message']?.text ?? '';
+    const order = ['WOLF 359', "BARNARD'S STAR", 'ALPHA CENTAURI', 'SOL'].map((n) => text.indexOf(n));
+    expect(order.every((v, i) => v >= 0 && (i === 0 || v > (order[i - 1] ?? -1)))).toBe(true);
+    expect(text).toContain('WE ARE COMING FOR THE LOUD ONE');
+  });
+
+  it('Mara reacts to the broadcast once you have heard it', () => {
+    const heard = { ...stateFor(), flags: ['core-signal-heard'] };
+    expect(shownChoices(mara, 'rumors', heard).some((c) => c.text.includes('New Horizons'))).toBe(true);
+    expect(shownChoices(mara, 'rumors', stateFor()).some((c) => c.text.includes('New Horizons'))).toBe(false);
   });
 });

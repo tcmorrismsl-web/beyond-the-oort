@@ -10,7 +10,7 @@ import { fromSave, newGame, repairAgainstContent, toSave, type GameState, type N
 import { gameData } from '../data/schema';
 import { canJump, depart, jump, land, type JumpCheck } from '../systems/travel';
 import { buy, sell, type TradeResult } from '../systems/market';
-import { canUpgrade, upgrade, type UpgradeCheck } from '../systems/ship';
+import { canRepaint, canUpgrade, repaint, upgrade, type RepaintCheck, type UpgradeCheck } from '../systems/ship';
 import { choose, type ChooseResult } from '../systems/dialogue';
 import type { StorageResult } from './storage';
 
@@ -128,7 +128,8 @@ export class Session {
     } catch {
       return false;
     }
-    this.state = next;
+    // Remember that you've landed somewhere (some story events wait for it).
+    this.state = next.flags.includes('landed-once') ? next : { ...next, flags: [...next.flags, 'landed-once'] };
     this.setMode('landed');
     this.bus.emit('landed', { siteId });
     this.save(now);
@@ -153,11 +154,23 @@ export class Session {
   departPort(now: number): boolean {
     const siteId = this.state.landedAt;
     if (siteId === null || this.state.mode !== 'landed') return false;
-    this.state = depart(this.state, gameData);
+    // Lifting off also proves you've landed (covers saves that were already
+    // sitting at a port before the 'landed-once' flag existed).
+    const next = depart(this.state, gameData);
+    this.state = next.flags.includes('landed-once') ? next : { ...next, flags: [...next.flags, 'landed-once'] };
     this.setMode('flight');
     this.bus.emit('departed', { siteId });
     this.save(now);
     return true;
+  }
+
+  /** Repaint the ship at a drydock. Saves. */
+  repaintShip(paint: GameState['paint'], now: number): RepaintCheck {
+    const check = canRepaint(this.state, paint, gameData);
+    if (!check.ok) return check;
+    this.state = repaint(this.state, paint, gameData);
+    this.save(now);
+    return check;
   }
 
   /** Pick a dialogue choice; applies its effects. Saves whenever the story moved (flags/credits/items). */

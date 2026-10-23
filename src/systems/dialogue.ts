@@ -93,3 +93,11 @@ export function choose(d: Dialogue, nodeId: string, choiceIndex: number, state: 
 export function dialoguesAt(siteId: string, dialogues: ReadonlyMap<string, Dialogue>): Dialogue[] {
   return [...dialogues.values()].filter((d) => d.site === siteId);
 }
+
+/** The story event (if any) that should play in flight right now: the first triggered dialogue whose condition is met. */
+export function pendingTransmission(state: GameState, dialogues: ReadonlyMap<string, Dialogue>): Dialogue | null {
+  for (const d of dialogues.values()) {
+    if (d.trigger && conditionMet(d.trigger.if, state)) return d;
+  }
+  return null;
+}

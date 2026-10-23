@@ -5,6 +5,9 @@ import upgradesJson from './upgrades.json';
 import commoditiesJson from './commodities.json';
 import originsJson from './origins.json';
 import dialoguesJson from './dialogues.json';
+import appearanceJson from './appearance.json';
+import itemsJson from './items.json';
+import logJson from './log.json';
 
 /**
  * All game content lives in JSON and is validated here, including
@@ -171,10 +174,43 @@ export const DialogueSchema = z.object({
   speaker: z.string().min(1),
   role: z.string().default(''),
   site: id.optional(), // where you can find this conversation
+  /** Or: a story event that plays in flight once its condition is met (e.g. an incoming transmission). */
+  trigger: z.object({ if: ConditionSchema }).optional(),
   start: id,
   nodes: z.record(id, z.object({ text: z.string().min(1), choices: z.array(ChoiceSchemaD).min(1) })),
 });
 export type Dialogue = z.infer<typeof DialogueSchema>;
+
+/** Things that go in the locker (mission items, recordings, artifacts). */
+export const ItemSchema = z.object({ id, name: z.string().min(1), description: z.string().min(1) });
+export type Item = z.infer<typeof ItemSchema>;
+
+/** Story log: an entry appears once its flag is set. */
+export const LogEntrySchema = z.object({ flag: id, title: z.string().min(1), text: z.string().min(1) });
+export type LogEntry = z.infer<typeof LogEntrySchema>;
+
+const NamedOption = z.object({ id, name: z.string().min(1) });
+
+/** Appearance options for the captain's portrait and the ship's paint. */
+export const AppearanceSchema = z.object({
+  captain: z.object({
+    faces: z.array(NamedOption).min(1),
+    skinTones: z.array(hexColor).min(1),
+    hairStyles: z.array(NamedOption).min(1),
+    hairColors: z.array(hexColor).min(1),
+    eyeColors: z.array(hexColor).min(1),
+    outfits: z.array(NamedOption).min(1),
+    outfitColors: z.array(hexColor).min(1),
+  }),
+  ship: z.object({
+    hullColors: z.array(hexColor).min(1),
+    accentColors: z.array(hexColor).min(1),
+    patterns: z.array(NamedOption).min(1),
+    glowColors: z.array(hexColor).min(1),
+  }),
+  repaintCost: z.number().int().nonnegative(),
+});
+export type AppearanceOptions = z.infer<typeof AppearanceSchema>;
 
 export function isLandable(body: Body): boolean {
   return body.sites.length > 0;
@@ -191,6 +227,9 @@ export interface GameData {
   commodities: ReadonlyMap<string, Commodity>;
   creation: Origins;
   dialogues: ReadonlyMap<string, Dialogue>;
+  appearance: AppearanceOptions;
+  items: ReadonlyMap<string, Item>;
+  log: readonly LogEntry[];
 }
 
 /** Bodies must sit clear of their star by at least this much (so nobody spawns inside the sun). */
@@ -205,6 +244,20 @@ function indexById<T extends { id: string }>(items: T[], kind: string, errors: s
   return map;
 }
 
+const DEFAULT_APPEARANCE = {
+  captain: {
+    faces: [{ id: 'oval', name: 'Oval' }],
+    skinTones: ['#d9a37e'],
+    hairStyles: [{ id: 'short', name: 'Short' }],
+    hairColors: ['#3b2416'],
+    eyeColors: ['#3b2a1d'],
+    outfits: [{ id: 'flight-jacket', name: 'Flight jacket' }],
+    outfitColors: ['#2b3a55'],
+  },
+  ship: { hullColors: ['#dfe8ff'], accentColors: ['#4fc3ff'], patterns: [{ id: 'plain', name: 'Plain' }], glowColors: ['#ffa040'] },
+  repaintCost: 0,
+};
+
 const EMPTY_ORIGINS = { origins: [], moments: [], motives: [], ship: { intro: '', nameSuggestions: [] } };
 
 export interface RawContent {
@@ -214,6 +267,9 @@ export interface RawContent {
   commodities?: unknown;
   origins?: unknown;
   dialogues?: unknown;
+  appearance?: unknown;
+  items?: unknown;
+  log?: unknown;
 }
 
 export function buildGameData(raw: RawContent): GameData {
@@ -223,6 +279,9 @@ export function buildGameData(raw: RawContent): GameData {
   const commodities = z.array(CommoditySchema).parse(raw.commodities ?? []);
   const creation = OriginsSchema.parse(raw.origins ?? EMPTY_ORIGINS);
   const dialogues = z.array(DialogueSchema).parse(raw.dialogues ?? []);
+  const appearance = AppearanceSchema.parse(raw.appearance ?? DEFAULT_APPEARANCE);
+  const items = z.array(ItemSchema).parse(raw.items ?? []);
+  const log = z.array(LogEntrySchema).parse(raw.log ?? []);
   const errors: string[] = [];
   const shipMap = indexById(ships, 'ship', errors);
   const systemMap = indexById(systems, 'system', errors);
@@ -277,9 +336,25 @@ export function buildGameData(raw: RawContent): GameData {
     moment: new Set(creation.moments.map((o) => o.id)),
     motive: new Set(creation.motives.map((o) => o.id)),
   };
-  for (const d of dialogues) validateDialogue(d, known, siteMap, errors);
+  const itemMap = indexById(items, 'item', errors);
+  for (const d of dialogues) {
+    validateDialogue(d, known, siteMap, errors);
+    if (d.site === undefined && d.trigger === undefined) errors.push(`dialogue "${d.id}" has no site and no trigger, so it can never be heard`);
+    for (const node of Object.values(d.nodes)) {
+      for (const c of node.choices) {
+        for (const e of c.effects) {
+          if (e.locker && !itemMap.has(e.locker.item)) errors.push(`dialogue "${d.id}" gives missing item "${e.locker.item}"`);
+        }
+      }
+    }
+  }
+  const logFlags = new Set<string>();
+  for (const entry of log) {
+    if (logFlags.has(entry.flag)) errors.push(`two log entries for flag "${entry.flag}"`);
+    logFlags.add(entry.flag);
+  }
   if (errors.length > 0) throw new Error(`Game data invalid:\n- ${errors.join('\n- ')}`);
-  return { ships: shipMap, systems: systemMap, bodies: bodyMap, sites: siteMap, upgrades, commodities: commodityMap, creation, dialogues: dialogueMap };
+  return { ships: shipMap, systems: systemMap, bodies: bodyMap, sites: siteMap, upgrades, commodities: commodityMap, creation, dialogues: dialogueMap, appearance, items: itemMap, log };
 }
 
 /**
@@ -326,4 +401,7 @@ export const gameData: GameData = buildGameData({
   commodities: commoditiesJson,
   origins: originsJson,
   dialogues: dialoguesJson,
+  appearance: appearanceJson,
+  items: itemsJson,
+  log: logJson,
 });

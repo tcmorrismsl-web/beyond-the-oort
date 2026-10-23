@@ -6,9 +6,10 @@
 import { gameData, type UpgradeEffect } from '../data/schema';
 import type { Session } from '../core/session';
 import { cargoUsed, holdSize, maxBuyable, quote, tradeBlockText } from '../systems/market';
-import { canUpgrade, statsFor, upgradeBlockText } from '../systems/ship';
+import { canRepaint, canUpgrade, statsFor, upgradeBlockText } from '../systems/ship';
 import { nodeText, shownChoices } from '../systems/dialogue';
-import { button, credits, el } from './dom';
+import { button, chips, credits, el, swatches } from './dom';
+import { portraitSvg, setSvg, shipSvg } from './art';
 import { showToast } from './toast';
 
 /** Open a sheet over the given layer; returns a function that closes it. */
@@ -128,6 +129,15 @@ export function renderDrydock(card: HTMLDivElement, session: Session, close: () 
     }
     card.append(el('h1', '', 'Drydock'), el('div', 'sub', `${state.shipName} · ${credits(state.credits)}`));
     if (site.site.notes.drydock) card.append(el('p', '', site.site.notes.drydock));
+    const paintPreview = el('div', 'ship-box small');
+    setSvg(paintPreview, shipSvg(state.paint));
+    const paintBtn = button(`Repaint · ${credits(gameData.appearance.repaintCost)}`, () => {
+      renderPaintShop(card, session, () => {
+        draw();
+        onChange();
+      });
+    }, 'small');
+    card.append(el('div', 'svc paint-row', paintPreview, el('div', '', el('b', '', 'Paint shop'), el('div', 'svc-note', 'New colors, pattern and engine glow.'), paintBtn)));
     const list = el('div', 'svc-list port-upgrades');
     for (const track of gameData.upgrades) {
       const owned = state.upgrades[track.id] ?? 0;
@@ -172,8 +182,14 @@ export function renderShip(card: HTMLDivElement, session: Session, close: () => 
   const stats = statsFor(state, gameData);
   card.append(el('h1', '', state.shipName), el('div', 'sub', def?.name ?? ''));
 
+  const art = el('div', 'ship-box');
+  setSvg(art, shipSvg(state.paint));
+  card.append(art);
   const cap = state.captain;
   if (cap) {
+    const portrait = el('div', 'portrait-box small');
+    setSvg(portrait, portraitSvg(cap.look));
+    card.append(portrait);
     const c = gameData.creation;
     const origin = c.origins.find((o) => o.id === cap.origin)?.name ?? '';
     const moment = c.moments.find((m) => m.id === cap.moment)?.name ?? '';
@@ -203,11 +219,19 @@ export function renderShip(card: HTMLDivElement, session: Session, close: () => 
   const hold = Object.entries(state.cargo).map(([id, n]) => `${gameData.commodities.get(id)?.name ?? id} ×${n}`);
   card.append(el('div', 'sub section', 'Cargo hold'), el('p', '', hold.length > 0 ? hold.join(' · ') : 'Empty.'));
 
-  const locker = Object.entries(state.locker).map(([id, n]) => `${id} ×${n}`);
-  card.append(
-    el('div', 'sub section', 'Locker'),
-    el('p', '', locker.length > 0 ? locker.join(' · ') : "Empty for now. Mission items, artifacts and things you discover go here, and it never fills up."),
-  );
+  card.append(el('div', 'sub section', 'Locker'));
+  const locker = Object.entries(state.locker);
+  if (locker.length === 0) card.append(el('p', '', 'Empty for now. Mission items, artifacts and things you discover go here, and it never fills up.'));
+  for (const [id, n] of locker) {
+    const item = gameData.items.get(id);
+    card.append(el('div', 'svc', el('b', '', `${item?.name ?? id}${n > 1 ? ` ×${n}` : ''}`), el('div', 'svc-note', item?.description ?? '')));
+  }
+
+  // Story log: what you've learned, newest first.
+  const entries = gameData.log.filter((e) => state.flags.includes(e.flag)).sort((a, b) => state.flags.indexOf(b.flag) - state.flags.indexOf(a.flag));
+  card.append(el('div', 'sub section', 'Log'));
+  if (entries.length === 0) card.append(el('p', '', 'Nothing yet. Talk to people, follow signals, and what you learn will be written here.'));
+  for (const e of entries) card.append(el('div', 'svc log-entry', el('b', '', e.title), el('div', 'svc-note', e.text)));
   const done = button('Close', close, 'primary');
   done.style.width = '100%';
   done.style.marginTop = '8px';
@@ -236,4 +260,57 @@ export function renderDialogue(card: HTMLDivElement, session: Session, dialogueI
     }
   };
   draw(d.start);
+}
+
+// ------------------------------------------------------------------ Paint shop
+
+const REPAINT_TEXT = { 'no-drydock': 'Needs a drydock', credits: 'Not enough credits', unchanged: 'No changes yet', invalid: 'Invalid paint' } as const;
+
+/** Repaint editor inside the drydock sheet. Applying charges the repaint cost. */
+export function renderPaintShop(card: HTMLDivElement, session: Session, back: () => void): void {
+  const a = gameData.appearance.ship;
+  const paint = { ...session.state.paint };
+  const preview = el('div', 'ship-box');
+  const apply = button('', () => {
+    const r = session.repaintShip(paint, Date.now());
+    if (r.ok) {
+      showToast(`${session.state.shipName} repainted`);
+      back();
+    } else showToast(REPAINT_TEXT[r.reason]);
+  }, 'primary');
+  apply.style.width = '100%';
+  const update = (): void => {
+    setSvg(preview, shipSvg(paint));
+    const check = canRepaint(session.state, paint, gameData);
+    apply.disabled = !check.ok;
+    apply.textContent = check.ok ? `Apply · ${credits(check.cost)}` : REPAINT_TEXT[check.reason];
+  };
+  const row = (label: string, build: (refresh: () => void) => HTMLElement): HTMLElement => {
+    const slot = el('div');
+    const refresh = (): void => {
+      slot.replaceChildren(build(refresh));
+      update();
+    };
+    slot.append(build(refresh));
+    return el('div', 'opt-row', el('div', 'sub section', label), slot);
+  };
+  card.replaceChildren(
+    el('h1', '', 'Paint shop'),
+    el('div', 'sub', `${session.state.shipName} · ${credits(session.state.credits)}`),
+    el(
+      'div',
+      'look-grid',
+      el('div', 'look-preview', preview),
+      el(
+        'div',
+        'look-options',
+        row('Hull', (r) => swatches(a.hullColors, paint.hull, (v) => { paint.hull = v; r(); }, 'Hull color')),
+        row('Accent', (r) => swatches(a.accentColors, paint.accent, (v) => { paint.accent = v; r(); }, 'Accent color')),
+        row('Pattern', (r) => chips(a.patterns, paint.pattern, (v) => { paint.pattern = v; r(); })),
+        row('Engine glow', (r) => swatches(a.glowColors, paint.glow, (v) => { paint.glow = v; r(); }, 'Engine glow')),
+      ),
+    ),
+    el('div', 'row', button('Back', back), apply),
+  );
+  update();
 }

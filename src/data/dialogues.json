@@ -10,74 +10,379 @@
       "hello": {
         "text": "A woman with silver rings on every finger slides a glass your way before you've asked. \"First one's on the house for new captains. I'm Mara. And you're {name}, of the {ship}. Word travels fast when somebody docks a ship nobody's ever seen.\"",
         "choices": [
-          { "text": "\"Word travels that fast?\"", "to": "gossip" },
-          { "text": "\"Do you greet every captain this warmly?\"", "to": "flirt", "effects": [{ "setFlag": "mara-flirted" }] },
-          { "text": "\"I'm looking for work. Real work, not hauling.\"", "to": "work" },
-          { "text": "Raise the glass and leave.", "to": null }
+          {
+            "text": "\"Word travels that fast?\"",
+            "to": "gossip"
+          },
+          {
+            "text": "\"Do you greet every captain this warmly?\"",
+            "to": "flirt",
+            "effects": [
+              {
+                "setFlag": "mara-flirted"
+              }
+            ]
+          },
+          {
+            "text": "\"I'm looking for work. Real work, not hauling.\"",
+            "to": "work"
+          },
+          {
+            "text": "Raise the glass and leave.",
+            "to": null
+          }
         ]
       },
       "gossip": {
         "text": "\"Bartenders hear everything. Half of Sol drinks here, and the other half wishes they could.\" She studies you over the rim of a glass.",
         "choices": [
-          { "text": "\"Spot a freighter kid, did you?\"", "if": { "origin": ["freighter-born"] }, "to": "freighter" },
-          { "text": "\"You've seen people like me before. From downstairs.\"", "if": { "origin": ["sol-undercity"] }, "to": "undercity" },
-          { "text": "\"Let me guess. You know my family name.\"", "if": { "origin": ["academy-legacy"] }, "to": "academy" },
-          { "text": "\"Frontier folk stand out here, don't they?\"", "if": { "origin": ["frontier-colonist"] }, "to": "frontier" },
-          { "text": "\"What else have you heard?\"", "to": "rumors" }
+          {
+            "text": "\"Spot a freighter kid, did you?\"",
+            "if": {
+              "origin": [
+                "freighter-born"
+              ]
+            },
+            "to": "freighter"
+          },
+          {
+            "text": "\"You've seen people like me before. From downstairs.\"",
+            "if": {
+              "origin": [
+                "sol-undercity"
+              ]
+            },
+            "to": "undercity"
+          },
+          {
+            "text": "\"Let me guess. You know my family name.\"",
+            "if": {
+              "origin": [
+                "academy-legacy"
+              ]
+            },
+            "to": "academy"
+          },
+          {
+            "text": "\"Frontier folk stand out here, don't they?\"",
+            "if": {
+              "origin": [
+                "frontier-colonist"
+              ]
+            },
+            "to": "frontier"
+          },
+          {
+            "text": "\"What else have you heard?\"",
+            "to": "rumors"
+          }
         ]
       },
       "freighter": {
         "text": "\"You sit with your back to the wall and you checked the exits twice. Freighter crews always do.\" She smiles. \"My dad ran the Centauri line for thirty years. You're in good company.\"",
-        "choices": [{ "text": "\"What else have you heard?\"", "to": "rumors" }]
+        "choices": [
+          {
+            "text": "\"What else have you heard?\"",
+            "to": "rumors"
+          }
+        ]
       },
       "undercity": {
         "text": "Her voice drops. \"You walk like someone who learned to read a room before they learned to read. Downstairs taught me the same.\" She taps the bar twice, an old signal from the lower levels. \"Your secrets are safe here.\"",
-        "choices": [{ "text": "Tap the bar twice back. \"What else have you heard?\"", "to": "rumors" }]
+        "choices": [
+          {
+            "text": "Tap the bar twice back. \"What else have you heard?\"",
+            "to": "rumors"
+          }
+        ]
       },
       "academy": {
         "text": "\"Everyone in this bar knows a Tranquility name when they hear one.\" She tilts her head. \"Funny. You don't look like you want to be recognized.\"",
-        "choices": [{ "text": "\"I'd rather earn my own name. What else have you heard?\"", "to": "rumors" }]
+        "choices": [
+          {
+            "text": "\"I'd rather earn my own name. What else have you heard?\"",
+            "to": "rumors"
+          }
+        ]
       },
       "frontier": {
         "text": "\"You look at the prices on my menu like they personally offended you.\" She laughs. \"Frontier folk always do. Relax. I'll put this one on the house too.\"",
-        "choices": [{ "text": "\"Generous. What else have you heard?\"", "to": "rumors" }]
+        "choices": [
+          {
+            "text": "\"Generous. What else have you heard?\"",
+            "to": "rumors"
+          }
+        ]
       },
       "rumors": {
         "text": "\"A survey team at Lalande 21185 stopped reporting in last month. A freighter came back from Kapteyn's Star with its crew refusing to talk. And there's something about the Oort lately — pilots coming home with strange static on their receivers.\"",
         "choices": [
-          { "text": "\"Static? Every night, at the same hour?\"", "if": { "motive": ["the-signal"] }, "to": "signal", "effects": [{ "setFlag": "signal-not-alone" }] },
-          { "text": "\"An empty colony, maybe? Lights on, nobody home?\"", "if": { "moment": ["silent-colony"] }, "to": "silent" },
-          { "text": "\"Someone went past the charts and never came back. Have you heard anything?\"", "if": { "motive": ["searching"] }, "to": "searching" },
-          { "text": "\"Sounds like work. Who's hiring?\"", "to": "work" }
+          {
+            "text": "\"Did you hear the New Horizons broadcast?\"",
+            "if": {
+              "flag": "core-signal-heard"
+            },
+            "to": "nh"
+          },
+          {
+            "text": "\"Static? Every night, at the same hour?\"",
+            "if": {
+              "motive": [
+                "the-signal"
+              ]
+            },
+            "to": "signal",
+            "effects": [
+              {
+                "setFlag": "signal-not-alone"
+              }
+            ]
+          },
+          {
+            "text": "\"An empty colony, maybe? Lights on, nobody home?\"",
+            "if": {
+              "moment": [
+                "silent-colony"
+              ]
+            },
+            "to": "silent"
+          },
+          {
+            "text": "\"Someone went past the charts and never came back. Have you heard anything?\"",
+            "if": {
+              "motive": [
+                "searching"
+              ]
+            },
+            "to": "searching"
+          },
+          {
+            "text": "\"Sounds like work. Who's hiring?\"",
+            "to": "work"
+          }
         ]
       },
       "signal": {
         "text": "Mara goes very still. \"Same hour every night. How did you know that?\" She glances around, then leans in close enough that you can smell her perfume. \"You're not the only one listening, {name}. Come back when you've got more than questions.\"",
-        "choices": [{ "text": "\"I will.\"", "to": "work" }]
+        "choices": [
+          {
+            "text": "\"I will.\"",
+            "to": "work"
+          }
+        ]
       },
       "silent": {
         "text": "The glass she's polishing stops moving. \"You've seen one of those too.\" It isn't a question. \"There was a mining camp on Wolf 359 last spring. Same story. Nobody believed the pilot who found it either.\"",
-        "choices": [{ "text": "\"Where's that pilot now?\"", "to": "work", "effects": [{ "setFlag": "heard-wolf-359-camp" }] }]
+        "choices": [
+          {
+            "text": "\"Where's that pilot now?\"",
+            "to": "work",
+            "effects": [
+              {
+                "setFlag": "heard-wolf-359-camp"
+              }
+            ]
+          }
+        ]
       },
       "searching": {
         "text": "\"People go out past Vega all the time. Fewer come back every year.\" Her voice softens. \"There's a waystation at Vega that logs every ship going out. If they passed through, it'll be in there.\"",
-        "choices": [{ "text": "\"Thank you. Truly.\"", "to": "work", "effects": [{ "setFlag": "vega-log-lead" }] }]
+        "choices": [
+          {
+            "text": "\"Thank you. Truly.\"",
+            "to": "work",
+            "effects": [
+              {
+                "setFlag": "vega-log-lead"
+              }
+            ]
+          }
+        ]
       },
       "flirt": {
         "text": "Mara laughs, low and warm. \"Only the ones with interesting ships.\" She leans on the bar, close enough that her rings catch the light. \"And interesting eyes. Stick around a while, captain. I get off at midnight, and nobody tells better stories than a bartender after closing.\"",
         "choices": [
-          { "text": "\"I might take you up on that.\"", "to": "flirt2", "effects": [{ "setFlag": "mara-interested" }] },
-          { "text": "Smile. \"Business first. What have you heard lately?\"", "to": "rumors" }
+          {
+            "text": "\"I might take you up on that.\"",
+            "to": "flirt2",
+            "effects": [
+              {
+                "setFlag": "mara-interested"
+              }
+            ]
+          },
+          {
+            "text": "Smile. \"Business first. What have you heard lately?\"",
+            "to": "rumors"
+          }
         ]
       },
       "flirt2": {
         "text": "\"I'll hold you to it.\" She writes something on a napkin and tucks it into your jacket pocket, fingers lingering a moment longer than they need to. \"For later. Now, before my manager notices I'm enjoying myself: are you looking for work?\"",
-        "choices": [{ "text": "\"Real work. Not hauling.\"", "to": "work" }]
+        "choices": [
+          {
+            "text": "\"Real work. Not hauling.\"",
+            "to": "work"
+          }
+        ]
       },
       "work": {
         "text": "\"Real work.\" She nods toward the far corner of the lounge. \"The Bessel Archive at 61 Cygni pays captains to recover lost records from wrecks and ruins. It's dangerous, it's strange, and it pays better than cargo. Tell the archivists Mara sent you.\"",
         "choices": [
-          { "text": "\"I'll head there. Thanks, Mara.\"", "to": null, "effects": [{ "setFlag": "archive-lead" }] }
+          {
+            "text": "\"I'll head there. Thanks, Mara.\"",
+            "to": null,
+            "effects": [
+              {
+                "setFlag": "archive-lead"
+              }
+            ]
+          }
+        ]
+      },
+      "nh": {
+        "text": "Mara sets the glass down a little too hard. \"Everyone's heard it. Half my regulars are drinking to forget it, the other half are drinking to the end of the world.\" She lowers her voice. \"'The quiet worlds.' Wolf 359 went quiet last spring, you know. A whole mining camp.\"",
+        "choices": [
+          {
+            "text": "\"Then someone should find out why.\"",
+            "to": "work",
+            "effects": [
+              {
+                "setFlag": "heard-wolf-359-camp"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "new-horizons-signal",
+    "title": "Incoming transmission",
+    "speaker": "Dr. Ines Okafor",
+    "role": "Deep Space Network relay · priority Omega",
+    "trigger": {
+      "if": {
+        "flag": "landed-once",
+        "notFlag": "core-signal-heard"
+      }
+    },
+    "start": "alert",
+    "nodes": {
+      "alert": {
+        "text": "Every channel on your console lights up at once. A tired voice cuts through: \"This is Dr. Ines Okafor, Deep Space Network. All ships, all stations. Forty minutes ago NASA's New Horizons probe, launched in 2006 and silent for decades out past the Kuiper Belt, started transmitting again. It's relaying something its old dish caught from the direction of the galactic core. We're broadcasting the decode to everyone. I'm sorry. You need to hear this.\"",
+        "choices": [
+          {
+            "text": "Play it.",
+            "to": "message"
+          }
+        ]
+      },
+      "message": {
+        "text": "Static, then a rhythm under the static, almost like breathing. Text crawls across your screen, one line at a time:\n\nWOLF 359.\nBARNARD'S STAR.\nALPHA CENTAURI.\nSOL.\n\nWE HAVE TASTED THE QUIET WORLDS.\nWE ARE COMING FOR THE LOUD ONE.",
+        "choices": [
+          {
+            "text": "\"Where exactly did that come from?\"",
+            "to": "origin"
+          }
+        ]
+      },
+      "origin": {
+        "text": "Okafor's voice is steady, but only just. \"Near Sagittarius A*, the black hole at the center of the galaxy. Twenty-six thousand light-years away.\" A pause. \"That's the part that keeps me up. The light we see from there is twenty-six thousand years old. But this answers a probe we launched less than a century ago. Whatever sent it isn't where its light says it is.\"",
+        "choices": [
+          {
+            "text": "\"Quiet worlds. Like the colony I found. Lights on, nobody home.\"",
+            "if": {
+              "moment": [
+                "silent-colony"
+              ]
+            },
+            "to": "silent"
+          },
+          {
+            "text": "\"This isn't the signal I've been hearing. Mine comes from the Oort.\"",
+            "if": {
+              "motive": [
+                "the-signal"
+              ]
+            },
+            "to": "two"
+          },
+          {
+            "text": "\"Ships have been disappearing past the charts. Is this connected?\"",
+            "if": {
+              "motive": [
+                "searching"
+              ]
+            },
+            "to": "searching"
+          },
+          {
+            "text": "\"Who else has heard this?\"",
+            "to": "who"
+          }
+        ]
+      },
+      "silent": {
+        "text": "A long silence on the line. \"Wolf 359 lost a mining camp last spring. Everyone gone, meals still on the tables. Captain... Wolf 359 is the first name on that list.\"",
+        "choices": [
+          {
+            "text": "\"Who else has heard this?\"",
+            "to": "who",
+            "effects": [
+              {
+                "setFlag": "core-signal-silent-link"
+              }
+            ]
+          }
+        ]
+      },
+      "two": {
+        "text": "\"You're hearing something else?\" You hear her typing fast. \"From the Oort. Patterned. Every night at the same hour.\" She stops typing. \"Then there are two of them, and one of them is a lot closer than the other.\"",
+        "choices": [
+          {
+            "text": "\"Who else has heard this?\"",
+            "to": "who",
+            "effects": [
+              {
+                "setFlag": "two-signals"
+              }
+            ]
+          }
+        ]
+      },
+      "searching": {
+        "text": "\"Ships go quiet past Vega all the time. But three went quiet the same week New Horizons woke up.\" Her voice softens. \"I'm sorry. I don't know if that helps.\"",
+        "choices": [
+          {
+            "text": "\"It does. Who else has heard this?\"",
+            "to": "who",
+            "effects": [
+              {
+                "setFlag": "vega-log-lead"
+              }
+            ]
+          }
+        ]
+      },
+      "who": {
+        "text": "\"Every receiver in Sol, by now. Sirius corporate is already buying up listening posts. The Academy is calling it a hoax on every channel. And the undercity's selling bootleg copies by the hour.\" Then, quieter, on a private channel: \"Captain {name}. Your ship's array caught that transmission cleaner than the whole Deep Space Network did. Somebody's going to want to know why. Be careful who you tell.\"",
+        "choices": [
+          {
+            "text": "\"Understood. Saving the recording.\"",
+            "to": null,
+            "effects": [
+              {
+                "setFlag": "core-signal-heard"
+              },
+              {
+                "locker": {
+                  "item": "nh-recording",
+                  "qty": 1
+                }
+              }
+            ]
+          }
         ]
       }
     }

@@ -85,3 +85,30 @@ export function upgradeBlockText(reason: UpgradeBlock): string {
       return 'Needs a drydock';
   }
 }
+
+export type RepaintBlock = 'no-drydock' | 'credits' | 'unchanged' | 'invalid';
+export type RepaintCheck = { ok: true; cost: number } | { ok: false; reason: RepaintBlock };
+
+/** Repainting at a drydock: any valid paint job, flat price, no charge if nothing changed. */
+export function canRepaint(state: GameState, paint: GameState['paint'], data: GameData): RepaintCheck {
+  const a = data.appearance.ship;
+  const valid =
+    a.hullColors.includes(paint.hull) &&
+    a.accentColors.includes(paint.accent) &&
+    a.glowColors.includes(paint.glow) &&
+    a.patterns.some((p) => p.id === paint.pattern);
+  if (!valid) return { ok: false, reason: 'invalid' };
+  const site = state.landedAt === null ? undefined : data.sites.get(state.landedAt);
+  if (!site?.site.services.includes('drydock')) return { ok: false, reason: 'no-drydock' };
+  const p = state.paint;
+  if (p.hull === paint.hull && p.accent === paint.accent && p.pattern === paint.pattern && p.glow === paint.glow) return { ok: false, reason: 'unchanged' };
+  const cost = data.appearance.repaintCost;
+  if (state.credits < cost) return { ok: false, reason: 'credits' };
+  return { ok: true, cost };
+}
+
+export function repaint(state: GameState, paint: GameState['paint'], data: GameData): GameState {
+  const check = canRepaint(state, paint, data);
+  if (!check.ok) throw new Error(`repaint not allowed: ${check.reason}`);
+  return { ...state, credits: state.credits - check.cost, paint: { ...paint } };
+}

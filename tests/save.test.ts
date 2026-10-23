@@ -11,12 +11,13 @@ const sample: SaveData = {
   ship: { defId: 'shuttle', x: 10, y: -5, angle: 1.2 },
   visited: ['sol'],
   landedAt: null,
-  captain: { name: 'Ada Kell', pronouns: 'they', origin: 'freighter-born', moment: 'the-debt', motive: 'running' },
+  captain: { name: 'Ada Kell', pronouns: 'they', origin: 'freighter-born', moment: 'the-debt', motive: 'running', look: { face: 'round', skin: '#5a3420', hair: 'curls', hairColor: '#1b1410', eyes: '#3b2a1d', outfit: 'mechanic', outfitColor: '#4a3b2a' } },
   shipName: 'Kestrel',
   upgrades: { engines: 2 },
   cargo: { ore: 5 },
   locker: {},
   flags: ['met-mara'],
+  paint: { hull: '#2f5a8a', accent: '#ffd27a', pattern: 'stripe', glow: '#4fc3ff' },
 };
 
 describe('save system', () => {
@@ -49,6 +50,22 @@ describe('save system', () => {
     expect(r.data).toMatchObject({ credits: 900, landedAt: 'terminator-city', shipName: 'Wayfarer', upgrades: {}, cargo: {}, locker: {}, captain: null });
     expect(r.data.ship.defId).toBe('prototype');
     expect('fuel' in r.data).toBe(false);
+    expect(r.data.paint.pattern).toBe('plain');
+  });
+
+  it('upgrades a v4 save: the captain gets a default portrait, the ship a default paint job', () => {
+    const v4 = {
+      version: 4, createdAt: 1, updatedAt: 2, rngSeed: 5, credits: 900, systemId: 'sol', ship: { defId: 'prototype', x: 1, y: 2, angle: 0 },
+      visited: ['sol'], landedAt: null, captain: { name: 'Rhea', pronouns: 'she', origin: 'frontier-colonist', moment: 'silent-colony', motive: 'the-signal' },
+      shipName: 'Lantern', upgrades: { engines: 1 }, cargo: {}, locker: {}, flags: ['archive-lead'],
+    };
+    const r = deserialize(JSON.stringify(v4));
+    expect(r.status).toBe('ok');
+    if (r.status !== 'ok') return;
+    expect(r.data.captain?.name).toBe('Rhea');
+    expect(r.data.captain?.look.face).toBe('oval');
+    expect(r.data.paint).toEqual({ hull: '#dfe8ff', accent: '#4fc3ff', pattern: 'plain', glow: '#ffa040' });
+    expect(r.data.flags).toEqual(['archive-lead']);
   });
 
   it('round-trips', () => {

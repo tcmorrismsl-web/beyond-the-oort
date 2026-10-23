@@ -15,6 +15,28 @@ import type { GameMode } from './flow';
 
 export type Pronouns = 'she' | 'he' | 'they';
 
+/** Captain portrait choices (ids/colors from data/appearance.json). */
+export interface Look {
+  face: string;
+  skin: string;
+  hair: string;
+  hairColor: string;
+  eyes: string;
+  outfit: string;
+  outfitColor: string;
+}
+
+/** Ship paint job. */
+export interface Paint {
+  hull: string;
+  accent: string;
+  pattern: string;
+  glow: string;
+}
+
+export const DEFAULT_LOOK: Look = { face: 'oval', skin: '#c08559', hair: 'short', hairColor: '#3b2416', eyes: '#6b4a2b', outfit: 'flight-jacket', outfitColor: '#2b3a55' };
+export const DEFAULT_PAINT: Paint = { hull: '#dfe8ff', accent: '#4fc3ff', pattern: 'plain', glow: '#ffa040' };
+
 /** Who you are, from character creation. Ids point into data/origins.json. */
 export interface Captain {
   name: string;
@@ -22,6 +44,7 @@ export interface Captain {
   origin: string;
   moment: string;
   motive: string;
+  look: Look;
 }
 
 export interface GameState {
@@ -52,6 +75,7 @@ export interface GameState {
   locker: Record<string, number>;
   /** Story flags set by conversations and missions. */
   flags: string[];
+  paint: Paint;
 }
 
 export const STARTING_CREDITS = 1000;
@@ -67,6 +91,7 @@ const START_POS = { x: 780, y: -200 };
 export interface NewCareer {
   captain: Captain;
   shipName: string;
+  paint?: Paint;
 }
 
 /** Starting credits from your story: base + origin + defining moment, with a floor. */
@@ -100,6 +125,7 @@ export function newGame(seed: number, now: number, career?: NewCareer): GameStat
     cargo: {},
     locker: {},
     flags: [],
+    paint: { ...(career?.paint ?? DEFAULT_PAINT) },
   };
 }
 
@@ -113,12 +139,13 @@ export function fromSave(save: SaveData): GameState {
     ship: { defId: save.ship.defId, x: save.ship.x, y: save.ship.y, vx: 0, vy: 0, angle: save.ship.angle },
     visited: [...save.visited],
     landedAt: save.landedAt,
-    captain: save.captain ? { ...save.captain } : null,
+    captain: save.captain ? { ...save.captain, look: { ...save.captain.look } } : null,
     shipName: save.shipName,
     upgrades: { ...save.upgrades },
     cargo: { ...save.cargo },
     locker: { ...save.locker },
     flags: [...save.flags],
+    paint: { ...save.paint },
   };
 }
 
@@ -133,12 +160,13 @@ export function toSave(state: GameState, now: number): SaveData {
     ship: { defId: state.ship.defId, x: state.ship.x, y: state.ship.y, angle: state.ship.angle },
     visited: [...state.visited],
     landedAt: state.landedAt,
-    captain: state.captain ? { ...state.captain } : null,
+    captain: state.captain ? { ...state.captain, look: { ...state.captain.look } } : null,
     shipName: state.shipName,
     upgrades: { ...state.upgrades },
     cargo: { ...state.cargo },
     locker: { ...state.locker },
     flags: [...state.flags],
+    paint: { ...state.paint },
   };
 }
 
@@ -176,6 +204,15 @@ export function repairAgainstContent(state: GameState, data: GameData = gameData
       state.upgrades[track.id] = track.tiers.length;
     }
   }
+  // Appearance options can be renamed or removed: fall back to defaults, never crash.
+  const a = data.appearance;
+  if (state.captain) {
+    const look = state.captain.look;
+    if (!a.captain.faces.some((o) => o.id === look.face)) look.face = DEFAULT_LOOK.face;
+    if (!a.captain.hairStyles.some((o) => o.id === look.hair)) look.hair = DEFAULT_LOOK.hair;
+    if (!a.captain.outfits.some((o) => o.id === look.outfit)) look.outfit = DEFAULT_LOOK.outfit;
+  }
+  if (!a.ship.patterns.some((o) => o.id === state.paint.pattern)) state.paint.pattern = DEFAULT_PAINT.pattern;
   state.visited = state.visited.filter((id) => data.systems.has(id));
   if (!state.visited.includes(state.systemId)) state.visited.push(state.systemId);
   state.mode = state.landedAt === null ? 'flight' : 'landed';

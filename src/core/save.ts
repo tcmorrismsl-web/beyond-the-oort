@@ -8,8 +8,20 @@ import { readKey, writeKey, type StorageResult } from './storage';
  *    is the most valuable thing in the game.
  *  - Every load is validated. A corrupt save is reported, never half-loaded.
  */
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 const SAVE_KEY = 'game.save';
+
+const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+export const LookSchema = z.object({
+  face: z.string().min(1),
+  skin: hex,
+  hair: z.string().min(1),
+  hairColor: hex,
+  eyes: hex,
+  outfit: z.string().min(1),
+  outfitColor: hex,
+});
+export const PaintSchema = z.object({ hull: hex, accent: hex, pattern: z.string().min(1), glow: hex });
 
 export const SaveSchema = z.object({
   version: z.literal(SAVE_VERSION),
@@ -34,8 +46,11 @@ export const SaveSchema = z.object({
       origin: z.string().min(1),
       moment: z.string().min(1),
       motive: z.string().min(1),
+      look: LookSchema,
     })
     .nullable(),
+  /** Your ship's paint job. */
+  paint: PaintSchema,
   shipName: z.string().min(1).max(40),
   /** Upgrade tiers owned, by track id (0 or missing = stock). */
   upgrades: z.record(z.string(), z.number().int().nonnegative()),
@@ -78,6 +93,18 @@ const migrations: Record<number, Migration> = {
   },
   // v3 → v4 (Milestone 4: dialogue & story): story flags.
   3: (old) => ({ ...old, flags: [] }),
+  // v4 → v5 (appearance): captain portrait + ship paint, with the defaults
+  // the game used before (frozen here on purpose: migrations never change).
+  4: (old) => {
+    const captain = typeof old['captain'] === 'object' && old['captain'] !== null ? (old['captain'] as Record<string, unknown>) : null;
+    return {
+      ...old,
+      captain: captain
+        ? { ...captain, look: { face: 'oval', skin: '#c08559', hair: 'short', hairColor: '#3b2416', eyes: '#6b4a2b', outfit: 'flight-jacket', outfitColor: '#2b3a55' } }
+        : null,
+      paint: { hull: '#dfe8ff', accent: '#4fc3ff', pattern: 'plain', glow: '#ffa040' },
+    };
+  },
 };
 
 export type LoadResult =

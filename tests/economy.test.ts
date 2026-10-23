@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { gameData } from '../src/data/schema';
-import { cleanName, MIN_STARTING_CREDITS, newGame, startingCredits, type Captain, type GameState } from '../src/core/state';
+import { cleanName, DEFAULT_LOOK, MIN_STARTING_CREDITS, newGame, startingCredits, type Captain, type GameState } from '../src/core/state';
 import { Session } from '../src/core/session';
-import { canUpgrade, shipStats, statsFor, upgrade } from '../src/systems/ship';
+import { canRepaint, canUpgrade, repaint, shipStats, statsFor, upgrade } from '../src/systems/ship';
 import { buy, cargoUsed, holdSize, maxBuyable, quote, sell } from '../src/systems/market';
 
-const captain: Captain = { name: 'Rhea Vance', pronouns: 'she', origin: 'frontier-colonist', moment: 'silent-colony', motive: 'the-signal' };
+const captain: Captain = { name: 'Rhea Vance', pronouns: 'she', origin: 'frontier-colonist', moment: 'silent-colony', motive: 'the-signal', look: DEFAULT_LOOK };
 const at = (siteId: string, extra: Partial<GameState> = {}): GameState => {
   const spot = gameData.sites.get(siteId);
   if (!spot) throw new Error(`site ${siteId} missing`);
@@ -147,5 +147,37 @@ describe('market', () => {
     }
     expect(best).toBeGreaterThanOrEqual(300);
     expect(best).toBeLessThanOrEqual(1600);
+  });
+});
+
+describe('appearance', () => {
+  const paint = { hull: '#2b2f38', accent: '#ffd27a', pattern: 'chevron', glow: '#4fc3ff' };
+
+  it('a new career keeps the paint and portrait you designed', () => {
+    const s = newGame(1, 1, { captain: { ...captain, look: { ...captain.look, hair: 'curls' } }, shipName: 'Lantern', paint });
+    expect(s.paint).toEqual(paint);
+    expect(s.captain?.look.hair).toBe('curls');
+  });
+
+  it('repaints only at a drydock, for the flat fee, and only when something changed', () => {
+    const dock = at('highport-docks', { credits: 5000 });
+    expect(canRepaint(dock, paint, gameData)).toEqual({ ok: true, cost: gameData.appearance.repaintCost });
+    expect(repaint(dock, paint, gameData).credits).toBe(5000 - gameData.appearance.repaintCost);
+    expect(canRepaint(at('new-geneva', { credits: 5000 }), paint, gameData)).toEqual({ ok: false, reason: 'no-drydock' });
+    expect(canRepaint(dock, dock.paint, gameData)).toEqual({ ok: false, reason: 'unchanged' });
+    expect(canRepaint(at('highport-docks', { credits: 1 }), paint, gameData)).toEqual({ ok: false, reason: 'credits' });
+    expect(canRepaint(dock, { ...paint, hull: '#123456' }, gameData)).toEqual({ ok: false, reason: 'invalid' });
+  });
+
+  it('defaults are real options (a fresh ship and captain always render)', () => {
+    const a = gameData.appearance;
+    const p = newGame(1, 1).paint;
+    expect(a.ship.hullColors).toContain(p.hull);
+    expect(a.ship.accentColors).toContain(p.accent);
+    expect(a.ship.glowColors).toContain(p.glow);
+    expect(a.ship.patterns.map((x) => x.id)).toContain(p.pattern);
+    expect(a.captain.faces.map((x) => x.id)).toContain(DEFAULT_LOOK.face);
+    expect(a.captain.hairStyles.map((x) => x.id)).toContain(DEFAULT_LOOK.hair);
+    expect(a.captain.outfits.map((x) => x.id)).toContain(DEFAULT_LOOK.outfit);
   });
 });

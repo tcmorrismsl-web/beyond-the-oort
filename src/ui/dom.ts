@@ -54,3 +54,34 @@ export function button(label: string, onTap: () => void, cls = ''): HTMLButtonEl
 export function credits(n: number): string {
   return `${Math.round(n).toLocaleString('en-US')} cr`;
 }
+
+/** A row of color swatches (44 pt tap targets); the selected one is outlined. */
+export function swatches(colors: readonly string[], selected: string, onPick: (c: string) => void, label: string): HTMLDivElement {
+  const row = el('div', 'swatches');
+  row.setAttribute('role', 'radiogroup');
+  row.setAttribute('aria-label', label);
+  for (const c of colors) {
+    const b = button('', () => {
+      onPick(c);
+    }, c === selected ? 'swatch on' : 'swatch');
+    b.style.background = c;
+    b.setAttribute('role', 'radio');
+    b.setAttribute('aria-checked', String(c === selected));
+    b.setAttribute('aria-label', `${label} ${c}`);
+    row.append(b);
+  }
+  return row;
+}
+
+/** A row of named options as small buttons; the selected one is highlighted. */
+export function chips(options: readonly { id: string; name: string }[], selected: string, onPick: (id: string) => void): HTMLDivElement {
+  const row = el('div', 'row chips');
+  for (const o of options) {
+    row.append(
+      button(o.name, () => {
+        onPick(o.id);
+      }, o.id === selected ? 'primary small' : 'small'),
+    );
+  }
+  return row;
+}

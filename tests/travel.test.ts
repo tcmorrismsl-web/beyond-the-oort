@@ -142,3 +142,17 @@ describe('moving between sites on one planet', () => {
     expect(s.state.mode).toBe('landed');
   });
 });
+
+describe('story readiness', () => {
+  it('lifting off from a save that was already landed counts as having landed (old saves get the transmission)', () => {
+    const s = Session.start(1, 1, {
+      load: () => ({ status: 'empty' as const }),
+      save: () => ({ ok: true as const }),
+      backupCorrupt: () => ({ ok: true as const }),
+    });
+    // Simulate an old save resumed while sitting at New Geneva, with no flags.
+    s.state = { ...s.state, landedAt: 'new-geneva', mode: 'landed', flags: [] };
+    expect(s.departPort(2)).toBe(true);
+    expect(s.state.flags).toContain('landed-once');
+  });
+});

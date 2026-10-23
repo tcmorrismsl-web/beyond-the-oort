@@ -226,6 +226,28 @@
       #ui .dialogue-text { font-size: 17px; line-height: 1.45; color: #eef3ff; }
       #ui .pick.special { border-color: rgba(143, 216, 255, 0.55); background: rgba(143, 216, 255, 0.08); }
       #ui .svc.person { border-color: rgba(255, 210, 122, 0.45); }
+      #ui .swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+      #ui button.swatch { min-width: 44px; width: 44px; min-height: 44px; height: 44px; padding: 0; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.15); }
+      #ui button.swatch.on { border: 3px solid var(--ui-accent); box-shadow: 0 0 0 2px #0b0f1b inset; }
+      #ui .chips { margin-top: 0; }
+      #ui .chips button { flex: 0 1 auto; }
+      #ui .opt-row .section { margin-top: 10px; margin-bottom: 6px; }
+      #ui .look-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+      #ui .look-preview { display: flex; flex-direction: column; align-items: center; gap: 8px; position: sticky; top: 0; z-index: 1; background: var(--ui-bg-strong); padding: 6px 0; }
+      #ui .portrait-box svg { width: 140px; height: auto; display: block; }
+      #ui .portrait-box.small svg { width: 96px; }
+      #ui .ship-box svg { width: 180px; height: auto; display: block; }
+      #ui .ship-box.small svg { width: 110px; }
+      #ui .summary-head { display: flex; gap: 14px; align-items: center; }
+      #ui .paint-row { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+      @media (orientation: landscape) and (max-height: 500px) {
+        #ui .look-grid { grid-template-columns: 200px 1fr; align-items: start; }
+        #ui .look-preview { position: sticky; top: 0; }
+      }
+      #ui .dialogue-text { white-space: pre-line; }
+      #ui .transmission { border-color: rgba(255, 90, 90, 0.5); box-shadow: 0 0 40px rgba(255, 60, 60, 0.15); }
+      #ui .transmission h1::before { content: "● "; color: #ff5a5a; }
+      #ui .log-entry { margin-bottom: 8px; }
       #ui .title-wrap { text-align: center; }
       #ui .title-wrap h1 { font-size: 34px; letter-spacing: 4px; margin: 0 0 6px; }
       #ui .title-wrap .tag { color: var(--ui-dim); margin-bottom: 22px; }
