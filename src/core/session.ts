@@ -6,7 +6,9 @@
 import { EventBus } from './events';
 import { transition, type GameMode, type TransitionResult } from './flow';
 import { backupCorruptSave, loadGame, saveGame, type LoadResult } from './save';
-import { fromSave, newGame, toSave, type GameState } from './state';
+import { fromSave, maxFuel, newGame, repairAgainstContent, toSave, type GameState } from './state';
+import { gameData } from '../data/schema';
+import { canJump, depart, jump, land, type JumpCheck } from '../systems/travel';
 import type { StorageResult } from './storage';
 
 export interface SaveBackend {
@@ -36,8 +38,12 @@ export class Session {
   static start(seed: number, now: number, backend: SaveBackend = browserBackend): Session {
     const loaded = backend.load();
     switch (loaded.status) {
-      case 'ok':
-        return new Session(fromSave(loaded.data), 'resumed', null, backend);
+      case 'ok': {
+        const state = fromSave(loaded.data);
+        const fixed = repairAgainstContent(state);
+        if (fixed.length > 0) console.warn('save adjusted to current content:', fixed.join('; '));
+        return new Session(state, 'resumed', null, backend);
+      }
       case 'empty':
         return new Session(newGame(seed, now), 'new', null, backend);
       case 'corrupt': {
@@ -60,6 +66,64 @@ export class Session {
     if (result.ok) this.bus.emit('saved', { at: now });
     else this.bus.emit('saveFailed', { reason: result.reason });
     return result;
+  }
+
+  /** Throw away the current playthrough and start fresh (saved immediately). */
+  restart(seed: number, now: number): void {
+    this.state = newGame(seed, now);
+    this.save(now);
+  }
+
+  /** Jump to a linked system (after the scene's charge-up). Saves on arrival. */
+  jumpTo(toId: string, now: number): JumpCheck {
+    const check = canJump(this.state, toId, gameData);
+    if (!check.ok) return check;
+    const from = this.state.systemId;
+    this.state = jump(this.state, toId, gameData);
+    this.bus.emit('jumped', { from, to: toId });
+    this.save(now);
+    return check;
+  }
+
+  /** Land at a site in this system: refuel if sold there, switch to the port. Saves. */
+  landOn(siteId: string, now: number): boolean {
+    if (this.state.mode !== 'flight') return false;
+    let next: GameState;
+    try {
+      next = land(this.state, siteId, gameData, maxFuel(this.state.ship.defId));
+    } catch {
+      return false;
+    }
+    this.state = next;
+    this.setMode('landed');
+    this.bus.emit('landed', { siteId });
+    this.save(now);
+    return true;
+  }
+
+  /**
+   * Hop to another landing site on the same planet/station without going
+   * back to space (e.g. from New Geneva to Lagos on Earth). Saves.
+   */
+  moveToSite(siteId: string, now: number): boolean {
+    const here = this.state.landedAt === null ? undefined : gameData.sites.get(this.state.landedAt);
+    const there = gameData.sites.get(siteId);
+    if (!here || !there || here.body.id !== there.body.id || siteId === this.state.landedAt) return false;
+    this.state = land(this.state, siteId, gameData, maxFuel(this.state.ship.defId));
+    this.bus.emit('landed', { siteId });
+    this.save(now);
+    return true;
+  }
+
+  /** Leave the port and return to flight just outside the body. Saves. */
+  departPort(now: number): boolean {
+    const siteId = this.state.landedAt;
+    if (siteId === null || this.state.mode !== 'landed') return false;
+    this.state = depart(this.state, gameData);
+    this.setMode('flight');
+    this.bus.emit('departed', { siteId });
+    this.save(now);
+    return true;
   }
 
   setMode(to: GameMode): TransitionResult {

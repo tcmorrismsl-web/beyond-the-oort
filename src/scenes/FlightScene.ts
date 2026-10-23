@@ -1,8 +1,15 @@
 import Phaser from 'phaser';
-import { gameData } from '../data/schema';
+import { gameData, type Body, type ShipDef, type StarSystem } from '../data/schema';
+import type { Session } from '../core/session';
+import { maxFuel } from '../core/state';
 import { CRUISE_IDLE, consumeSteps, stepShip, STEP, updateCruise, type CruiseState, type ShipKinematics } from '../systems/flight';
+import { canJump, jumpBlockText, JUMP_CHARGE_SECONDS, landingTarget } from '../systems/travel';
 import { IDLE, readStick, type StickReading } from '../ui/joystick';
+import { button, createLayer, el, fuelPips, type Layer } from '../ui/dom';
+import { showToast } from '../ui/toast';
 import { getSession } from './sessionAccess';
+import { onScreenResize, onSceneEvent } from './resize';
+import { ensureBodyTexture, ensureStarTexture, hexToNumber } from './systemTextures';
 
 const STICK_RADIUS = 60;
 /** How much the star layers move relative to the camera (parallax depth). */
@@ -24,13 +31,22 @@ const LOOK_AHEAD_EASE = 0.08;
 const FLAME_NORMAL = { r: 0xff, g: 0xa0, b: 0x40 };
 const FLAME_CRUISE = { r: 0x8f, g: 0xd8, b: 0xff };
 
+/** Data passed when the star chart closes and wakes flight. */
+export interface FlightResumeData {
+  jumpTo?: string;
+}
+
 /**
- * Two cameras: the main camera follows the ship and zooms with speed; a HUD
- * camera on top never zooms, so the joystick and arrow stay exactly under
- * the thumb. Every new object must be added to one of the two lists via
- * `world()` or `hud()`, or it will render on both cameras.
+ * In-system flight. Two cameras: the main camera follows the ship and zooms
+ * with speed; a HUD camera on top never zooms, so the joystick and arrow
+ * stay exactly under the thumb. Every new object must be added via `world()`
+ * or `hud()`, or it will render on both cameras. Buttons and labels are DOM
+ * (see ui/dom.ts), destroyed on shutdown.
  */
 export class FlightScene extends Phaser.Scene {
+  private session!: Session;
+  private def!: ShipDef;
+  private system!: StarSystem;
   private ship!: Phaser.GameObjects.Image;
   private flame!: Phaser.GameObjects.Image;
   private accumulator = 0;
@@ -43,19 +59,39 @@ export class FlightScene extends Phaser.Scene {
   private knob!: Phaser.GameObjects.Image;
   private farStars!: Phaser.GameObjects.TileSprite;
   private nearStars!: Phaser.GameObjects.TileSprite;
-  private sun!: Phaser.GameObjects.Image;
+  private star!: Phaser.GameObjects.Image;
   private homeArrow!: Phaser.GameObjects.Image;
+  /** Edge arrows toward every body you can land on, so new systems aren't empty space. */
+  private portArrows: { body: Body; arrow: Phaser.GameObjects.Image }[] = [];
   private hudCam!: Phaser.Cameras.Scene2D.Camera;
+
+  // DOM HUD
+  private ui!: Layer;
+  private landBtn!: HTMLButtonElement;
+  private chargeBox!: HTMLDivElement;
+  private chargeFill!: HTMLDivElement;
+  private shownTarget: Body | null = null;
+
+  // Jump charge in progress (null when not jumping)
+  private jumpTarget: string | null = null;
+  private jumpCharge = 0;
+  /** Site picker open: the ship holds still and controls are ignored. */
+  private picking = false;
 
   constructor() {
     super('flight');
   }
 
   create(): void {
-    const session = getSession(this);
-    const ship = session.state.ship;
+    this.session = getSession(this);
+    const state = this.session.state;
+    const ship = state.ship;
     const def = gameData.ships.get(ship.defId);
+    const system = gameData.systems.get(state.systemId);
     if (!def) throw new Error(`ship "${ship.defId}" missing from data`);
+    if (!system) throw new Error(`system "${state.systemId}" missing from data`);
+    this.def = def;
+    this.system = system;
 
     // Reset per-run fields: Phaser reuses the scene instance on restart.
     this.accumulator = 0;
@@ -63,6 +99,10 @@ export class FlightScene extends Phaser.Scene {
     this.cruise = CRUISE_IDLE;
     this.stick = IDLE;
     this.stickPointerId = null;
+    this.jumpTarget = null;
+    this.jumpCharge = 0;
+    this.shownTarget = null;
+    this.picking = false;
 
     const { width, height } = this.scale;
     this.hudCam = this.cameras.add(0, 0, width, height).setName('hud');
@@ -71,47 +111,212 @@ export class FlightScene extends Phaser.Scene {
     // ignore scrolling and counter the zoom, so they always fill the screen.
     this.farStars = this.world(this.add.tileSprite(width / 2, height / 2, width, height, 'stars-far').setScrollFactor(0).setDepth(-20));
     this.nearStars = this.world(this.add.tileSprite(width / 2, height / 2, width, height, 'stars-near').setScrollFactor(0).setDepth(-19));
-    this.sun = this.world(this.add.image(0, 0, 'sun').setDepth(-10));
+    this.star = this.world(this.add.image(0, 0, ensureStarTexture(this, system)).setDepth(-10));
+    for (const body of system.bodies) {
+      this.world(this.add.image(body.x, body.y, ensureBodyTexture(this, body)).setDepth(-5));
+    }
     this.flame = this.world(this.add.image(ship.x, ship.y, 'flame').setOrigin(0, 0.5).setVisible(false).setDepth(-1));
     this.ship = this.world(this.add.image(ship.x, ship.y, 'ship').setRotation(ship.angle));
 
     this.homeArrow = this.hud(this.add.image(0, 0, 'home-arrow').setDepth(5).setVisible(false));
+    this.portArrows = system.bodies
+      .filter((b) => b.sites.length > 0)
+      .map((body) => ({
+        body,
+        arrow: this.hud(this.add.image(0, 0, 'port-arrow').setTint(hexToNumber(body.color)).setAlpha(0.9).setDepth(5).setVisible(false)),
+      }));
     this.ring = this.hud(this.add.image(0, 0, 'stick-ring').setVisible(false).setDepth(10));
     this.knob = this.hud(this.add.image(0, 0, 'stick-knob').setVisible(false).setDepth(11));
 
     const cam = this.cameras.main;
+    cam.setZoom(1);
     cam.startFollow(this.ship, true, 0.12, 0.12);
+    cam.setFollowOffset(0, 0);
     cam.centerOn(ship.x, ship.y);
-    this.handleResize();
+    cam.fadeIn(250, 5, 6, 10);
+    onScreenResize(this, () => {
+      this.fitToScreen();
+    });
     this.setupInput();
+    this.buildHud();
 
-    this.events.on(Phaser.Scenes.Events.UPDATE, (_t: number, deltaMs: number) => {
-      const { steps, remainder } = consumeSteps(this.accumulator, deltaMs / 1000);
-      this.accumulator = remainder;
-      let kin: ShipKinematics = ship;
-      for (let i = 0; i < steps; i += 1) {
-        this.cruise = updateCruise(this.cruise, this.stick.throttle, STEP);
-        kin = stepShip(kin, def, { throttle: this.stick.throttle, targetAngle: this.stick.angle, cruise: this.cruise.level }, STEP);
-        cam.setZoom(cam.zoom + (1 - (1 - CRUISE_ZOOM) * this.cruise.level - cam.zoom) * ZOOM_EASE);
-        this.easeLookAhead(cam, kin);
-      }
-      Object.assign(ship, kin);
-      // Safety net: if a resize was missed, the cameras no longer match the
-      // screen (the ship drifts off-center or vanishes). Repair it here.
-      if (cam.width !== this.scale.width || cam.height !== this.scale.height || this.hudCam.width !== this.scale.width) {
-        this.fitToScreen();
-      }
-      this.ship.setPosition(ship.x, ship.y).setRotation(ship.angle);
-      this.updateFlame();
-      this.updateBackdrop();
-
-      this.sinceSave += steps * STEP;
-      if (this.sinceSave >= AUTOSAVE_SECONDS) {
-        this.sinceSave = 0;
-        session.save(Date.now());
-      }
+    // The star chart puts flight to sleep (no update, no rendering) and wakes
+    // it with `{ jumpTo }` if the player chose a jump.
+    onSceneEvent(this, Phaser.Scenes.Events.WAKE, (_sys: unknown, data: unknown) => {
+      this.ui.root.style.display = '';
+      this.accumulator = 0;
+      this.resetStick();
+      const jumpTo = (data as FlightResumeData | undefined)?.jumpTo;
+      if (jumpTo !== undefined) this.beginJump(jumpTo);
     });
   }
+
+  override update(_time: number, deltaMs: number): void {
+    const cam = this.cameras.main;
+    const ship = this.session.state.ship;
+    const { steps, remainder } = consumeSteps(this.accumulator, deltaMs / 1000);
+    this.accumulator = remainder;
+    let kin: ShipKinematics = ship;
+    for (let i = 0; i < steps && !this.picking; i += 1) {
+      this.cruise = updateCruise(this.cruise, this.stick.throttle, STEP);
+      kin = stepShip(kin, this.def, { throttle: this.stick.throttle, targetAngle: this.stick.angle, cruise: this.cruise.level }, STEP);
+      cam.setZoom(cam.zoom + (1 - (1 - CRUISE_ZOOM) * this.cruise.level - cam.zoom) * ZOOM_EASE);
+      this.easeLookAhead(cam, kin);
+      if (this.jumpTarget !== null) this.jumpCharge += STEP;
+    }
+    Object.assign(ship, kin);
+    // Safety net: if a resize was missed, the cameras no longer match the
+    // screen (the ship drifts off-center or vanishes). Repair it here.
+    if (cam.width !== this.scale.width || cam.height !== this.scale.height || this.hudCam.width !== this.scale.width) {
+      this.fitToScreen();
+    }
+    this.ship.setPosition(ship.x, ship.y).setRotation(ship.angle);
+    this.updateFlame();
+    this.updateBackdrop();
+    this.updateLandingButton();
+    this.updateJumpCharge();
+
+    this.sinceSave += steps * STEP;
+    if (this.sinceSave >= AUTOSAVE_SECONDS) {
+      this.sinceSave = 0;
+      this.session.save(Date.now());
+    }
+  }
+
+  // ------------------------------------------------------------------ HUD
+
+  private buildHud(): void {
+    this.ui = createLayer('flight');
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.ui.destroy();
+    });
+    const state = this.session.state;
+
+    const info = el('div', 'chip hud-tl', el('b', '', this.system.name), ' ', fuelPips(state.fuel, maxFuel(state.ship.defId)));
+    const mapBtn = button('Map', () => {
+      this.openMap();
+    });
+    const tr = el('div', 'hud-tr', mapBtn);
+
+    this.landBtn = button('Land', () => {
+      this.tryLand();
+    }, 'primary land-btn');
+    this.landBtn.style.display = 'none';
+    const br = el('div', 'hud-br', this.landBtn);
+
+    this.chargeFill = el('div');
+    this.chargeBox = el('div', 'center-msg', el('div', '', ''), el('div', 'bar', this.chargeFill));
+    this.chargeBox.style.display = 'none';
+
+    this.ui.root.append(info, tr, br, this.chargeBox);
+  }
+
+  private updateLandingButton(): void {
+    const target = this.jumpTarget === null ? landingTarget(this.session.state, gameData) : null;
+    if (target === this.shownTarget) return; // only touch the DOM when it changes
+    this.shownTarget = target;
+    if (target) {
+      this.landBtn.textContent = target.sites.length > 1 ? `Land · ${target.name} (${target.sites.length} sites)` : `Land · ${target.name}`;
+      this.landBtn.style.display = '';
+    } else {
+      this.landBtn.style.display = 'none';
+    }
+  }
+
+  private tryLand(): void {
+    const target = this.shownTarget;
+    if (!target || this.jumpTarget !== null || this.picking) return;
+    const only = target.sites.length === 1 ? target.sites[0] : undefined;
+    if (only) {
+      this.landAt(only.id);
+      return;
+    }
+    this.openSitePicker(target);
+  }
+
+  /** Planets with several landing sites: pick one (Starfield-style). */
+  private openSitePicker(body: Body): void {
+    this.picking = true;
+    this.resetStick();
+    const ship = this.session.state.ship;
+    ship.vx = 0;
+    ship.vy = 0;
+    const card = el('div', 'card', el('h1', '', body.name), el('div', 'sub', 'Choose where to land'));
+    for (const site of body.sites) {
+      const b = button(site.name, () => {
+        sheet.remove();
+        this.landAt(site.id);
+      }, 'pick');
+      b.append(el('small', '', site.description));
+      card.append(b);
+    }
+    const cancel = button('Stay in orbit', () => {
+      sheet.remove();
+      this.picking = false;
+    });
+    cancel.style.width = '100%';
+    cancel.style.marginTop = '12px';
+    card.append(cancel);
+    const sheet = el('div', 'sheet', card);
+    this.ui.root.append(sheet);
+  }
+
+  private landAt(siteId: string): void {
+    if (this.session.landOn(siteId, Date.now())) {
+      this.picking = true; // freeze until the scene changes
+      this.cameras.main.fadeOut(200, 5, 6, 10);
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+        this.scene.start('landed');
+      });
+    } else {
+      this.picking = false;
+    }
+  }
+
+  private openMap(): void {
+    if (this.jumpTarget !== null || this.picking) return;
+    this.resetStick();
+    this.ui.root.style.display = 'none';
+    this.scene.sleep();
+    this.scene.launch('map');
+  }
+
+  // ------------------------------------------------------------------ jumping
+
+  private beginJump(toId: string): void {
+    const check = canJump(this.session.state, toId, gameData);
+    const label = this.chargeBox.firstElementChild;
+    if (!check.ok) {
+      showToast(jumpBlockText(check.reason));
+      return;
+    }
+    const dest = gameData.systems.get(toId);
+    this.jumpTarget = toId;
+    this.jumpCharge = 0;
+    if (label) label.textContent = `Jumping to ${dest?.name ?? toId}…`;
+    this.chargeBox.style.display = '';
+  }
+
+  private updateJumpCharge(): void {
+    if (this.jumpTarget === null) return;
+    const t = Math.min(1, this.jumpCharge / JUMP_CHARGE_SECONDS);
+    this.chargeFill.style.width = `${Math.round(t * 100)}%`;
+    if (t < 1) return;
+    const to = this.jumpTarget;
+    this.jumpTarget = null;
+    this.chargeBox.style.display = 'none';
+    const result = this.session.jumpTo(to, Date.now());
+    if (!result.ok) {
+      showToast(jumpBlockText(result.reason));
+      return;
+    }
+    this.cameras.main.flash(300, 220, 235, 255);
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FLASH_COMPLETE, () => {
+      this.scene.restart();
+    });
+  }
+
+  // ------------------------------------------------------------------ camera & visuals
 
   /**
    * Lead the camera in the direction of travel so that at speed you see what
@@ -139,21 +344,6 @@ export class FlightScene extends Phaser.Scene {
   private hud<T extends Phaser.GameObjects.GameObject>(obj: T): T {
     this.cameras.main.ignore(obj);
     return obj;
-  }
-
-  /**
-   * Rotating the phone resizes the game. Phaser only auto-resizes a camera
-   * that exactly matched the old size, which iOS rotation can break, so we
-   * resize the cameras and background ourselves and re-center on the ship.
-   */
-  private handleResize(): void {
-    const onResize = (): void => {
-      this.fitToScreen();
-    };
-    this.scale.on(Phaser.Scale.Events.RESIZE, onResize);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.scale.off(Phaser.Scale.Events.RESIZE, onResize);
-    });
   }
 
   /** Match both cameras and the star layers to the current game size and re-center. */
@@ -195,15 +385,25 @@ export class FlightScene extends Phaser.Scene {
     this.farStars.setTilePosition(cam.scrollX * FAR_PARALLAX, cam.scrollY * FAR_PARALLAX);
     this.nearStars.setTilePosition(cam.scrollX * NEAR_PARALLAX, cam.scrollY * NEAR_PARALLAX);
 
-    // Point toward the system's star whenever it is off screen.
-    const sunVisible = cam.worldView.contains(this.sun.x, this.sun.y);
-    this.homeArrow.setVisible(!sunVisible);
-    if (!sunVisible) {
-      const angle = Math.atan2(this.sun.y - this.ship.y, this.sun.x - this.ship.x);
-      const r = Math.min(cam.width, cam.height) * ARROW_RING;
+    // Point toward the system's star, and each port, whenever off screen.
+    const r = Math.min(cam.width, cam.height) * ARROW_RING;
+    const starVisible = cam.worldView.contains(this.star.x, this.star.y);
+    this.homeArrow.setVisible(!starVisible);
+    if (!starVisible) {
+      const angle = Math.atan2(this.star.y - this.ship.y, this.star.x - this.ship.x);
       this.homeArrow.setPosition(cam.width / 2 + Math.cos(angle) * r, cam.height / 2 + Math.sin(angle) * r).setRotation(angle);
     }
+    const pr = r * 0.88;
+    for (const { body, arrow } of this.portArrows) {
+      const visible = cam.worldView.contains(body.x, body.y);
+      arrow.setVisible(!visible);
+      if (visible) continue;
+      const angle = Math.atan2(body.y - this.ship.y, body.x - this.ship.x);
+      arrow.setPosition(cam.width / 2 + Math.cos(angle) * pr, cam.height / 2 + Math.sin(angle) * pr).setRotation(angle);
+    }
   }
+
+  // ------------------------------------------------------------------ input
 
   private resetStick(): void {
     this.stickPointerId = null;
@@ -217,7 +417,7 @@ export class FlightScene extends Phaser.Scene {
 
     this.input.on(Phaser.Input.Events.POINTER_DOWN, (p: Phaser.Input.Pointer) => {
       // Left 60% of the screen is the movement zone.
-      if (this.stickPointerId !== null || p.x > this.scale.width * 0.6) return;
+      if (this.picking || this.stickPointerId !== null || p.x > this.scale.width * 0.6) return;
       this.stickPointerId = p.id;
       this.stickOrigin = { x: p.x, y: p.y };
       this.ring.setPosition(p.x, p.y).setVisible(true);

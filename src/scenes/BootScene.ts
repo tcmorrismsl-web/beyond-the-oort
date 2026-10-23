@@ -30,20 +30,6 @@ export class BootScene extends Phaser.Scene {
     this.starTile(g, 'stars-far', FAR_STARS_SEED, 110, 0.5, 1.1, 0.25, 0.6);
     this.starTile(g, 'stars-near', NEAR_STARS_SEED, 40, 0.9, 1.8, 0.5, 0.95);
 
-    // The system's star: a fixed landmark at the origin, so you can see where
-    // you are (and that a reloaded game put you back in the same place).
-    const r = 90;
-    for (let i = 6; i >= 1; i -= 1) {
-      g.fillStyle(0xffb347, 0.06 * (7 - i));
-      g.fillCircle(r * 2, r * 2, r + i * 14);
-    }
-    g.fillStyle(0xffd27a, 1);
-    g.fillCircle(r * 2, r * 2, r);
-    g.fillStyle(0xfff3d0, 1);
-    g.fillCircle(r * 2, r * 2, r * 0.6);
-    g.generateTexture('sun', r * 4, r * 4);
-    g.clear();
-
     // Engine flame, drawn pointing right with its base at the left edge;
     // the scene stretches it with throttle and tints it during cruise.
     g.fillStyle(0xffffff, 0.35);
@@ -58,6 +44,12 @@ export class BootScene extends Phaser.Scene {
     g.generateTexture('home-arrow', 18, 18);
     g.clear();
 
+    // Smaller arrow pointing at off-screen ports; tinted with the body's color.
+    g.fillStyle(0xffffff, 1);
+    g.fillTriangle(12, 6, 0, 0, 0, 12);
+    g.generateTexture('port-arrow', 12, 12);
+    g.clear();
+
     g.lineStyle(3, 0xffffff, 0.35);
     g.strokeCircle(60, 60, 57);
     g.generateTexture('stick-ring', 120, 120);
@@ -68,7 +60,7 @@ export class BootScene extends Phaser.Scene {
     g.generateTexture('stick-knob', 52, 52);
     g.destroy();
 
-    this.scene.start('flight');
+    this.scene.start('title');
   }
 
   private starTile(

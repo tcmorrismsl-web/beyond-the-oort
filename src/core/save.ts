@@ -8,7 +8,7 @@ import { readKey, writeKey, type StorageResult } from './storage';
  *    is the most valuable thing in the game.
  *  - Every load is validated. A corrupt save is reported, never half-loaded.
  */
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 const SAVE_KEY = 'game.save';
 
 export const SaveSchema = z.object({
@@ -24,12 +24,24 @@ export const SaveSchema = z.object({
     y: z.number(),
     angle: z.number(),
   }),
+  fuel: z.number().int().nonnegative(),
+  visited: z.array(z.string().min(1)),
+  landedAt: z.string().min(1).nullable(),
 });
 export type SaveData = z.infer<typeof SaveSchema>;
 
 type Migration = (old: Record<string, unknown>) => Record<string, unknown>;
 /** migrations[n] upgrades a version-n save to version n+1. */
-const migrations: Record<number, Migration> = {};
+const migrations: Record<number, Migration> = {
+  // v1 → v2 (Milestone 2: galaxy & travel): fuel, visited systems, landed location.
+  // Fuel starts at 3 (every ship holds at least 3; landing refills to full).
+  1: (old) => ({
+    ...old,
+    fuel: 3,
+    visited: typeof old['systemId'] === 'string' ? [old['systemId']] : [],
+    landedAt: null,
+  }),
+};
 
 export type LoadResult =
   | { status: 'ok'; data: SaveData }

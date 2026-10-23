@@ -3,7 +3,7 @@ import { EventBus } from '../src/core/events';
 import { canTransition, transition, type GameMode } from '../src/core/flow';
 import { SaveSchema, type LoadResult, type SaveData } from '../src/core/save';
 import { Session, type SaveBackend } from '../src/core/session';
-import { fromSave, newGame, STARTING_SHIP, STARTING_SYSTEM, toSave } from '../src/core/state';
+import { fromSave, maxFuel, newGame, repairAgainstContent, STARTING_SHIP, STARTING_SYSTEM, toSave } from '../src/core/state';
 import { gameData } from '../src/data/schema';
 import type { StorageResult } from '../src/core/storage';
 
@@ -162,5 +162,36 @@ describe('session', () => {
     expect(s.setMode('landed').ok).toBe(false);
     expect(s.state.mode).toBe('landed');
     expect(seen).toEqual(['flight->landed']);
+  });
+});
+
+describe('loading against changed content', () => {
+  it('repairs references to content that no longer exists instead of crashing', () => {
+    const s = newGame(1, 1);
+    s.systemId = 'gone-system';
+    s.landedAt = 'gone-station';
+    s.ship.defId = 'gone-ship';
+    s.fuel = 99;
+    s.visited = ['sol', 'gone-system'];
+    const fixed = repairAgainstContent(s);
+    expect(fixed).toEqual([`unknown ship "gone-ship"`, `unknown system "gone-system"`]);
+    expect(s).toMatchObject({ systemId: STARTING_SYSTEM, landedAt: null, mode: 'flight', visited: ['sol'] });
+    expect(s.ship.defId).toBe(STARTING_SHIP);
+    expect(s.fuel).toBe(maxFuel(STARTING_SHIP));
+  });
+
+  it('resumes landed when the save says so', () => {
+    const s = newGame(1, 1);
+    s.landedAt = 'new-geneva';
+    const back = fromSave(toSave(s, 2));
+    expect(repairAgainstContent(back)).toEqual([]);
+    expect(back.mode).toBe('landed');
+  });
+
+  it('drops a landing spot that belongs to a different system', () => {
+    const s = newGame(1, 1);
+    s.landedAt = 'terminator-city'; // Alpha Centauri, not Sol
+    repairAgainstContent(s);
+    expect(s.landedAt).toBeNull();
   });
 });

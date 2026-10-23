@@ -1,0 +1,1 @@
+{"version":2,"createdAt":1761190000000,"updatedAt":1761190500000,"rngSeed":987654321,"credits":2500,"systemId":"alpha-centauri","ship":{"defId":"shuttle","x":-300,"y":220,"angle":0.4},"fuel":2,"visited":["sol","alpha-centauri"],"landedAt":"terminator-city"}

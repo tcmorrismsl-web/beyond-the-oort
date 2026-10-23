@@ -37,8 +37,11 @@
          insets keep it clear of the Dynamic Island in every orientation. */
       #toast {
         position: fixed;
-        top: calc(env(safe-area-inset-top) + 10px);
-        right: calc(env(safe-area-inset-right) + 14px);
+        top: calc(env(safe-area-inset-top) + 12px);
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 3;
+        white-space: nowrap;
         padding: 6px 12px;
         border-radius: 999px;
         background: rgba(20, 28, 44, 0.75);
@@ -49,10 +52,146 @@
         pointer-events: none;
       }
       #toast.show { opacity: 1; }
+
+      /* ---- DOM UI layer: buttons and panels over the game ----
+         Kept inside the safe areas (notch, Dynamic Island, home bar). The
+         layer itself ignores touches so the joystick works everywhere a
+         button isn't. */
+      :root {
+        --ui-bg: rgba(14, 20, 34, 0.82);
+        --ui-bg-strong: rgba(10, 14, 26, 0.94);
+        --ui-line: rgba(160, 190, 255, 0.22);
+        --ui-text: #e4ecff;
+        --ui-dim: #93a3c4;
+        --ui-accent: #ffd27a;
+        --ui-cruise: #8fd8ff;
+        --pad-t: max(12px, env(safe-area-inset-top));
+        --pad-r: max(12px, env(safe-area-inset-right));
+        --pad-b: max(12px, env(safe-area-inset-bottom));
+        --pad-l: max(12px, env(safe-area-inset-left));
+      }
+      #ui {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        color: var(--ui-text);
+        font: 16px/1.35 -apple-system, system-ui, sans-serif;
+        z-index: 2;
+      }
+      #ui .layer { position: absolute; inset: 0; pointer-events: none; }
+      #ui button, #ui .panel { pointer-events: auto; }
+      #ui button {
+        font: 600 16px/1 -apple-system, system-ui, sans-serif;
+        color: var(--ui-text);
+        background: var(--ui-bg);
+        border: 1px solid var(--ui-line);
+        border-radius: 14px;
+        min-height: 48px;
+        min-width: 48px;
+        padding: 0 18px;
+        -webkit-appearance: none;
+        appearance: none;
+        transition: transform 0.08s ease, background 0.15s ease;
+      }
+      #ui button:active { transform: scale(0.96); }
+      #ui button.primary { background: var(--ui-accent); color: #1a1408; border-color: transparent; }
+      #ui button:disabled { opacity: 0.45; }
+      #ui .hud-tl { position: absolute; top: var(--pad-t); left: var(--pad-l); }
+      #ui .hud-tr { position: absolute; top: var(--pad-t); right: var(--pad-r); display: flex; gap: 8px; }
+      #ui .hud-br { position: absolute; bottom: var(--pad-b); right: var(--pad-r); }
+      #ui .hud-bc { position: absolute; bottom: var(--pad-b); left: 50%; transform: translateX(-50%); }
+      #ui .chip {
+        background: var(--ui-bg);
+        border: 1px solid var(--ui-line);
+        border-radius: 12px;
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+      #ui .chip b { font-size: 16px; }
+      #ui .fuel { color: var(--ui-dim); letter-spacing: 2px; }
+      #ui .fuel i { font-style: normal; color: var(--ui-accent); }
+      #ui .land-btn { min-height: 60px; font-size: 18px; padding: 0 24px; }
+      #ui .center-msg {
+        position: absolute; left: 50%; top: 22%; transform: translateX(-50%);
+        background: var(--ui-bg); border: 1px solid var(--ui-line); border-radius: 14px;
+        padding: 10px 16px; text-align: center; white-space: nowrap;
+      }
+      #ui .bar { height: 4px; border-radius: 2px; background: var(--ui-line); margin-top: 8px; overflow: hidden; }
+      #ui .bar > div { height: 100%; width: 0; background: var(--ui-cruise); }
+      /* Full-screen panels (port, title): centered card that scrolls if tall. */
+      #ui .screen {
+        position: absolute; inset: 0; pointer-events: auto;
+        display: flex; align-items: center; justify-content: center;
+        padding: var(--pad-t) var(--pad-r) var(--pad-b) var(--pad-l);
+        overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y;
+      }
+      #ui .card {
+        width: min(560px, 100%);
+        background: var(--ui-bg-strong);
+        border: 1px solid var(--ui-line);
+        border-radius: 20px;
+        padding: 20px;
+        margin: auto;
+      }
+      #ui .card h1 { margin: 0 0 2px; font-size: 26px; }
+      #ui .card .sub { color: var(--ui-dim); font-size: 14px; margin-bottom: 12px; }
+      #ui .card p { margin: 0 0 14px; color: #c9d4ee; }
+      #ui .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+      #ui .row button { flex: 1 1 120px; }
+      #ui .note { color: var(--ui-dim); font-size: 13px; margin-top: 10px; }
+      #ui .svc-list { display: grid; gap: 8px; margin: 4px 0 6px; }
+      #ui .svc {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--ui-line);
+        border-radius: 12px;
+        padding: 10px 12px;
+      }
+      #ui .svc-dim { opacity: 0.7; }
+      #ui .svc-note { color: #c9d4ee; font-size: 14px; margin-top: 3px; }
+      #ui .svc-soon { color: var(--ui-dim); font-size: 12px; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+      #ui .actions {
+        position: sticky; bottom: 0;
+        margin: 14px -20px -20px; padding: 12px 20px 16px;
+        background: var(--ui-bg-strong); border-top: 1px solid var(--ui-line);
+        border-radius: 0 0 20px 20px;
+      }
+      #ui .actions .row { margin-top: 0; margin-bottom: 8px; }
+      #ui .section { margin: 14px 0 0; text-transform: uppercase; letter-spacing: 0.5px; font-size: 12px; }
+      #ui .port { display: grid; grid-template-areas: "head" "svc" "act"; }
+      #ui .port-head { grid-area: head; }
+      #ui .port-svc { grid-area: svc; }
+      #ui .port-act { grid-area: act; }
+      /* Short landscape phones: place + actions on the left, services scroll on the right. */
+      @media (orientation: landscape) and (max-height: 500px) {
+        #ui .card { width: min(820px, 100%); padding: 16px 20px; }
+        #ui .card h1 { font-size: 22px; }
+        #ui .card p { margin-bottom: 10px; }
+        #ui .port {
+          grid-template-areas: "head svc" "act svc";
+          grid-template-columns: 1fr 1.1fr;
+          grid-template-rows: 1fr auto;
+          column-gap: 16px;
+          max-height: calc(100dvh - var(--pad-t) - var(--pad-b));
+        }
+        #ui .port-svc { overflow-y: auto; margin: 0; align-content: start; -webkit-overflow-scrolling: touch; }
+        #ui .port .actions { position: static; margin: 8px 0 0; padding: 0; border: 0; background: none; }
+      }
+      /* Site picker sheet (landing on a planet with several sites). */
+      #ui .sheet { position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: center;
+        padding: var(--pad-t) var(--pad-r) var(--pad-b) var(--pad-l); pointer-events: auto; background: rgba(4, 6, 12, 0.45); }
+      #ui .sheet .card { margin: 0; }
+      #ui .pick { display: block; width: 100%; text-align: left; padding: 12px 14px; margin-top: 8px; min-height: 60px; }
+      #ui .pick small { display: block; color: var(--ui-dim); font-weight: 400; font-size: 13px; margin-top: 4px; line-height: 1.3; }
+      #ui .title-wrap { text-align: center; }
+      #ui .title-wrap h1 { font-size: 34px; letter-spacing: 4px; margin: 0 0 6px; }
+      #ui .title-wrap .tag { color: var(--ui-dim); margin-bottom: 22px; }
+      #ui .title-wrap .row { flex-direction: column; max-width: 320px; margin: 0 auto; }
+      #ui .title-wrap .row button { flex: none; min-height: 54px; }
     </style>
   </head>
   <body>
     <div id="game"></div>
+    <div id="ui"></div>
     <div id="toast" role="status" aria-live="polite"></div>
     <script type="module" src="./src/main.ts"></script>
   </body>

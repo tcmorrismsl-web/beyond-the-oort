@@ -1,10 +1,14 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { FlightScene } from './scenes/FlightScene';
+import { LandedScene } from './scenes/LandedScene';
+import { MapScene } from './scenes/MapScene';
+import { TitleScene } from './scenes/TitleScene';
 import { readKey, requestPersistence, writeKey } from './core/storage';
 import { freshSeed } from './core/rng';
 import { Session } from './core/session';
 import { SESSION_KEY } from './scenes/sessionAccess';
+import { showToast } from './ui/toast';
 
 // One playthrough shared by every scene: resumes the saved game if there is one.
 const session = Session.start(freshSeed(), Date.now());
@@ -21,7 +25,7 @@ const game = new Phaser.Game({
   },
   input: { activePointers: 3 },
   render: { antialias: true, powerPreference: 'high-performance' },
-  scene: [BootScene, FlightScene],
+  scene: [BootScene, TitleScene, FlightScene, MapScene, LandedScene],
   callbacks: { preBoot: (g) => g.registry.set(SESSION_KEY, session) },
 });
 
@@ -45,18 +49,6 @@ window.addEventListener('orientationchange', scheduleSizeChecks);
 window.visualViewport?.addEventListener('resize', scheduleSizeChecks);
 setInterval(syncGameSize, 500);
 
-// Brief on-screen confirmation for saves, so the player can trust them.
-const toast = document.getElementById('toast');
-let toastTimer: ReturnType<typeof setTimeout> | undefined;
-function showToast(text: string): void {
-  if (!toast) return;
-  toast.textContent = text;
-  toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    toast.classList.remove('show');
-  }, 1500);
-}
 session.bus.on('saved', () => {
   showToast('Saved');
 });

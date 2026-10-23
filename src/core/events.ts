@@ -11,6 +11,9 @@ import type { GameMode } from './flow';
 export interface GameEvents {
   modeChanged: { from: GameMode; to: GameMode };
   saved: { at: number };
+  jumped: { from: string; to: string };
+  landed: { siteId: string };
+  departed: { siteId: string };
   saveFailed: { reason: string };
 }
 

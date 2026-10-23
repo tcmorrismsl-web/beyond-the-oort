@@ -1,4 +1,1686 @@
 [
-  { "id": "sol", "name": "Sol", "x": 0, "y": 0, "links": ["alpha-centauri"], "shipyard": ["shuttle"] },
-  { "id": "alpha-centauri", "name": "Alpha Centauri", "x": 120, "y": -40, "links": ["sol"], "shipyard": ["shuttle", "corvette"] }
+  {
+    "id": "sol",
+    "name": "Sol",
+    "x": 0.0,
+    "y": 0.0,
+    "distanceLy": 0.0,
+    "spectral": "G2V",
+    "description": "Humanity's cradle. Crowded lanes, old money, and every rumor of what lies past the Oort Cloud.",
+    "star": {
+      "color": "#ffd27a",
+      "radius": 90
+    },
+    "links": [
+      "alpha-centauri",
+      "barnards-star",
+      "wolf-359",
+      "sirius"
+    ],
+    "shipyard": [
+      "shuttle"
+    ],
+    "bodies": [
+      {
+        "id": "earth",
+        "name": "Earth",
+        "kind": "planet",
+        "x": 900,
+        "y": -320,
+        "radius": 70,
+        "color": "#3f8fd2",
+        "description": "Blue, loud, and expensive. Every captain's story starts or ends here.",
+        "sites": [
+          {
+            "id": "new-geneva",
+            "name": "New Geneva Spaceport",
+            "kind": "city",
+            "description": "The busiest port in human space: customs queues, glass towers, and contracts signed over lunch.",
+            "services": [
+              "refuel",
+              "trade",
+              "missions",
+              "bar"
+            ],
+            "notes": {
+              "trade": "Commodity exchange — prices set by half the colonies.",
+              "missions": "Contract hall — corporate couriers and government charters.",
+              "bar": "The Departure Lounge — overpriced, and everyone who matters drinks there."
+            }
+          },
+          {
+            "id": "lagos-skyport",
+            "name": "Lagos Skyport",
+            "kind": "spaceport",
+            "description": "A sprawling freight port where crews swap cargo, gossip, and favors at all hours.",
+            "services": [
+              "refuel",
+              "trade",
+              "bar"
+            ],
+            "notes": {
+              "trade": "Freight market — haggling encouraged.",
+              "bar": "Mama Ade's — cheap stew, good tips on who's hiring."
+            }
+          }
+        ]
+      },
+      {
+        "id": "luna",
+        "name": "Luna",
+        "kind": "moon",
+        "x": 1060,
+        "y": -110,
+        "radius": 22,
+        "color": "#c8c8c8",
+        "description": "Earth's moon: old landing sites under glass, and a university that trains half the pilots in Sol.",
+        "sites": [
+          {
+            "id": "tranquility",
+            "name": "Tranquility Base",
+            "kind": "settlement",
+            "description": "A preserved landing site wrapped in a pilot academy. Cadets salute anyone with their own ship.",
+            "services": [
+              "refuel",
+              "missions"
+            ],
+            "notes": {
+              "missions": "Academy board — test flights and odd jobs for licensed captains."
+            }
+          }
+        ]
+      },
+      {
+        "id": "highport",
+        "name": "Highport",
+        "kind": "station",
+        "x": 1150,
+        "y": -500,
+        "radius": 34,
+        "color": "#c9d4e6",
+        "description": "Earth's orbital gateway. Cargo cranes, dry docks, and a bar that never closes.",
+        "sites": [
+          {
+            "id": "highport-docks",
+            "name": "Highport Docks",
+            "kind": "station",
+            "description": "Ring-shaped dry docks where most of Sol's ships are refit.",
+            "services": [
+              "refuel",
+              "shipyard",
+              "outfitter",
+              "repair"
+            ],
+            "notes": {
+              "shipyard": "Highport Yards — new hulls fresh off the line.",
+              "outfitter": "Parts district — engines, scanners, shields.",
+              "repair": "Dry dock — patched hulls while you wait."
+            }
+          }
+        ]
+      },
+      {
+        "id": "mars",
+        "name": "Mars",
+        "kind": "planet",
+        "x": -1450,
+        "y": 720,
+        "radius": 46,
+        "color": "#c4623a",
+        "description": "Domed cities and shipyards under a rust-red sky. Mars builds the hulls Earth pays for.",
+        "sites": [
+          {
+            "id": "olympus-yards",
+            "name": "Olympus Yards",
+            "kind": "spaceport",
+            "description": "Launch rails up the flank of Olympus Mons, and the loudest engineers in Sol.",
+            "services": [
+              "refuel",
+              "shipyard",
+              "outfitter",
+              "repair"
+            ],
+            "notes": {
+              "shipyard": "Martian-built hulls — sturdier than they look.",
+              "outfitter": "Red Sands Supply — engine parts by the crate."
+            }
+          },
+          {
+            "id": "valles-commons",
+            "name": "Valles Commons",
+            "kind": "city",
+            "description": "A canyon city of terraced domes, where water rights decide elections.",
+            "services": [
+              "trade",
+              "missions",
+              "bar"
+            ],
+            "notes": {
+              "trade": "Water and ore exchange.",
+              "missions": "Canyon Council postings — survey runs and escorts.",
+              "bar": "The Dust Devil — miners, mechanics, and arguments."
+            }
+          }
+        ]
+      },
+      {
+        "id": "jupiter",
+        "name": "Jupiter",
+        "kind": "gas-giant",
+        "x": 2500,
+        "y": 1300,
+        "radius": 150,
+        "color": "#d9a066",
+        "description": "A gas giant. Too deep a gravity well to land, but its moons are busy.",
+        "sites": []
+      },
+      {
+        "id": "europa",
+        "name": "Europa",
+        "kind": "moon",
+        "x": 2300,
+        "y": 1080,
+        "radius": 20,
+        "color": "#e6e2d6",
+        "description": "An ice moon with an ocean underneath, and scientists who won't say what they found.",
+        "sites": [
+          {
+            "id": "europa-deep",
+            "name": "Europa Deep Station",
+            "kind": "research",
+            "description": "A drilling station perched over the ice, staffed by researchers who rarely see visitors.",
+            "services": [
+              "refuel",
+              "missions"
+            ],
+            "notes": {
+              "missions": "Research grants — sample runs and quiet deliveries."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "alpha-centauri",
+    "name": "Alpha Centauri",
+    "x": -26.2,
+    "y": 7.5,
+    "distanceLy": 4.37,
+    "spectral": "G2V + K1V, M5.5Ve",
+    "description": "The first colony system. Twin suns, frontier pride, and the busiest shipyard outside Sol.",
+    "star": {
+      "color": "#fff1c2",
+      "radius": 100
+    },
+    "links": [
+      "sol",
+      "barnards-star"
+    ],
+    "shipyard": [
+      "shuttle",
+      "corvette"
+    ],
+    "bodies": [
+      {
+        "id": "proxima-b",
+        "name": "Proxima b",
+        "kind": "planet",
+        "x": 1100,
+        "y": 500,
+        "radius": 52,
+        "color": "#b0704a",
+        "description": "A tidally locked world orbiting Proxima, the system's red dwarf. Life clings to the twilight band.",
+        "sites": [
+          {
+            "id": "terminator-city",
+            "name": "Terminator City",
+            "kind": "city",
+            "description": "Built along the narrow twilight ring between frozen night and burning day. Proud, cramped, and fiercely independent.",
+            "services": [
+              "refuel",
+              "trade",
+              "missions",
+              "bar"
+            ],
+            "notes": {
+              "trade": "Twilight Market — Centauri goods, Sol prices.",
+              "missions": "Colonial Office — the colony needs pilots and isn't shy about it.",
+              "bar": "The Long Dusk — toasts to the first ships, every night."
+            }
+          },
+          {
+            "id": "darkside-camp",
+            "name": "Darkside Camp",
+            "kind": "mining",
+            "description": "Ice miners on the frozen night side. They work in shifts and sleep in their suits.",
+            "services": [
+              "trade",
+              "bar"
+            ],
+            "notes": {
+              "trade": "Ice and volatiles by the ton.",
+              "bar": "The Heat Lamp — one room, always full."
+            }
+          }
+        ]
+      },
+      {
+        "id": "centauri-yards",
+        "name": "Centauri Yards",
+        "kind": "station",
+        "x": -900,
+        "y": -700,
+        "radius": 40,
+        "color": "#b8c4d8",
+        "description": "The largest shipyard outside Sol, hanging between the twin suns.",
+        "sites": [
+          {
+            "id": "centauri-yards-dock",
+            "name": "Yard Ring",
+            "kind": "station",
+            "description": "Endless construction scaffolds and a waiting list for berths.",
+            "services": [
+              "refuel",
+              "shipyard",
+              "outfitter",
+              "repair"
+            ],
+            "notes": {
+              "shipyard": "Centauri Yards — corvettes, if you can afford one.",
+              "outfitter": "Frontier outfitters — rugged and reliable."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "barnards-star",
+    "name": "Barnard's Star",
+    "x": -17.3,
+    "y": 58.1,
+    "distanceLy": 5.96,
+    "spectral": "M4V",
+    "description": "A dim, ancient red dwarf. Quiet, cheap, and popular with people who prefer not to be noticed.",
+    "star": {
+      "color": "#ff7a4d",
+      "radius": 55
+    },
+    "links": [
+      "ross-154",
+      "sol",
+      "alpha-centauri"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "barnards-b",
+        "name": "Barnard's Star b",
+        "kind": "planet",
+        "x": -500,
+        "y": 450,
+        "radius": 30,
+        "color": "#8a5a48",
+        "description": "A small, hot rock orbiting close to its dim star. Nobody lives here on purpose.",
+        "sites": []
+      },
+      {
+        "id": "barnard-waystation",
+        "name": "Barnard Waystation",
+        "kind": "station",
+        "x": 700,
+        "y": 600,
+        "radius": 30,
+        "color": "#a8b0bf",
+        "description": "Fuel, food, and no questions. The log has more blank entries than names.",
+        "sites": [
+          {
+            "id": "waystation-ring",
+            "name": "The Ring",
+            "kind": "station",
+            "description": "A creaky trading ring where cargo changes hands without paperwork.",
+            "services": [
+              "refuel",
+              "trade",
+              "bar"
+            ],
+            "notes": {
+              "trade": "No-questions market — some of it is even legal.",
+              "bar": "The Blank Page — nobody signs the guestbook."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "wolf-359",
+    "name": "Wolf 359",
+    "x": -86.5,
+    "y": -18.7,
+    "distanceLy": 7.9,
+    "spectral": "M6V",
+    "description": "A flare-prone red dwarf. Miners come for the ore and leave before the next storm.",
+    "star": {
+      "color": "#ff5a3c",
+      "radius": 45
+    },
+    "links": [
+      "ross-128",
+      "lalande-21185",
+      "sol"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "cinder",
+        "name": "Cinder",
+        "kind": "planet",
+        "x": -600,
+        "y": -500,
+        "radius": 40,
+        "color": "#7a4a3a",
+        "description": "A scorched rock baked by stellar flares. Rich ore under the crust.",
+        "sites": [
+          {
+            "id": "cinder-pits",
+            "name": "Cinder Pits",
+            "kind": "mining",
+            "description": "Strip mines and shielded bunkers. When the flare sirens sound, everyone runs.",
+            "services": [
+              "trade",
+              "missions"
+            ],
+            "notes": {
+              "trade": "Ore by the ton, sold fast before the next flare.",
+              "missions": "Shift boss — haul ore out before the storm."
+            }
+          }
+        ]
+      },
+      {
+        "id": "wolf-point",
+        "name": "Wolf Point",
+        "kind": "station",
+        "x": 1000,
+        "y": 200,
+        "radius": 32,
+        "color": "#b0a090",
+        "description": "A shielded mining hub. Its crews measure time in flares survived.",
+        "sites": [
+          {
+            "id": "wolf-point-dock",
+            "name": "Wolf Point",
+            "kind": "station",
+            "description": "Heavy shielding, low ceilings, and the best ore prices this side of Sol.",
+            "services": [
+              "refuel",
+              "repair",
+              "bar"
+            ],
+            "notes": {
+              "repair": "Flare-damage specialists.",
+              "bar": "Storm Shelter Bar — stays open through every flare."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lalande-21185",
+    "name": "Lalande 21185",
+    "x": -80.3,
+    "y": 16.4,
+    "distanceLy": 8.3,
+    "spectral": "M2V",
+    "description": "A bright red dwarf with two known planets and a scattering of research claims.",
+    "star": {
+      "color": "#ff8a55",
+      "radius": 60
+    },
+    "links": [
+      "wolf-359",
+      "ross-128"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "lalande-b",
+        "name": "Lalande 21185 b",
+        "kind": "planet",
+        "x": 800,
+        "y": -400,
+        "radius": 44,
+        "color": "#9a6a50",
+        "description": "A rocky world with a thin, cold atmosphere. Survey beacons blink across its plains.",
+        "sites": [
+          {
+            "id": "survey-camp",
+            "name": "Survey Camp Seven",
+            "kind": "research",
+            "description": "Prefab domes and a dozen surveyors who are very glad to see a new face.",
+            "services": [
+              "refuel",
+              "missions"
+            ],
+            "notes": {
+              "missions": "Survey contracts — beacons to place, data to recover."
+            }
+          }
+        ]
+      },
+      {
+        "id": "lalande-c",
+        "name": "Lalande 21185 c",
+        "kind": "planet",
+        "x": -1700,
+        "y": 900,
+        "radius": 70,
+        "color": "#c0a080",
+        "description": "A cold giant in a wide orbit. No landing sites.",
+        "sites": []
+      }
+    ]
+  },
+  {
+    "id": "sirius",
+    "name": "Sirius",
+    "x": -21.7,
+    "y": -76.4,
+    "distanceLy": 8.6,
+    "spectral": "A1V + DA2 (white dwarf)",
+    "description": "A blinding white star with a white-dwarf companion and corporate money in every orbit.",
+    "star": {
+      "color": "#dfeaff",
+      "radius": 130
+    },
+    "links": [
+      "procyon",
+      "luytens-star",
+      "kapteyns-star",
+      "sol"
+    ],
+    "shipyard": [
+      "corvette"
+    ],
+    "bodies": [
+      {
+        "id": "sirius-gate",
+        "name": "Sirius Gate",
+        "kind": "station",
+        "x": -1300,
+        "y": 400,
+        "radius": 40,
+        "color": "#d6e2f5",
+        "description": "A polished corporate hub. Everything is for sale, and everything is watched.",
+        "sites": [
+          {
+            "id": "gate-concourse",
+            "name": "The Concourse",
+            "kind": "station",
+            "description": "Marble floors, holo-ads, and security drones that know your name before you do.",
+            "services": [
+              "refuel",
+              "trade",
+              "shipyard",
+              "outfitter"
+            ],
+            "notes": {
+              "trade": "Corporate exchange — fixed prices, no haggling.",
+              "shipyard": "Sirius Dynamics showroom — corvettes in every color.",
+              "outfitter": "Premium outfitting — top quality, top price."
+            }
+          },
+          {
+            "id": "gate-underdeck",
+            "name": "Underdeck",
+            "kind": "station",
+            "description": "Below the concourse: maintenance tunnels, back-room deals, and people the corporations would rather forget.",
+            "services": [
+              "bar",
+              "missions"
+            ],
+            "notes": {
+              "bar": "The Drain — the only honest bar on the station.",
+              "missions": "Quiet work, paid in cash."
+            }
+          }
+        ]
+      },
+      {
+        "id": "sirius-b",
+        "name": "Sirius B",
+        "kind": "star-remnant",
+        "x": 2000,
+        "y": -1200,
+        "radius": 18,
+        "color": "#f4f8ff",
+        "description": "A white dwarf: a dead star's core, hot enough to blister hulls that get too close.",
+        "sites": []
+      }
+    ]
+  },
+  {
+    "id": "luyten-726-8",
+    "name": "Luyten 726-8",
+    "x": 66.0,
+    "y": -43.9,
+    "distanceLy": 8.7,
+    "spectral": "M5.5Ve + M6Ve (UV Ceti)",
+    "description": "A pair of flare stars, one of them the infamous UV Ceti. Nothing lives here but a fuel depot.",
+    "star": {
+      "color": "#ff6a48",
+      "radius": 50
+    },
+    "links": [
+      "tau-ceti",
+      "epsilon-eridani",
+      "lacaille-9352"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "luyten-726-8-depot",
+        "name": "Luyten 726-8 Fuel Depot",
+        "kind": "station",
+        "x": 900,
+        "y": 300,
+        "radius": 26,
+        "color": "#9fb0c8",
+        "description": "An automated fuel depot maintained by the Lanes Authority. Free fuel for any ship.",
+        "sites": [
+          {
+            "id": "luyten-726-8-depot-dock",
+            "name": "Depot Dock",
+            "kind": "depot",
+            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
+            "services": [
+              "refuel"
+            ],
+            "notes": {
+              "refuel": "Free — courtesy of the Lanes Authority."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ross-154",
+    "name": "Ross 154",
+    "x": 4.0,
+    "y": 86.9,
+    "distanceLy": 9.7,
+    "spectral": "M3.5Ve",
+    "description": "A young, restless red dwarf. A relay point on the way to the far lanes.",
+    "star": {
+      "color": "#ff7650",
+      "radius": 50
+    },
+    "links": [
+      "barnards-star",
+      "wolf-1061"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "ross-154-depot",
+        "name": "Ross 154 Fuel Depot",
+        "kind": "station",
+        "x": -800,
+        "y": 500,
+        "radius": 26,
+        "color": "#9fb0c8",
+        "description": "An automated fuel depot maintained by the Lanes Authority. Free fuel for any ship.",
+        "sites": [
+          {
+            "id": "ross-154-depot-dock",
+            "name": "Depot Dock",
+            "kind": "depot",
+            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
+            "services": [
+              "refuel"
+            ],
+            "notes": {
+              "refuel": "Free — courtesy of the Lanes Authority."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ross-248",
+    "name": "Ross 248",
+    "x": 81.3,
+    "y": 60.0,
+    "distanceLy": 10.3,
+    "spectral": "M6V",
+    "description": "A small red dwarf drifting toward Sol. In forty thousand years it will be the nearest star.",
+    "star": {
+      "color": "#ff5c40",
+      "radius": 45
+    },
+    "links": [
+      "groombridge-34",
+      "kruger-60",
+      "61-cygni"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "ross-248-depot",
+        "name": "Ross 248 Fuel Depot",
+        "kind": "station",
+        "x": 700,
+        "y": -600,
+        "radius": 26,
+        "color": "#9fb0c8",
+        "description": "An automated depot with a hand-painted sign: 'Closest star someday. Be patient.'",
+        "sites": [
+          {
+            "id": "ross-248-depot-dock",
+            "name": "Depot Dock",
+            "kind": "depot",
+            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
+            "services": [
+              "refuel"
+            ],
+            "notes": {
+              "refuel": "Free — courtesy of the Lanes Authority."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "epsilon-eridani",
+    "name": "Epsilon Eridani",
+    "x": 46.7,
+    "y": -73.8,
+    "distanceLy": 10.5,
+    "spectral": "K2V",
+    "description": "A young orange star wrapped in dust belts and comet traffic. A crossroads of the southern lanes.",
+    "star": {
+      "color": "#ffc58a",
+      "radius": 80
+    },
+    "links": [
+      "luyten-726-8",
+      "tau-ceti",
+      "teegardens-star",
+      "gliese-1061"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "epsilon-eridani-b",
+        "name": "Epsilon Eridani b",
+        "kind": "gas-giant",
+        "x": 1900,
+        "y": -800,
+        "radius": 120,
+        "color": "#b89070",
+        "description": "A gas giant on a wide orbit, shepherding the inner dust belt.",
+        "sites": []
+      },
+      {
+        "id": "eridani-belt",
+        "name": "Belt Haven",
+        "kind": "station",
+        "x": -1000,
+        "y": 700,
+        "radius": 34,
+        "color": "#a0a8b8",
+        "description": "A station hollowed out of an asteroid in the inner belt.",
+        "sites": [
+          {
+            "id": "belt-haven-core",
+            "name": "Haven Core",
+            "kind": "station",
+            "description": "Tunnels carved from rock, lit by grow-lamps. The belters are polite, wary, and armed.",
+            "services": [
+              "refuel",
+              "trade",
+              "repair",
+              "bar"
+            ],
+            "notes": {
+              "trade": "Belter exchange — metals, ice, and rare finds.",
+              "repair": "Rock-rat mechanics — they fix anything.",
+              "bar": "The Drift — darts, debts, and old songs."
+            }
+          },
+          {
+            "id": "belt-haven-claims",
+            "name": "Claims Office",
+            "kind": "mining",
+            "description": "A cramped office where prospectors register claims and argue over borders.",
+            "services": [
+              "missions"
+            ],
+            "notes": {
+              "missions": "Claim disputes, survey runs, and the occasional rescue."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lacaille-9352",
+    "name": "Lacaille 9352",
+    "x": 96.8,
+    "y": -2.7,
+    "distanceLy": 10.7,
+    "spectral": "M0.5V",
+    "description": "A bright red dwarf moving fast across the sky, with super-Earths in tight orbits.",
+    "star": {
+      "color": "#ff9a60",
+      "radius": 60
+    },
+    "links": [
+      "epsilon-indi",
+      "gliese-876",
+      "luyten-726-8"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "lacaille-9352-b",
+        "name": "Lacaille 9352 b",
+        "kind": "planet",
+        "x": 700,
+        "y": 500,
+        "radius": 56,
+        "color": "#8a7a6a",
+        "description": "A heavy super-Earth with crushing gravity. Only the stubborn settle here.",
+        "sites": [
+          {
+            "id": "gravity-well",
+            "name": "Gravity Well",
+            "kind": "settlement",
+            "description": "Low buildings, strong people, and a landing pad rated for very sturdy ships.",
+            "services": [
+              "refuel",
+              "trade",
+              "missions"
+            ],
+            "notes": {
+              "trade": "Heavy metals and stubbornness.",
+              "missions": "Haulage — someone has to lift cargo out of this well."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ross-128",
+    "name": "Ross 128",
+    "x": -123.6,
+    "y": -6.9,
+    "distanceLy": 11.0,
+    "spectral": "M4V",
+    "description": "A quiet, old red dwarf with a temperate planet. Home to a small, patient colony.",
+    "star": {
+      "color": "#ff7048",
+      "radius": 50
+    },
+    "links": [
+      "wolf-359",
+      "lalande-21185"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "ross-128-b",
+        "name": "Ross 128 b",
+        "kind": "planet",
+        "x": -900,
+        "y": -400,
+        "radius": 50,
+        "color": "#6a8a6a",
+        "description": "A temperate world under a calm red sun. Farms in the twilight, observatories on the ridges.",
+        "sites": [
+          {
+            "id": "quiet-harbor",
+            "name": "Quiet Harbor",
+            "kind": "settlement",
+            "description": "A farming town that talks slowly and builds things to last.",
+            "services": [
+              "refuel",
+              "trade",
+              "bar"
+            ],
+            "notes": {
+              "trade": "Farm goods, preserved and packed for long voyages.",
+              "bar": "The Slow Sun — homebrew and long stories."
+            }
+          },
+          {
+            "id": "ridge-observatory",
+            "name": "Ridge Observatory",
+            "kind": "research",
+            "description": "Telescopes pointed outward. The astronomers here are listening for something.",
+            "services": [
+              "missions"
+            ],
+            "notes": {
+              "missions": "Sensor runs past the edge of the map."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "procyon",
+    "name": "Procyon",
+    "x": -66.9,
+    "y": -90.1,
+    "distanceLy": 11.4,
+    "spectral": "F5IV-V + DQZ (white dwarf)",
+    "description": "A bright yellow-white star and its white-dwarf companion. Rich, sunny, and expensive.",
+    "star": {
+      "color": "#fff6d8",
+      "radius": 110
+    },
+    "links": [
+      "luytens-star",
+      "sirius"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "procyon-station",
+        "name": "Procyon Exchange",
+        "kind": "station",
+        "x": 1200,
+        "y": 600,
+        "radius": 38,
+        "color": "#d0d8e8",
+        "description": "A trading station built for bulk cargo and bigger profits.",
+        "sites": [
+          {
+            "id": "procyon-floor",
+            "name": "Trading Floor",
+            "kind": "station",
+            "description": "A cavernous hall of cargo screens and shouting brokers.",
+            "services": [
+              "refuel",
+              "trade",
+              "missions"
+            ],
+            "notes": {
+              "trade": "Bulk exchange — the best prices are for full holds.",
+              "missions": "Freight contracts across the eastern lanes."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "61-cygni",
+    "name": "61 Cygni",
+    "x": 56.9,
+    "y": 105.4,
+    "distanceLy": 11.4,
+    "spectral": "K5V + K7V",
+    "description": "Twin orange dwarfs circling each other. The first star ever measured — and a haven for scholars.",
+    "star": {
+      "color": "#ffb070",
+      "radius": 70
+    },
+    "links": [
+      "kruger-60",
+      "ross-248",
+      "altair"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "cygni-archive",
+        "name": "Bessel Archive",
+        "kind": "station",
+        "x": -900,
+        "y": -600,
+        "radius": 36,
+        "color": "#c0b8a8",
+        "description": "A library station named for the astronomer who first measured the distance to a star.",
+        "sites": [
+          {
+            "id": "archive-halls",
+            "name": "Archive Halls",
+            "kind": "research",
+            "description": "Quiet halls of records from every colony. Archivists trade in secrets, not credits.",
+            "services": [
+              "refuel",
+              "missions"
+            ],
+            "notes": {
+              "missions": "Recover lost records — from wrecks, ruins, and stubborn people."
+            }
+          },
+          {
+            "id": "archive-commons",
+            "name": "Scholars' Commons",
+            "kind": "station",
+            "description": "A cafe-and-dormitory deck where students argue about everything.",
+            "services": [
+              "bar",
+              "trade"
+            ],
+            "notes": {
+              "bar": "The Parallax — cheap tea, expensive debates.",
+              "trade": "Rare books, data cores, and instruments."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "groombridge-34",
+    "name": "Groombridge 34",
+    "x": 98.4,
+    "y": 55.1,
+    "distanceLy": 11.6,
+    "spectral": "M1.5V + M3.5V",
+    "description": "A red dwarf pair with a known super-Earth. A sleepy stop on the northern lanes.",
+    "star": {
+      "color": "#ff8c58",
+      "radius": 55
+    },
+    "links": [
+      "ross-248",
+      "kruger-60",
+      "teegardens-star"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "groombridge-34-ab",
+        "name": "Groombridge 34 Ab",
+        "kind": "planet",
+        "x": 800,
+        "y": 200,
+        "radius": 48,
+        "color": "#7a6a5a",
+        "description": "A hot super-Earth. No settlement, but the views are spectacular.",
+        "sites": []
+      },
+      {
+        "id": "groombridge-34-depot",
+        "name": "Groombridge 34 Fuel Depot",
+        "kind": "station",
+        "x": -700,
+        "y": -500,
+        "radius": 26,
+        "color": "#9fb0c8",
+        "description": "An automated fuel depot maintained by the Lanes Authority. Free fuel for any ship.",
+        "sites": [
+          {
+            "id": "groombridge-34-depot-dock",
+            "name": "Depot Dock",
+            "kind": "depot",
+            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
+            "services": [
+              "refuel"
+            ],
+            "notes": {
+              "refuel": "Free — courtesy of the Lanes Authority."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "epsilon-indi",
+    "name": "Epsilon Indi",
+    "x": 60.8,
+    "y": 11.7,
+    "distanceLy": 11.9,
+    "spectral": "K5V + brown dwarf pair",
+    "description": "An orange star with a giant planet and two brown dwarfs. A frontier mining claim.",
+    "star": {
+      "color": "#ffb878",
+      "radius": 70
+    },
+    "links": [
+      "lacaille-9352"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "epsilon-indi-ab",
+        "name": "Epsilon Indi Ab",
+        "kind": "gas-giant",
+        "x": 1800,
+        "y": 900,
+        "radius": 110,
+        "color": "#a08060",
+        "description": "A cold Jupiter-sized giant. Its moons are rich in ice.",
+        "sites": []
+      },
+      {
+        "id": "indi-outpost",
+        "name": "Indi Outpost",
+        "kind": "station",
+        "x": -800,
+        "y": 600,
+        "radius": 30,
+        "color": "#a8a8b8",
+        "description": "A frontier outpost run by a mining cooperative.",
+        "sites": [
+          {
+            "id": "indi-co-op",
+            "name": "The Co-op",
+            "kind": "mining",
+            "description": "Everyone owns a share, everyone gets a vote, and the votes are loud.",
+            "services": [
+              "refuel",
+              "trade",
+              "missions"
+            ],
+            "notes": {
+              "trade": "Co-op store — ice, ore, and fair prices.",
+              "missions": "Co-op jobs — escort the ore haulers."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tau-ceti",
+    "name": "Tau Ceti",
+    "x": 90.7,
+    "y": -67.7,
+    "distanceLy": 11.9,
+    "spectral": "G8V",
+    "description": "A calm Sun-like star and a garden world. Farmers, pilgrims, and smugglers hiding among them.",
+    "star": {
+      "color": "#ffe08a",
+      "radius": 85
+    },
+    "links": [
+      "luyten-726-8",
+      "epsilon-eridani"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "tau-ceti-e",
+        "name": "Tau Ceti e",
+        "kind": "planet",
+        "x": 1000,
+        "y": -600,
+        "radius": 62,
+        "color": "#5aa05a",
+        "description": "A warm, green world under a gentle sun. Its fields feed half the inner colonies.",
+        "sites": [
+          {
+            "id": "verdance",
+            "name": "Verdance",
+            "kind": "city",
+            "description": "A garden city of terraces and markets. Everything smells like rain.",
+            "services": [
+              "refuel",
+              "trade",
+              "missions",
+              "bar"
+            ],
+            "notes": {
+              "trade": "Harvest market — food for the colonies.",
+              "missions": "Growers' Guild — fast freight before the harvest spoils.",
+              "bar": "The Orchard — cider, music, and pilgrims."
+            }
+          },
+          {
+            "id": "pilgrim-field",
+            "name": "Pilgrim's Field",
+            "kind": "settlement",
+            "description": "A simple landing field beside a monastery. The monks don't ask what's in your hold.",
+            "services": [
+              "refuel",
+              "missions"
+            ],
+            "notes": {
+              "missions": "Pilgrim passage — carry the faithful, no questions."
+            }
+          }
+        ]
+      },
+      {
+        "id": "tau-ceti-f",
+        "name": "Tau Ceti f",
+        "kind": "planet",
+        "x": -1600,
+        "y": 800,
+        "radius": 58,
+        "color": "#b0b8c8",
+        "description": "A cold world at the edge of the habitable zone. Frozen seas, and one stubborn research team.",
+        "sites": [
+          {
+            "id": "frostline",
+            "name": "Frostline",
+            "kind": "research",
+            "description": "A research base buried in the ice.",
+            "services": [
+              "missions"
+            ],
+            "notes": {
+              "missions": "Supply runs to the ice."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gliese-1061",
+    "name": "Gliese 1061",
+    "x": 53.0,
+    "y": -112.2,
+    "distanceLy": 12.0,
+    "spectral": "M5.5V",
+    "description": "A small red dwarf with three tight planets. One sits in the habitable zone.",
+    "star": {
+      "color": "#ff6448",
+      "radius": 45
+    },
+    "links": [
+      "kapteyns-star",
+      "epsilon-eridani"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "gliese-1061-d",
+        "name": "Gliese 1061 d",
+        "kind": "planet",
+        "x": 900,
+        "y": 400,
+        "radius": 40,
+        "color": "#7a8a6a",
+        "description": "A temperate rock with a thin atmosphere. A frontier homestead clings on.",
+        "sites": [
+          {
+            "id": "homestead",
+            "name": "Homestead",
+            "kind": "settlement",
+            "description": "Six families, one landing pad, and a lot of hope.",
+            "services": [
+              "refuel",
+              "trade"
+            ],
+            "notes": {
+              "trade": "Homestead store — they need everything and sell a little."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "luytens-star",
+    "name": "Luyten's Star",
+    "x": -67.4,
+    "y": -101.8,
+    "distanceLy": 12.4,
+    "spectral": "M3.5V",
+    "description": "A red dwarf with a super-Earth in the habitable zone, a short hop from Procyon.",
+    "star": {
+      "color": "#ff7650",
+      "radius": 50
+    },
+    "links": [
+      "procyon",
+      "sirius"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "luyten-b",
+        "name": "Luyten b",
+        "kind": "planet",
+        "x": -800,
+        "y": -500,
+        "radius": 50,
+        "color": "#6a7a8a",
+        "description": "A cool super-Earth with deep oceans and stormy skies.",
+        "sites": [
+          {
+            "id": "stormwall",
+            "name": "Stormwall",
+            "kind": "settlement",
+            "description": "A sea-wall town built against storms that never stop.",
+            "services": [
+              "refuel",
+              "trade",
+              "bar"
+            ],
+            "notes": {
+              "trade": "Fish, salt, and storm-glass.",
+              "bar": "The Breakwater — loud when the storms are loudest."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "teegardens-star",
+    "name": "Teegarden's Star",
+    "x": 115.3,
+    "y": -48.4,
+    "distanceLy": 12.5,
+    "spectral": "M7V",
+    "description": "A tiny, dim red dwarf with two Earth-sized planets. One of the most Earth-like places known.",
+    "star": {
+      "color": "#ff5034",
+      "radius": 40
+    },
+    "links": [
+      "epsilon-eridani",
+      "groombridge-34"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "teegarden-b",
+        "name": "Teegarden's Star b",
+        "kind": "planet",
+        "x": 700,
+        "y": -300,
+        "radius": 44,
+        "color": "#6a9a7a",
+        "description": "Nearly Earth-sized and temperate. A young colony is betting everything on it.",
+        "sites": [
+          {
+            "id": "second-chance",
+            "name": "Second Chance",
+            "kind": "settlement",
+            "description": "A new colony of people who left everything behind. They're building fast and trusting slowly.",
+            "services": [
+              "refuel",
+              "trade",
+              "missions",
+              "bar"
+            ],
+            "notes": {
+              "trade": "Colony supply exchange — they pay well for tools.",
+              "missions": "Colony charter — supplies, settlers, and protection.",
+              "bar": "First Light — the colony's only bar, opened last month."
+            }
+          }
+        ]
+      },
+      {
+        "id": "teegarden-c",
+        "name": "Teegarden's Star c",
+        "kind": "planet",
+        "x": -1300,
+        "y": 700,
+        "radius": 42,
+        "color": "#8aa0b8",
+        "description": "A colder sibling world. Unsettled, for now.",
+        "sites": []
+      }
+    ]
+  },
+  {
+    "id": "kapteyns-star",
+    "name": "Kapteyn's Star",
+    "x": 21.7,
+    "y": -129.3,
+    "distanceLy": 12.8,
+    "spectral": "sdM1",
+    "description": "An ancient star from the galaxy's halo, older than the Sun by billions of years.",
+    "star": {
+      "color": "#ff9060",
+      "radius": 50
+    },
+    "links": [
+      "gliese-1061",
+      "sirius"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "kapteyn-b",
+        "name": "Kapteyn b",
+        "kind": "planet",
+        "x": 900,
+        "y": 600,
+        "radius": 46,
+        "color": "#8a7060",
+        "description": "An old world around an old star. Something built here, long ago.",
+        "sites": [
+          {
+            "id": "old-ruins",
+            "name": "The Old Site",
+            "kind": "ruins",
+            "description": "Weathered structures no human built. A small research team keeps watch.",
+            "services": [
+              "missions"
+            ],
+            "notes": {
+              "missions": "Excavation support — and questions nobody can answer yet."
+            }
+          }
+        ]
+      },
+      {
+        "id": "kapteyns-star-depot",
+        "name": "Kapteyn Fuel Depot",
+        "kind": "station",
+        "x": -700,
+        "y": -500,
+        "radius": 26,
+        "color": "#9fb0c8",
+        "description": "An automated fuel depot maintained by the Lanes Authority. Free fuel for any ship.",
+        "sites": [
+          {
+            "id": "kapteyns-star-depot-dock",
+            "name": "Depot Dock",
+            "kind": "depot",
+            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
+            "services": [
+              "refuel"
+            ],
+            "notes": {
+              "refuel": "Free — courtesy of the Lanes Authority."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "kruger-60",
+    "name": "Kruger 60",
+    "x": 101.1,
+    "y": 101.0,
+    "distanceLy": 13.1,
+    "spectral": "M3V + M4V",
+    "description": "Two red dwarfs locked in a 44-year dance. A popular waypoint in the northern lanes.",
+    "star": {
+      "color": "#ff7a52",
+      "radius": 50
+    },
+    "links": [
+      "ross-248",
+      "groombridge-34",
+      "61-cygni"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "kruger-60-depot",
+        "name": "Kruger 60 Fuel Depot",
+        "kind": "station",
+        "x": 800,
+        "y": 400,
+        "radius": 26,
+        "color": "#9fb0c8",
+        "description": "An automated fuel depot maintained by the Lanes Authority. Free fuel for any ship.",
+        "sites": [
+          {
+            "id": "kruger-60-depot-dock",
+            "name": "Depot Dock",
+            "kind": "depot",
+            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
+            "services": [
+              "refuel"
+            ],
+            "notes": {
+              "refuel": "Free — courtesy of the Lanes Authority."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "wolf-1061",
+    "name": "Wolf 1061",
+    "x": -72.6,
+    "y": 123.7,
+    "distanceLy": 14.0,
+    "spectral": "M3V",
+    "description": "A red dwarf with a super-Earth at the inner edge of the habitable zone. The far end of the western lanes.",
+    "star": {
+      "color": "#ff7a52",
+      "radius": 55
+    },
+    "links": [
+      "ross-154"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "wolf-1061-c",
+        "name": "Wolf 1061 c",
+        "kind": "planet",
+        "x": 900,
+        "y": -500,
+        "radius": 52,
+        "color": "#9a7a5a",
+        "description": "A warm super-Earth with long, harsh days.",
+        "sites": [
+          {
+            "id": "sunward",
+            "name": "Sunward Station",
+            "kind": "outpost",
+            "description": "A sun-shielded outpost on the edge of the western lanes.",
+            "services": [
+              "refuel",
+              "trade",
+              "missions"
+            ],
+            "notes": {
+              "trade": "Frontier trade post.",
+              "missions": "Patrol and escort contracts."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gliese-876",
+    "name": "Gliese 876",
+    "x": 156.2,
+    "y": 17.6,
+    "distanceLy": 15.2,
+    "spectral": "M4V",
+    "description": "A red dwarf with a family of giant planets in tight resonance. The road to Fomalhaut starts here.",
+    "star": {
+      "color": "#ff7048",
+      "radius": 50
+    },
+    "links": [
+      "lacaille-9352",
+      "fomalhaut"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "gliese-876-b",
+        "name": "Gliese 876 b",
+        "kind": "gas-giant",
+        "x": 1500,
+        "y": -700,
+        "radius": 110,
+        "color": "#c09060",
+        "description": "A massive gas giant in the star's habitable zone.",
+        "sites": []
+      },
+      {
+        "id": "resonance-station",
+        "name": "Resonance Station",
+        "kind": "station",
+        "x": -900,
+        "y": 500,
+        "radius": 30,
+        "color": "#b0b8c8",
+        "description": "A waystation that watches the giant planets wheel in lockstep.",
+        "sites": [
+          {
+            "id": "resonance-deck",
+            "name": "Observation Deck",
+            "kind": "station",
+            "description": "Tired crews, a big window, and the last good coffee before Fomalhaut.",
+            "services": [
+              "refuel",
+              "bar",
+              "repair"
+            ],
+            "notes": {
+              "bar": "The Lockstep — last call before the long jump.",
+              "repair": "Long-jump checkups."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "altair",
+    "name": "Altair",
+    "x": 55.8,
+    "y": 169.7,
+    "distanceLy": 16.7,
+    "spectral": "A7V",
+    "description": "A fast-spinning white star, flattened by its own speed. Frontier space.",
+    "star": {
+      "color": "#f0f4ff",
+      "radius": 120
+    },
+    "links": [
+      "61-cygni",
+      "vega"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "altair-depot",
+        "name": "Altair Fuel Depot",
+        "kind": "station",
+        "x": -1100,
+        "y": 600,
+        "radius": 26,
+        "color": "#9fb0c8",
+        "description": "A hardened depot at the frontier. The fuel is free; the silence is total.",
+        "sites": [
+          {
+            "id": "altair-depot-dock",
+            "name": "Depot Dock",
+            "kind": "depot",
+            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
+            "services": [
+              "refuel"
+            ],
+            "notes": {
+              "refuel": "Free — courtesy of the Lanes Authority."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fomalhaut",
+    "name": "Fomalhaut",
+    "x": 252.6,
+    "y": -5.8,
+    "distanceLy": 25.1,
+    "spectral": "A3V",
+    "description": "A young white star circled by a vast dust ring. Few ships make the long jump out here.",
+    "star": {
+      "color": "#e8f0ff",
+      "radius": 125
+    },
+    "links": [
+      "gliese-876"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "fomalhaut-ring",
+        "name": "Ringwatch",
+        "kind": "station",
+        "x": -1200,
+        "y": -700,
+        "radius": 32,
+        "color": "#a8b8d0",
+        "description": "A lonely station on the inner edge of the great dust ring.",
+        "sites": [
+          {
+            "id": "ringwatch-dock",
+            "name": "Ringwatch",
+            "kind": "outpost",
+            "description": "A handful of watchers studying the ring, and whatever moves inside it.",
+            "services": [
+              "refuel",
+              "missions"
+            ],
+            "notes": {
+              "missions": "Ring surveys — strange readings to investigate."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vega",
+    "name": "Vega",
+    "x": 17.4,
+    "y": 266.9,
+    "distanceLy": 25.0,
+    "spectral": "A0V",
+    "description": "A brilliant blue-white star at the edge of charted space. Beyond here, the maps go quiet.",
+    "star": {
+      "color": "#dce8ff",
+      "radius": 130
+    },
+    "links": [
+      "altair"
+    ],
+    "shipyard": [],
+    "bodies": [
+      {
+        "id": "vega-depot",
+        "name": "Vega Fuel Depot",
+        "kind": "station",
+        "x": 1000,
+        "y": -800,
+        "radius": 26,
+        "color": "#9fb0c8",
+        "description": "The last depot before the dark. Its log records every ship that goes out, and every one that comes back.",
+        "sites": [
+          {
+            "id": "vega-depot-dock",
+            "name": "Depot Dock",
+            "kind": "depot",
+            "description": "Robot arms, a fuel line, and a sign reminding captains the fuel is free and the cameras are not.",
+            "services": [
+              "refuel"
+            ],
+            "notes": {
+              "refuel": "Free — courtesy of the Lanes Authority."
+            }
+          }
+        ]
+      }
+    ]
+  }
 ]

@@ -9,6 +9,9 @@ const sample: SaveData = {
   credits: 1500,
   systemId: 'sol',
   ship: { defId: 'shuttle', x: 10, y: -5, angle: 1.2 },
+  fuel: 3,
+  visited: ['sol'],
+  landedAt: null,
 };
 
 describe('save system', () => {
@@ -21,6 +24,15 @@ describe('save system', () => {
       expect(fixture, `tests/fixtures/save-v${v}.json is missing`).toBeDefined();
       expect(deserialize(JSON.stringify(fixture?.default)).status, `save-v${v}.json`).toBe('ok');
     }
+  });
+
+  it('upgrades a v1 save: keeps progress, adds fuel, visited and landed fields', () => {
+    const v1 = { version: 1, createdAt: 1, updatedAt: 2, rngSeed: 5, credits: 2500, systemId: 'sol', ship: { defId: 'shuttle', x: 120.5, y: -48, angle: 1.57 } };
+    const r = deserialize(JSON.stringify(v1));
+    expect(r.status).toBe('ok');
+    if (r.status !== 'ok') return;
+    expect(r.data).toMatchObject({ version: SAVE_VERSION, credits: 2500, systemId: 'sol', fuel: 3, visited: ['sol'], landedAt: null });
+    expect(r.data.ship).toEqual(v1.ship);
   });
 
   it('round-trips', () => {
