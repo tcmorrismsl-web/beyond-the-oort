@@ -5,6 +5,8 @@ import { button, createLayer, credits, el, type Layer } from '../ui/dom';
 import { openSheet, renderDialogue, renderDrydock, renderMarket, shortName } from '../ui/panels';
 import { dialoguesAt } from '../systems/dialogue';
 import { waitingAt } from '../systems/crew';
+import { entryOpen } from '../systems/onfoot';
+import type { OnFootData } from './OnFootScene';
 import { portraitSvg, setSvg } from '../ui/art';
 import { showToast } from '../ui/toast';
 import { getSession } from './sessionAccess';
@@ -127,6 +129,15 @@ export class LandedScene extends Phaser.Scene {
       this.fillServices(list, site);
     };
     const state = this.session.state;
+    // Somewhere here you can walk around in.
+    if (entryOpen(site.interior, state)) {
+      const entry = site.interior;
+      const go = button(entry.label, () => {
+        this.walkIn(entry.id);
+      }, 'small primary');
+      go.style.marginTop = '8px';
+      list.append(el('div', 'svc person', el('b', '', gameData.interiors.get(entry.id)?.name ?? entry.label), el('div', 'sub', 'On foot'), go));
+    }
     for (const d of dialoguesAt(site.id, gameData.dialogues, state)) {
       const who = d.character === undefined ? undefined : gameData.characters.get(d.character);
       const talk = button(who ? `Talk to ${d.speaker}` : d.title, () => {
@@ -188,6 +199,15 @@ export class LandedScene extends Phaser.Scene {
 
   override update(): void {
     if (this.cameras.main.width !== this.scale.width || this.cameras.main.height !== this.scale.height) this.fit();
+  }
+
+  private walkIn(interiorId: string): void {
+    if (this.leaving || !this.session.enterInterior()) return;
+    this.leaving = true;
+    this.cameras.main.fadeOut(300, 0, 0, 0);
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.start('onfoot', { interior: interiorId } satisfies OnFootData);
+    });
   }
 
   private hop(siteId: string): void {

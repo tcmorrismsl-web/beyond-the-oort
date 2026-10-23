@@ -361,15 +361,21 @@
   }
  },
  {
-  "id": "ninefold-wreck-search",
-  "title": "Board the Ninefold",
-  "speaker": "Ninefold wreck",
+  "id": "nf-board",
+  "title": "Aboard the Ninefold",
+  "speaker": "The Ninefold",
   "role": "Wolf 359 · derelict",
-  "poi": "ninefold-wreck",
-  "start": "approach",
+  "spot": {
+   "interior": "ninefold",
+   "id": "airlock"
+  },
+  "if": {
+   "notFlag": "nf-boarded"
+  },
+  "start": "a",
   "nodes": {
-   "approach": {
-    "text": "The Ninefold tumbles slowly in Wolf 359's red light, frost glittering along her seams. You match her spin and dock. Every hatch is welded shut. From the inside.",
+   "a": {
+    "text": "You match the Ninefold's slow tumble and dock. Every hatch is welded shut. From the inside.",
     "choices": [
      {
       "text": "\"Ilse, do the Archive's codes still open consortium locks?\"",
@@ -388,38 +394,218 @@
      },
      {
       "text": "Cut through the hatch.",
-      "to": "inside"
+      "to": "cut"
      }
     ]
    },
    "codes": {
-    "text": "\"They should.\" On the suit channel you hear her typing, then a click deep in the hull. \"There. She remembers who owns her.\"",
+    "text": "\"They should.\" On the suit channel you hear her typing, then a heavy clunk deep in the hull. \"There. She remembers who owns her.\"",
     "choices": [
      {
-      "text": "Go in.",
-      "to": "inside"
+      "text": "Step inside.",
+      "to": "in"
      }
     ]
    },
-   "inside": {
-    "text": "Frost on everything. The crew lockers stand open and empty. In the galley the table is set for six, and someone has left a card game in the middle of a hand. Six coffee cups, still full, frozen solid.",
+   "cut": {
+    "text": "Twenty minutes with the torch. The weld gives with a crack, and a breath of old air puffs out past you and freezes into glitter.",
     "choices": [
      {
-      "text": "Check the cargo bay.",
-      "to": "cargo"
+      "text": "Step inside.",
+      "to": "in"
+     }
+    ]
+   },
+   "in": {
+    "text": "Frost on everything. Your helmet light is the only light. Somewhere deeper in the ship, something metal ticks as it cools, or warms. It's hard to tell which.",
+    "choices": [
+     {
+      "text": "Look around.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "nf-boarded"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "nf-galley",
+  "title": "Galley",
+  "speaker": "The Ninefold",
+  "role": "Galley",
+  "spot": {
+   "interior": "ninefold",
+   "id": "galley"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "The table is set for six. Six coffee cups, still full, frozen solid. Someone left a card game in the middle of a hand: four of them face down, two face up, one chair pushed back as if its owner had just stood to answer something.",
+    "choices": [
+     {
+      "text": "\"Ilse. Look at the chair.\"",
+      "to": "ilse",
+      "if": {
+       "crew": "ilse"
+      }
      },
      {
-      "text": "Head for the bridge.",
-      "to": "bridge"
+      "text": "Move on.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "nf-galley"
+       }
+      ]
      }
     ]
    },
-   "cargo": {
-    "text": "The bay is empty except for a cradle bolted to the deck, shaped to hold something roughly the size of your own ship's drive core. Its bolts have been sheared, not unscrewed.\n\nSomeone has scrawled on the cradle in marker: SOLD - TALLIS CAMP - CINDER. And under it, smaller, in a different hand: it hums.",
+   "ilse": {
+    "text": "\"I see it.\" Her light lingers on the empty chair. \"Everyone else stayed sitting.\" A pause. \"Whatever called, it called one of them first.\"",
     "choices": [
      {
-      "text": "Head for the bridge.",
-      "to": "bridge",
+      "text": "Move on.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "nf-galley"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "nf-quarters",
+  "title": "Crew bunks",
+  "speaker": "The Ninefold",
+  "role": "Crew quarters",
+  "spot": {
+   "interior": "ninefold",
+   "id": "quarters"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Six bunks. The lockers stand open and empty, as if everyone packed in a hurry. On one bunk a photo is still taped to the frame: six people in survey jackets, squinting into a sunlit dock, one of them holding up a hand-lettered sign that reads NINEFOLD OR BUST.\n\nThe bunk underneath it has the name OKONKWO stenciled on the frame. Someone has scratched lines into the metal beside the name. Not a tally. A wave: rising, falling, rising.",
+    "choices": [
+     {
+      "text": "Trace the scratches with your light.",
+      "to": "wave"
+     },
+     {
+      "text": "Move on.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "nf-quarters"
+       }
+      ]
+     }
+    ]
+   },
+   "wave": {
+    "text": "You've seen this shape before. On Okafor's screen, on Ilse's desk: the carrier tone under the core signal. Scratched in by hand, over and over, deeper each time, until the last one goes right through the frame.",
+    "choices": [
+     {
+      "text": "Move on.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "nf-quarters"
+       },
+       {
+        "setFlag": "nf-okonkwo-waves"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "nf-storage",
+  "title": "Supply crates",
+  "speaker": "The Ninefold",
+  "role": "Storage",
+  "spot": {
+   "interior": "ninefold",
+   "id": "storage"
+  },
+  "if": {
+   "notFlag": "nf-charts"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Ration crates, mostly empty. Survey drones in their foam, never launched. And wedged behind the last crate, a tube of paper charts, the old-fashioned kind survey crews carry in case everything else fails.\n\nYou unroll the top one. The outer Oort Cloud, hand-plotted. One point far out past Pluto is circled three times, with a note in shaky capitals: FOUND IT HERE.",
+    "choices": [
+     {
+      "text": "Take the charts.",
+      "to": null,
+      "effects": [
+       {
+        "locker": {
+         "item": "ninefold-charts",
+         "qty": 1
+        }
+       },
+       {
+        "setFlag": "nf-charts"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "nf-storage-empty",
+  "title": "Supply crates",
+  "speaker": "The Ninefold",
+  "role": "Storage",
+  "spot": {
+   "interior": "ninefold",
+   "id": "storage"
+  },
+  "if": {
+   "flag": "nf-charts"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Empty ration crates and a few survey drones nobody will ever launch. You already have the charts.",
+    "choices": [
+     {
+      "text": "Move on.",
+      "to": null
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "nf-cradle",
+  "title": "The cradle",
+  "speaker": "The Ninefold",
+  "role": "Cargo bay",
+  "spot": {
+   "interior": "ninefold",
+   "id": "cradle"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "The cargo bay is huge and empty except for one thing: a cradle bolted to the deck, shaped to hold something roughly the size of your own ship's drive core. Its bolts have been sheared, not unscrewed.\n\nSomeone has scrawled on it in marker: SOLD - TALLIS CAMP - CINDER. And under that, smaller, in a different hand: it hums.\n\nBeside the cradle, neatly side by side, is a pair of boots. Just the boots.",
+    "choices": [
+     {
+      "text": "Move on.",
+      "to": null,
       "effects": [
        {
         "setFlag": "ninefold-cradle"
@@ -427,9 +613,25 @@
       ]
      }
     ]
-   },
+   }
+  }
+ },
+ {
+  "id": "nf-recorder",
+  "title": "The bridge",
+  "speaker": "The Ninefold",
+  "role": "Bridge",
+  "spot": {
+   "interior": "ninefold",
+   "id": "bridge"
+  },
+  "if": {
+   "notFlag": "ninefold-recorder"
+  },
+  "start": "bridge",
+  "nodes": {
    "bridge": {
-    "text": "The flight recorder sits in its armored housing behind the pilot's seat. You pull it free. When its power cell touches your suit, it plays its last log on its own.",
+    "text": "The bridge consoles are dead and furred with frost. The flight recorder sits in its armored housing behind the pilot's seat. You pull it free. When its power cell touches your suit, it plays its last log on its own.",
     "choices": [
      {
       "text": "Listen.",
@@ -448,8 +650,8 @@
       }
      },
      {
-      "text": "Take the recorder and get out.",
-      "to": "out"
+      "text": "Take the recorder.",
+      "to": "take"
      }
     ]
    },
@@ -457,8 +659,8 @@
     "text": "Ilse's voice on the suit channel is very calm, which is how you know she's frightened. \"Big, warm, old.\" She takes a breath. \"Captain, the consortium only built one ship after this. Yours.\"\n\nShe doesn't have to finish.",
     "choices": [
      {
-      "text": "\"I know. Let's go.\"",
-      "to": "out",
+      "text": "\"I know. Let's get out of here.\"",
+      "to": "take",
       "effects": [
        {
         "affinity": {
@@ -470,11 +672,11 @@
      }
     ]
    },
-   "out": {
-    "text": "Back aboard, hatch sealed behind you, you notice it for the first time. Your drive core, the part of her that's older than the rest, is humming. Very softly. In time with the recorder.\n\nA message pings in from the Bessel Archive: fee received, with thanks.",
+   "take": {
+    "text": "The recorder goes into your pack. It's heavier than it should be.",
     "choices": [
      {
-      "text": "Shut the recorder off. Set a course for Cinder.",
+      "text": "Head back to the airlock.",
       "to": null,
       "effects": [
        {
@@ -485,7 +687,59 @@
        },
        {
         "setFlag": "ninefold-recorder"
-       },
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "nf-recorder-empty",
+  "title": "The bridge",
+  "speaker": "The Ninefold",
+  "role": "Bridge",
+  "spot": {
+   "interior": "ninefold",
+   "id": "bridge"
+  },
+  "if": {
+   "flag": "ninefold-recorder"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "The empty recorder housing. Frost has already started to grow back over the place where it sat.",
+    "choices": [
+     {
+      "text": "Move on.",
+      "to": null
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "ninefold-hum",
+  "title": "Back aboard",
+  "speaker": "Your ship",
+  "role": "After the Ninefold",
+  "aboard": true,
+  "trigger": {
+   "if": {
+    "flag": "ninefold-recorder",
+    "notFlag": "drive-core-origin"
+   }
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Back aboard, hatch sealed behind you, you notice it for the first time. Your drive core, the part of her that's older than the rest, is humming. Very softly. In time with the recorder in your pack.\n\nA message pings in from the Bessel Archive: fee received, with thanks.",
+    "choices": [
+     {
+      "text": "Shut the recorder off. Set a course for Cinder.",
+      "to": null,
+      "effects": [
        {
         "setFlag": "drive-core-origin"
        },
@@ -496,10 +750,6 @@
      }
     ]
    }
-  },
-  "if": {
-   "flag": "ilse-hired",
-   "notFlag": "ninefold-recorder"
   }
  }
 ]

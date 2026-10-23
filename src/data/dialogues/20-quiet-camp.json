@@ -1,12 +1,15 @@
 [
  {
-  "id": "tallis-camp-search",
-  "title": "Search the camp",
+  "id": "tc-arrive",
+  "title": "Tallis Camp",
   "speaker": "Tallis Camp",
   "role": "Wolf 359 · silent since spring",
-  "site": "tallis-camp",
+  "spot": {
+   "interior": "tallis-camp",
+   "id": "airlock"
+  },
   "if": {
-   "notFlag": "camp-searched"
+   "notFlag": "tc-arrived"
   },
   "start": "land",
   "nodes": {
@@ -14,50 +17,29 @@
     "text": "Tallis Camp sits in a crater on Cinder's night side, under flare shielding that nobody ever closed. Every light is on. The airlock cycles for you as if it has been expecting company.",
     "choices": [
      {
-      "text": "Try the mess hall.",
-      "to": "mess"
-     },
-     {
-      "text": "Try the bunkhouse.",
-      "to": "bunks"
-     },
-     {
-      "text": "Go straight to the comms shack.",
-      "to": "comms"
-     },
-     {
-      "text": "Leave. Come back later.",
-      "to": null
+      "text": "Look around.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "tc-arrived"
+       }
+      ]
      }
     ]
-   },
-   "hub": {
-    "text": "The camp hums around you. Somewhere a ventilation fan ticks over, patient as a clock.",
-    "choices": [
-     {
-      "text": "The mess hall.",
-      "to": "mess",
-      "if": {
-       "notFlag": "camp-mess"
-      }
-     },
-     {
-      "text": "The bunkhouse.",
-      "to": "bunks",
-      "if": {
-       "notFlag": "camp-bunks"
-      }
-     },
-     {
-      "text": "The comms shack.",
-      "to": "comms"
-     },
-     {
-      "text": "Leave. Come back later.",
-      "to": null
-     }
-    ]
-   },
+   }
+  }
+ },
+ {
+  "id": "tc-mess",
+  "title": "Mess hall",
+  "speaker": "Tallis Camp",
+  "role": "Mess hall",
+  "spot": {
+   "interior": "tallis-camp",
+   "id": "mess"
+  },
+  "start": "mess",
+  "nodes": {
    "mess": {
     "text": "Forty trays on long tables. Forty meals, half eaten, gone gray and hard under the frost. The forks are set down neatly beside the plates, every one of them, as if somebody asked everyone to stop eating at once and they all politely did.",
     "choices": [
@@ -75,7 +57,7 @@
      },
      {
       "text": "Move on.",
-      "to": "hub",
+      "to": null,
       "effects": [
        {
         "setFlag": "camp-mess"
@@ -89,16 +71,29 @@
     "choices": [
      {
       "text": "Move on.",
-      "to": "hub"
+      "to": null
      }
     ]
-   },
+   }
+  }
+ },
+ {
+  "id": "tc-bunks",
+  "title": "Bunkhouse",
+  "speaker": "Tallis Camp",
+  "role": "Bunkhouse",
+  "spot": {
+   "interior": "tallis-camp",
+   "id": "bunks"
+  },
+  "start": "bunks",
+  "nodes": {
    "bunks": {
     "text": "Boots lined up by every bunk. Blankets turned down. On one pillow, a crayon drawing of the camp: little domes, a little dish, and a long line climbing out of the comms shack and up, up, off the top of the page. At the end of the line someone has drawn a face.\n\nIt's smiling.",
     "choices": [
      {
       "text": "Take the drawing.",
-      "to": "hub",
+      "to": null,
       "effects": [
        {
         "setFlag": "camp-bunks"
@@ -110,7 +105,7 @@
      },
      {
       "text": "Leave it where it is.",
-      "to": "hub",
+      "to": null,
       "effects": [
        {
         "setFlag": "camp-bunks"
@@ -118,7 +113,23 @@
       ]
      }
     ]
-   },
+   }
+  }
+ },
+ {
+  "id": "tc-receiver",
+  "title": "The receiver",
+  "speaker": "Tallis Camp",
+  "role": "Comms shack",
+  "spot": {
+   "interior": "tallis-camp",
+   "id": "receiver"
+  },
+  "if": {
+   "notFlag": "camp-searched"
+  },
+  "start": "comms",
+  "nodes": {
    "comms": {
     "text": "The comms shack is warm. Too warm. In the middle of the floor sits a receiver nobody would ever sell you: hull plating, consortium cabling and a mining laser's focusing lens, bolted into a dish that points straight up through a hole cut in the roof.\n\nIts screen shows one line, still glowing: TRANSMISSION COMPLETE.",
     "choices": [
@@ -398,6 +409,142 @@
         "setFlag": "camp-searched"
        }
       ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "tc-receiver-after",
+  "title": "The receiver",
+  "speaker": "Tallis Camp",
+  "role": "Comms shack",
+  "spot": {
+   "interior": "tallis-camp",
+   "id": "receiver"
+  },
+  "if": {
+   "flag": "camp-searched"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "The homemade receiver sits in the middle of the shack. Its screen still glows: TRANSMISSION COMPLETE. The dish above it points patiently at the core.",
+    "choices": [
+     {
+      "text": "Leave it be.",
+      "to": null
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "tc-names",
+  "title": "Names on the wall",
+  "speaker": "Tallis Camp",
+  "role": "By the airlock",
+  "spot": {
+   "interior": "tallis-camp",
+   "id": "names"
+  },
+  "if": {
+   "notFlag": "quin-met"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Forty-one names, chalked in a neat column on the wall by the airlock, the way crews mark who's on shift. Nobody has crossed any of them out. One of them, near the bottom, is QUIN REYES.",
+    "choices": [
+     {
+      "text": "Move on.",
+      "to": null
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "tc-names-after",
+  "title": "Names on the wall",
+  "speaker": "Tallis Camp",
+  "role": "By the airlock",
+  "spot": {
+   "interior": "tallis-camp",
+   "id": "names"
+  },
+  "if": {
+   "flag": "quin-met"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Forty-one names in chalk. QUIN REYES is crossed out now, and under the column, in his blocky capitals: GONE LOOKING.",
+    "choices": [
+     {
+      "text": "Move on.",
+      "to": null
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "tc-desk",
+  "title": "Hadley's desk",
+  "speaker": "Tallis Camp",
+  "role": "Ore office",
+  "spot": {
+   "interior": "tallis-camp",
+   "id": "desk"
+  },
+  "if": {
+   "notFlag": "tc-notebook"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "A desk in the corner of the ore office, buried in assay printouts. The nameplate says HADLEY. Under the printouts is a paper notebook full of frequencies, star names, and one sketch drawn over and over: a ring of dots with one of them filled in black.\n\nOn the last page someone has drawn a hand raised to a mouth, then scribbled it out so hard the pen went through the paper.",
+    "choices": [
+     {
+      "text": "Take the notebook.",
+      "to": null,
+      "effects": [
+       {
+        "locker": {
+         "item": "hadley-notebook",
+         "qty": 1
+        }
+       },
+       {
+        "setFlag": "tc-notebook"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "tc-desk-after",
+  "title": "Hadley's desk",
+  "speaker": "Tallis Camp",
+  "role": "Ore office",
+  "spot": {
+   "interior": "tallis-camp",
+   "id": "desk"
+  },
+  "if": {
+   "flag": "tc-notebook"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Assay printouts and a cold mug. You already have Hadley's notebook.",
+    "choices": [
+     {
+      "text": "Move on.",
+      "to": null
      }
     ]
    }

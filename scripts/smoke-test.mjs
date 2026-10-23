@@ -94,12 +94,13 @@ try {
       const bad = all.find(([w, h]) => Math.abs(w - want[0]) > 1 || Math.abs(h - want[1]) > 1);
       return bad ? `game/cameras ${JSON.stringify(all)} vs screen ${want.join('x')}` : '';
     });
-    const vp = page.viewportSize();
-    if (vp) {
+    const rotationCheck = async (where) => {
+      const vp = page.viewportSize();
+      if (!vp) return;
       await page.setViewportSize({ width: vp.height, height: vp.width });
       await page.waitForTimeout(800);
       const afterRotate = await sizesMatch();
-      if (afterRotate) problems.push(`${tag} after rotating: ${afterRotate}`);
+      if (afterRotate) problems.push(`${tag} ${where} after rotating: ${afterRotate}`);
 
       await page.evaluate(([w, h]) => {
         const g = document.getElementById('game');
@@ -113,7 +114,19 @@ try {
       });
       await page.waitForTimeout(800);
       const afterLate = await sizesMatch();
-      if (afterLate) problems.push(`${tag} after late (iOS-style) layout: ${afterLate}`);
+      if (afterLate) problems.push(`${tag} ${where} after late (iOS-style) layout: ${afterLate}`);
+    };
+    await rotationCheck('title');
+
+    // On foot (walkable places): same rotation checks, plus the loop keeps running.
+    const entered = await page.evaluate(() => window.__smoke?.walkInto?.('ninefold') ?? false);
+    if (!entered) problems.push(`${tag} could not enter the on-foot scene (smoke hook walkInto)`);
+    else {
+      await page.waitForTimeout(1200);
+      const onFoot = await page.evaluate(() => window.__smoke?.activeScenes() ?? []);
+      if (!onFoot.includes('onfoot')) problems.push(`${tag} on-foot scene not running (${onFoot.join(',')})`);
+      await rotationCheck('on foot');
+      await page.touchscreen.tap(layout.vw * 0.5, layout.vh * 0.5);
     }
 
     // Touch the movement zone and the right side; nothing should throw.

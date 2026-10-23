@@ -11,6 +11,8 @@ import { crewHasNews, openSheet, renderDialogue } from '../ui/panels';
 import { dialogueAtPoi, pendingTransmission } from '../systems/dialogue';
 import { poiInRange, routeTo, targetPosition, trackedObjective, visiblePois } from '../systems/missions';
 import { getSession } from './sessionAccess';
+import { entryOpen } from '../systems/onfoot';
+import type { OnFootData } from './OnFootScene';
 import { onScreenResize, onSceneEvent } from './resize';
 import { ensureBodyTexture, ensureStarTexture, hexToNumber } from './systemTextures';
 import { SHIP_DISPLAY, shipTextureFor } from './shipTexture';
@@ -279,10 +281,13 @@ export class FlightScene extends Phaser.Scene {
       const ship = this.session.state.ship;
       ship.vx = 0;
       ship.vy = 0;
-      showToast(d.title);
-      this.cameras.main.shake(400, 0.004);
+      // Calls arrive with a jolt and a red light; scenes aboard just begin.
+      if (d.aboard !== true) {
+        showToast(d.title);
+        this.cameras.main.shake(400, 0.004);
+      }
       openSheet(this.ui.root, (card, close) => {
-        card.classList.add('transmission');
+        if (d.aboard !== true) card.classList.add('transmission');
         renderDialogue(card, this.session, d.id, () => {
           close();
           this.picking = false;
@@ -360,7 +365,7 @@ export class FlightScene extends Phaser.Scene {
     if (poi === this.shownPoi) return;
     this.shownPoi = poi;
     if (poi) {
-      this.investigateBtn.textContent = `Investigate · ${poi.name}`;
+      this.investigateBtn.textContent = entryOpen(poi.interior, this.session.state) ? `${poi.interior.label} · ${poi.name}` : `Investigate · ${poi.name}`;
       this.investigateBtn.style.display = '';
     } else {
       this.investigateBtn.style.display = 'none';
@@ -371,6 +376,17 @@ export class FlightScene extends Phaser.Scene {
   private investigate(): void {
     const poi = this.shownPoi;
     if (!poi || this.jumpTarget !== null || this.picking) return;
+    // Somewhere you can board and walk around? Step aboard.
+    if (entryOpen(poi.interior, this.session.state) && this.session.enterInterior()) {
+      const entry = poi.interior;
+      this.picking = true;
+      this.resetStick();
+      this.cameras.main.fadeOut(300, 0, 0, 0);
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+        this.scene.start('onfoot', { interior: entry.id } satisfies OnFootData);
+      });
+      return;
+    }
     const d = dialogueAtPoi(poi.id, gameData.dialogues, this.session.state);
     this.picking = true;
     this.resetStick();

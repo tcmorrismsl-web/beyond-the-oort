@@ -195,6 +195,22 @@ export class Session {
     return r;
   }
 
+  /**
+   * Step out to walk around a place (a wreck you've docked with, or somewhere
+   * at the port). Your ship stays where it is; position inside isn't saved.
+   */
+  enterInterior(): boolean {
+    return this.setMode('onFoot').ok;
+  }
+
+  /** Walk back out: to the port if you're landed, else to your ship's helm. Saves. Returns the scene to show. */
+  leaveInterior(now: number): 'landed' | 'flight' {
+    const to = this.state.landedAt === null ? 'flight' : 'landed';
+    this.setMode(to);
+    this.save(now);
+    return to;
+  }
+
   /** Ask a crew member to leave the ship; they wait at their home port. Saves. */
   dismiss(who: string, now: number): boolean {
     if (!this.state.crew.includes(who)) return false;

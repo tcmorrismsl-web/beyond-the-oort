@@ -23,5 +23,15 @@
     "id": "hush-starmap",
     "name": "The Hush star map",
     "description": "A map the beacon gave you, reaching far past Vega. Dozens of stars are marked. Most of them have gone quiet."
+  },
+  {
+    "id": "ninefold-charts",
+    "name": "Ninefold survey charts",
+    "description": "Hand-plotted charts of the outer Oort Cloud. One point far past Pluto is circled three times: FOUND IT HERE."
+  },
+  {
+    "id": "hadley-notebook",
+    "name": "Hadley's notebook",
+    "description": "A Tallis Camp miner's notes: frequencies, star names, a ring of dots with one filled in black, and a hand raised to a mouth, scribbled out."
   }
 ]

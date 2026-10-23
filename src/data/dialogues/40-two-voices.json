@@ -112,7 +112,10 @@
   "title": "Celeste Amari",
   "speaker": "Dr. Celeste Amari",
   "role": "Halcyon listening post",
-  "site": "halcyon-post-deck",
+  "spot": {
+   "interior": "halcyon",
+   "id": "celeste"
+  },
   "character": "celeste",
   "if": {
    "notFlag": "joined-celeste"
@@ -675,6 +678,155 @@
        },
        {
         "setFlag": "noori-hail"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "hal-galley",
+  "title": "Galley",
+  "speaker": "Halcyon post",
+  "role": "Galley",
+  "spot": {
+   "interior": "halcyon",
+   "id": "galley"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "A spotless galley. One mug on the drying rack. A calendar on the wall that stopped being turned six years ago; the last page has a birthday circled in red, with eight names written around it in eight different hands.",
+    "choices": [
+     {
+      "text": "Move on.",
+      "to": null
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "hal-bunks",
+  "title": "Bunk room",
+  "speaker": "Halcyon post",
+  "role": "Bunk room",
+  "spot": {
+   "interior": "halcyon",
+   "id": "bunks"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Eight bunks. Seven are made with military neatness and covered in a fine layer of dust. The eighth is a nest of blankets, books and a lamp shaped like a whale, and the dust around it has been swept in a careful little circle.",
+    "choices": [
+     {
+      "text": "Move on.",
+      "to": null
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "hal-hydro",
+  "title": "Hydroponics",
+  "speaker": "Halcyon post",
+  "role": "Hydroponics",
+  "spot": {
+   "interior": "halcyon",
+   "id": "hydro"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "The grow lamps are off. The trays are dry and the plants in them are long dead, brown and brittle. All except one tray at the very end, where something pale and soft-looking has grown up in neat rows, and you don't recognize it, and it is very slightly warm.",
+    "choices": [
+     {
+      "text": "\"Celeste. What is this?\"",
+      "to": "cel",
+      "if": {
+       "crew": "celeste"
+      }
+     },
+     {
+      "text": "Leave it alone.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "hal-pale-tray"
+       }
+      ]
+     }
+    ]
+   },
+   "cel": {
+    "text": "Celeste looks at the tray for a long moment. \"Food,\" she says finally, lightly. \"Of a kind.\" She takes your arm and turns you, gently, toward the door. \"I'll tell you one day. Not here.\"",
+    "choices": [
+     {
+      "text": "Let her lead you out.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "hal-pale-tray"
+       },
+       {
+        "setFlag": "celeste-secret-noticed"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "hal-logs",
+  "title": "Supply log",
+  "speaker": "Halcyon post",
+  "role": "Operations",
+  "spot": {
+   "interior": "halcyon",
+   "id": "logs"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "The post's supply log is still on screen. Deliveries every ninety days, regular as a heartbeat, for years. Then the last delivery, signed off six years ago.\n\nAfter that, nothing. No requests. No warnings. Just a single line typed into the notes field, a long time later: STILL HERE.",
+    "choices": [
+     {
+      "text": "Move on.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "hal-log-read"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "hal-dish",
+  "title": "Dish housing",
+  "speaker": "Halcyon post",
+  "role": "The big dish",
+  "spot": {
+   "interior": "halcyon",
+   "id": "dish"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "The door to the dish housing is welded shut. The bead of the weld is ragged and runs all the way around the frame, and it was done from this side.\n\nSomeone stood here, after the others went out to the dish, and sealed the door behind them.",
+    "choices": [
+     {
+      "text": "Step away from the door.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "hal-dish-door"
        }
       ]
      }

@@ -378,7 +378,11 @@
             "kind": "research",
             "description": "A research habitat ringed by dishes that never stop turning. One window is lit.",
             "services": [],
-            "emptyNote": "The dishes turn. The habitat hums. Someone has left the lights on in the galley."
+            "emptyNote": "The dishes turn. The habitat hums. Someone has left the lights on in the galley.",
+            "interior": {
+              "id": "halcyon",
+              "label": "Step inside"
+            }
           }
         ]
       }
@@ -442,7 +446,11 @@
             "kind": "ruins",
             "description": "A mining camp in a crater on the night side. Silent since spring. Every light is still on.",
             "services": [],
-            "emptyNote": "No one answers your hails. The airlock cycles open anyway."
+            "emptyNote": "No one answers your hails. The airlock cycles open anyway.",
+            "interior": {
+              "id": "tallis-camp",
+              "label": "Walk into the camp"
+            }
           }
         ]
       },

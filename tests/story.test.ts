@@ -6,6 +6,7 @@ import { Session } from '../src/core/session';
 import { choose, crewTalks, dialogueAtPoi, dialoguesAt, pendingTransmission, shownChoices } from '../src/systems/dialogue';
 import { romanceOpen, romanceThreshold, waitingAt, withinLean } from '../src/systems/crew';
 import { journal, poiInRange, progressOf, routeTo, trackedObjective, visiblePois } from '../src/systems/missions';
+import { dialogueAtSpot, entryOpen } from '../src/systems/onfoot';
 
 const captainOf = (over: Partial<Captain> = {}): Captain => ({ name: 'Rhea Vance', pronouns: 'she', origin: 'frontier-colonist', moment: 'silent-colony', motive: 'the-signal', look: DEFAULT_LOOK, ...over });
 const stateFor = (over: Partial<Captain> = {}): GameState => newGame(1, 1, { captain: captainOf(over), shipName: 'Lantern' });
@@ -148,8 +149,10 @@ describe('missions and routes', () => {
     expect(poiInRange(s, gameData)?.id).toBe('ninefold-wreck');
     expect(poiInRange({ ...s, ship: { ...s.ship, x: 0, y: 0 } }, gameData)).toBeNull();
     // Before the Archive hires you the wreck is sealed; afterwards you can board her.
+    const wreck = gameData.pois.get('ninefold-wreck');
     expect(dialogueAtPoi('ninefold-wreck', gameData.dialogues, s)?.id).toBe('ninefold-sealed');
-    expect(dialogueAtPoi('ninefold-wreck', gameData.dialogues, { ...s, flags: ['ilse-hired'] })?.id).toBe('ninefold-wreck-search');
+    expect(entryOpen(wreck?.interior, s)).toBe(false);
+    expect(entryOpen(wreck?.interior, { ...s, flags: ['ilse-hired'] })).toBe(true);
   });
 });
 
@@ -180,13 +183,29 @@ describe('Act 1 playthrough', () => {
         return dialogueAtPoi(poiId, gameData.dialogues, s);
       };
       const call = () => (): Dialogue | null => pendingTransmission((s = inSpace(s, s.systemId)), gameData.dialogues);
+      const walk = (interior: string, spotId: string) => (): Dialogue | null => dialogueAtSpot(interior, spotId, gameData.dialogues, s);
       const beats: [() => Dialogue | null | undefined, string][] = [
         [call(), 'okafor-archive-lead'],
         [site('archive-halls', 'ilse-archive'), 'ilse-hired'],
-        [poi('wolf-359', 'ninefold-wreck'), 'ninefold-recorder'],
-        [site('tallis-camp'), 'camp-searched'],
+        [() => {
+          const wreck = gameData.pois.get('ninefold-wreck');
+          s = inSpace(s, 'wolf-359', wreck?.x, wreck?.y);
+          expect(entryOpen(wreck?.interior, s), `${label}: can't board the Ninefold`).toBe(true);
+          return walk('ninefold', 'airlock')();
+        }, 'nf-boarded'],
+        [walk('ninefold', 'bridge'), 'ninefold-recorder'],
+        [call(), 'drive-core-origin'],
+        [() => {
+          s = at(s, 'tallis-camp');
+          expect(entryOpen(gameData.sites.get('tallis-camp')?.site.interior, s), label).toBe(true);
+          return walk('tallis-camp', 'receiver')();
+        }, 'camp-searched'],
         [call(), 'okafor-two-voices'],
-        [site('halcyon-post-deck'), 'reading-barnard'],
+        [() => {
+          s = at(s, 'halcyon-post-deck');
+          expect(entryOpen(gameData.sites.get('halcyon-post-deck')?.site.interior, s), label).toBe(true);
+          return walk('halcyon', 'celeste')();
+        }, 'reading-barnard'],
         [poi('alpha-centauri', 'centauri-reading'), 'reading-centauri'],
         [poi('sirius', 'sirius-reading'), 'beacon-located'],
         [site('gate-concourse', 'aurum-teague'), 'heard-aurum'],

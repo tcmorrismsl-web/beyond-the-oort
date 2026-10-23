@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { FlightScene } from './scenes/FlightScene';
 import { LandedScene } from './scenes/LandedScene';
+import { OnFootScene } from './scenes/OnFootScene';
+import { gameData } from './data/schema';
 import { MapScene } from './scenes/MapScene';
 import { TitleScene } from './scenes/TitleScene';
 import { CreateScene } from './scenes/CreateScene';
@@ -27,7 +29,7 @@ const game = new Phaser.Game({
   },
   input: { activePointers: 3 },
   render: { antialias: true, powerPreference: 'high-performance' },
-  scene: [BootScene, TitleScene, CreateScene, FlightScene, MapScene, ShipScene, LandedScene],
+  scene: [BootScene, TitleScene, CreateScene, FlightScene, MapScene, ShipScene, LandedScene, OnFootScene],
   callbacks: { preBoot: (g) => g.registry.set(SESSION_KEY, session) },
 });
 
@@ -102,6 +104,10 @@ declare global {
       size: () => { game: [number, number]; cameras: [number, number][] };
       /** Test-only: move the ship (e.g. next to a station) and read the state. */
       setShip: (x: number, y: number) => void;
+      /** Test-only: stand somewhere on foot (tiles). */
+      setWalker: (x: number, y: number) => void;
+      /** Test-only: jump straight into a walkable place (smoke test checks rotation there). */
+      walkInto: (interior: string) => boolean;
       state: () => string;
     };
   }
@@ -118,6 +124,17 @@ if (new URLSearchParams(window.location.search).has('smoke')) {
       session.state.ship.y = y;
       session.state.ship.vx = 0;
       session.state.ship.vy = 0;
+    },
+    walkInto: (interior) => {
+      if (!gameData.interiors.has(interior)) return false;
+      session.enterInterior();
+      for (const sc of game.scene.getScenes(true)) sc.scene.stop();
+      game.scene.start('onfoot', { interior });
+      return true;
+    },
+    setWalker: (x, y) => {
+      const scene = game.scene.getScene('onfoot');
+      if (scene instanceof OnFootScene) scene.teleport(x, y);
     },
     state: () => JSON.stringify(session.state),
     size: () => ({

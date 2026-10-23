@@ -11,6 +11,12 @@ import charactersJson from './characters.json';
 import poisJson from './pois.json';
 import missionsJson from './missions.json';
 
+/** Walkable places (wrecks, camps, stations), one file each in data/interiors/. */
+const interiorFiles = import.meta.glob<{ default: unknown }>('./interiors/*.json', { eager: true });
+const interiorsJson: unknown[] = Object.keys(interiorFiles)
+  .sort()
+  .map((k) => interiorFiles[k]?.default);
+
 /** Conversations live one file per story beat or character in data/dialogues/. */
 const dialogueFiles = import.meta.glob<{ default: unknown[] }>('./dialogues/*.json', { eager: true });
 const dialoguesJson: unknown[] = Object.keys(dialogueFiles)
@@ -64,6 +70,8 @@ export const SiteSchema = z.object({
   market: z.object({ cheap: z.array(id).default([]), dear: z.array(id).default([]) }).optional(),
   /** Shown instead of a service list at a place with no services (a quiet dock, an empty camp). */
   emptyNote: z.string().min(1).optional(),
+  /** A place here you can walk around in (on foot). */
+  interior: z.lazy(() => EntrySchema).optional(),
 });
 export type Site = z.infer<typeof SiteSchema>;
 
@@ -215,6 +223,9 @@ export const DialogueSchema = z.object({
   trigger: z.object({ if: ConditionSchema }).optional(),
   poi: id.optional(), // at a point of interest in space ("Investigate")
   crew: id.optional(), // aboard your ship, with this crew member (Ship screen)
+  spot: z.object({ interior: id, id }).optional(), // a spot inside a walkable place (on foot)
+  /** Transmissions only: plays as a scene aboard your ship rather than an incoming call. */
+  aboard: z.boolean().optional(),
   /** When it's available (site, poi and crew conversations). */
   if: ConditionSchema.optional(),
   start: id,
@@ -292,6 +303,8 @@ export const PoiSchema = z.object({
   description: z.string().min(1),
   /** When it shows up in space (hidden until then). */
   if: ConditionSchema.optional(),
+  /** You can board it and walk around (when the entry's condition holds; otherwise Investigate plays its conversation). */
+  interior: z.lazy(() => EntrySchema).optional(),
 });
 export type Poi = z.infer<typeof PoiSchema>;
 
@@ -316,6 +329,45 @@ export const MissionSchema = z.object({
     .min(1),
 });
 export type Mission = z.infer<typeof MissionSchema>;
+
+/** A way into a walkable place, from a landing site or a point of interest. */
+export const EntrySchema = z.object({ id, label: z.string().min(1), if: ConditionSchema.optional() });
+export type Entry = z.infer<typeof EntrySchema>;
+
+/**
+ * Tile legend for walkable places. Solid tiles block walking.
+ *   #  wall          .  floor        +  doorway (floor)   (space) outside (solid)
+ *   t  table         b  bunk         c  crate             k  console
+ *   d  dish/machine  p  plant bed    ~  frost/debris (floor, drawn as clutter)
+ */
+export const TILE_SOLID: Readonly<Record<string, boolean>> = { '#': true, ' ': true, t: true, b: true, c: true, k: true, d: true, p: true, '.': false, '+': false, '~': false };
+
+/**
+ * A place you walk around in, top-down: a wreck, a camp, a station. The map
+ * is ASCII rows (see TILE_SOLID); positions are in tiles (x = column, y = row,
+ * may be fractional). Spots are the things to look at; each plays the first
+ * available conversation placed at it. `auto` spots play when you walk onto them.
+ */
+export const InteriorSchema = z.object({
+  id,
+  name: z.string().min(1),
+  theme: z.enum(['derelict', 'camp', 'station']),
+  /** Dark places are lit only by your flashlight. */
+  dark: z.boolean().default(false),
+  map: z.array(z.string().min(1)).min(3),
+  spawn: z.object({ x: z.number(), y: z.number() }),
+  exit: z.object({ x: z.number(), y: z.number(), label: z.string().min(1) }),
+  spots: z.array(z.object({ id, x: z.number(), y: z.number(), label: z.string().min(1), auto: z.boolean().default(false) })),
+  /** People standing here (when their condition holds). Tapping them plays the conversation at their spot. */
+  people: z.array(z.object({ character: id, x: z.number(), y: z.number(), spot: id, if: ConditionSchema.optional() })).default([]),
+});
+export type Interior = z.infer<typeof InteriorSchema>;
+
+/** True if a tile position is somewhere a person can stand. */
+export function walkableTile(map: readonly string[], x: number, y: number): boolean {
+  const ch = map[Math.floor(y)]?.[Math.floor(x)];
+  return ch !== undefined && TILE_SOLID[ch] === false;
+}
 
 /** Appearance options for the captain's portrait and the ship's paint. */
 export const AppearanceSchema = z.object({
@@ -360,6 +412,7 @@ export interface GameData {
   characters: ReadonlyMap<string, Character>;
   pois: ReadonlyMap<string, Poi>;
   missions: readonly Mission[];
+  interiors: ReadonlyMap<string, Interior>;
 }
 
 /** Flags the engine sets by itself (not from conversations). */
@@ -407,6 +460,7 @@ export interface RawContent {
   characters?: unknown;
   pois?: unknown;
   missions?: unknown;
+  interiors?: unknown;
 }
 
 export function buildGameData(raw: RawContent): GameData {
@@ -422,7 +476,10 @@ export function buildGameData(raw: RawContent): GameData {
   const characters = z.array(CharacterSchema).parse(raw.characters ?? []);
   const pois = z.array(PoiSchema).parse(raw.pois ?? []);
   const missions = z.array(MissionSchema).parse(raw.missions ?? []);
+  const interiors = z.array(InteriorSchema).parse(raw.interiors ?? []);
   const errors: string[] = [];
+  const interiorMap = indexById(interiors, 'interior', errors);
+  for (const inside of interiors) validateInterior(inside, errors);
   const shipMap = indexById(ships, 'ship', errors);
   const systemMap = indexById(systems, 'system', errors);
   const commodityMap = indexById(commodities, 'commodity', errors);
@@ -514,9 +571,14 @@ export function buildGameData(raw: RawContent): GameData {
   for (const d of dialogues) {
     validateDialogue(d, known, siteMap, errors);
     const where = `dialogue "${d.id}"`;
-    const placements = [d.site, d.trigger, d.poi, d.crew].filter((x) => x !== undefined).length;
-    if (placements === 0) errors.push(`${where} has no site, trigger, poi or crew, so it can never be heard`);
-    if (placements > 1) errors.push(`${where} is placed in more than one way (site/trigger/poi/crew)`);
+    const placements = [d.site, d.trigger, d.poi, d.crew, d.spot].filter((x) => x !== undefined).length;
+    if (placements === 0) errors.push(`${where} has no site, trigger, poi, crew or spot, so it can never be heard`);
+    if (placements > 1) errors.push(`${where} is placed in more than one way (site/trigger/poi/crew/spot)`);
+    if (d.spot !== undefined) {
+      const inside = interiorMap.get(d.spot.interior);
+      if (!inside) errors.push(`${where} is placed in missing interior "${d.spot.interior}"`);
+      else if (!inside.spots.some((sp) => sp.id === d.spot?.id)) errors.push(`${where} is placed at missing spot "${d.spot.id}" in "${d.spot.interior}"`);
+    }
     if (d.poi !== undefined && !poiMap.has(d.poi)) errors.push(`${where} is placed at missing point of interest "${d.poi}"`);
     if (d.crew !== undefined) {
       const who = characterMap.get(d.crew);
@@ -547,6 +609,23 @@ export function buildGameData(raw: RawContent): GameData {
       }
     }
   }
+  const checkEntry = (e: Entry | undefined, where: string): void => {
+    if (!e) return;
+    if (!interiorMap.has(e.id)) errors.push(`${where} leads into missing interior "${e.id}"`);
+    checkCond(e.if, where);
+  };
+  for (const p of pois) checkEntry(p.interior, `point of interest "${p.id}"`);
+  for (const { site } of siteMap.values()) checkEntry(site.interior, `site "${site.id}"`);
+  for (const inside of interiors) {
+    for (const sp of inside.spots) {
+      if (!dialogues.some((d) => d.spot?.interior === inside.id && d.spot.id === sp.id)) errors.push(`interior "${inside.id}" spot "${sp.id}" has no conversation`);
+    }
+    for (const person of inside.people) {
+      if (!characterMap.has(person.character)) errors.push(`interior "${inside.id}" has missing character "${person.character}"`);
+      if (!inside.spots.some((sp) => sp.id === person.spot)) errors.push(`interior "${inside.id}" person "${person.character}" talks at missing spot "${person.spot}"`);
+      checkCond(person.if, `interior "${inside.id}" person "${person.character}"`);
+    }
+  }
   for (const m of missions) {
     const where = `mission "${m.id}"`;
     checkCond(m.startIf, where);
@@ -566,7 +645,28 @@ export function buildGameData(raw: RawContent): GameData {
     if (!settable.has(entry.flag)) errors.push(`log entry "${entry.title}" waits for flag "${entry.flag}", which nothing sets`);
   }
   if (errors.length > 0) throw new Error(`Game data invalid:\n- ${errors.join('\n- ')}`);
-  return { ships: shipMap, systems: systemMap, bodies: bodyMap, sites: siteMap, upgrades, commodities: commodityMap, creation, dialogues: dialogueMap, appearance, items: itemMap, log, characters: characterMap, pois: poiMap, missions };
+  return { ships: shipMap, systems: systemMap, bodies: bodyMap, sites: siteMap, upgrades, commodities: commodityMap, creation, dialogues: dialogueMap, appearance, items: itemMap, log, characters: characterMap, pois: poiMap, missions, interiors: interiorMap };
+}
+
+/** Maps must be rectangular and use known tiles; everything placed in them must stand on floor. */
+function validateInterior(inside: Interior, errors: string[]): void {
+  const where = `interior "${inside.id}"`;
+  const width = inside.map[0]?.length ?? 0;
+  inside.map.forEach((row, y) => {
+    if (row.length !== width) errors.push(`${where} row ${y} is ${row.length} wide, expected ${width}`);
+    for (const ch of row) if (!(ch in TILE_SOLID)) errors.push(`${where} row ${y} uses unknown tile "${ch}"`);
+  });
+  const onFloor = (x: number, y: number, what: string): void => {
+    if (!walkableTile(inside.map, x, y)) errors.push(`${where}: ${what} at ${x},${y} isn't on a floor tile`);
+  };
+  onFloor(inside.spawn.x, inside.spawn.y, 'spawn');
+  onFloor(inside.exit.x, inside.exit.y, 'exit');
+  const ids = new Set<string>();
+  for (const sp of inside.spots) {
+    if (ids.has(sp.id)) errors.push(`${where} has two spots called "${sp.id}"`);
+    ids.add(sp.id);
+  }
+  for (const p of inside.people) onFloor(p.x, p.y, `person "${p.character}"`);
 }
 
 /** A condition may only name things that exist: characters, items, and flags something can set. */
@@ -636,4 +736,5 @@ export const gameData: GameData = buildGameData({
   characters: charactersJson,
   pois: poisJson,
   missions: missionsJson,
+  interiors: interiorsJson,
 });

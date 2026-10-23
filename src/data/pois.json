@@ -6,7 +6,14 @@
   "system": "wolf-359",
   "x": 1650,
   "y": -1250,
-  "description": "A consortium survey tender, NINEFOLD stenciled on her flank, tumbling slowly in the red light. Her hatches are welded shut. From the inside."
+  "description": "A consortium survey tender, NINEFOLD stenciled on her flank, tumbling slowly in the red light. Her hatches are welded shut. From the inside.",
+  "interior": {
+   "id": "ninefold",
+   "label": "Board",
+   "if": {
+    "flag": "ilse-hired"
+   }
+  }
  },
  {
   "id": "centauri-reading",
