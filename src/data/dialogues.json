@@ -1,0 +1,85 @@
+[
+  {
+    "id": "mara-departure-lounge",
+    "title": "Mara",
+    "speaker": "Mara",
+    "role": "Bartender, The Departure Lounge",
+    "site": "new-geneva",
+    "start": "hello",
+    "nodes": {
+      "hello": {
+        "text": "A woman with silver rings on every finger slides a glass your way before you've asked. \"First one's on the house for new captains. I'm Mara. And you're {name}, of the {ship}. Word travels fast when somebody docks a ship nobody's ever seen.\"",
+        "choices": [
+          { "text": "\"Word travels that fast?\"", "to": "gossip" },
+          { "text": "\"Do you greet every captain this warmly?\"", "to": "flirt", "effects": [{ "setFlag": "mara-flirted" }] },
+          { "text": "\"I'm looking for work. Real work, not hauling.\"", "to": "work" },
+          { "text": "Raise the glass and leave.", "to": null }
+        ]
+      },
+      "gossip": {
+        "text": "\"Bartenders hear everything. Half of Sol drinks here, and the other half wishes they could.\" She studies you over the rim of a glass.",
+        "choices": [
+          { "text": "\"Spot a freighter kid, did you?\"", "if": { "origin": ["freighter-born"] }, "to": "freighter" },
+          { "text": "\"You've seen people like me before. From downstairs.\"", "if": { "origin": ["sol-undercity"] }, "to": "undercity" },
+          { "text": "\"Let me guess. You know my family name.\"", "if": { "origin": ["academy-legacy"] }, "to": "academy" },
+          { "text": "\"Frontier folk stand out here, don't they?\"", "if": { "origin": ["frontier-colonist"] }, "to": "frontier" },
+          { "text": "\"What else have you heard?\"", "to": "rumors" }
+        ]
+      },
+      "freighter": {
+        "text": "\"You sit with your back to the wall and you checked the exits twice. Freighter crews always do.\" She smiles. \"My dad ran the Centauri line for thirty years. You're in good company.\"",
+        "choices": [{ "text": "\"What else have you heard?\"", "to": "rumors" }]
+      },
+      "undercity": {
+        "text": "Her voice drops. \"You walk like someone who learned to read a room before they learned to read. Downstairs taught me the same.\" She taps the bar twice, an old signal from the lower levels. \"Your secrets are safe here.\"",
+        "choices": [{ "text": "Tap the bar twice back. \"What else have you heard?\"", "to": "rumors" }]
+      },
+      "academy": {
+        "text": "\"Everyone in this bar knows a Tranquility name when they hear one.\" She tilts her head. \"Funny. You don't look like you want to be recognized.\"",
+        "choices": [{ "text": "\"I'd rather earn my own name. What else have you heard?\"", "to": "rumors" }]
+      },
+      "frontier": {
+        "text": "\"You look at the prices on my menu like they personally offended you.\" She laughs. \"Frontier folk always do. Relax. I'll put this one on the house too.\"",
+        "choices": [{ "text": "\"Generous. What else have you heard?\"", "to": "rumors" }]
+      },
+      "rumors": {
+        "text": "\"A survey team at Lalande 21185 stopped reporting in last month. A freighter came back from Kapteyn's Star with its crew refusing to talk. And there's something about the Oort lately — pilots coming home with strange static on their receivers.\"",
+        "choices": [
+          { "text": "\"Static? Every night, at the same hour?\"", "if": { "motive": ["the-signal"] }, "to": "signal", "effects": [{ "setFlag": "signal-not-alone" }] },
+          { "text": "\"An empty colony, maybe? Lights on, nobody home?\"", "if": { "moment": ["silent-colony"] }, "to": "silent" },
+          { "text": "\"Someone went past the charts and never came back. Have you heard anything?\"", "if": { "motive": ["searching"] }, "to": "searching" },
+          { "text": "\"Sounds like work. Who's hiring?\"", "to": "work" }
+        ]
+      },
+      "signal": {
+        "text": "Mara goes very still. \"Same hour every night. How did you know that?\" She glances around, then leans in close enough that you can smell her perfume. \"You're not the only one listening, {name}. Come back when you've got more than questions.\"",
+        "choices": [{ "text": "\"I will.\"", "to": "work" }]
+      },
+      "silent": {
+        "text": "The glass she's polishing stops moving. \"You've seen one of those too.\" It isn't a question. \"There was a mining camp on Wolf 359 last spring. Same story. Nobody believed the pilot who found it either.\"",
+        "choices": [{ "text": "\"Where's that pilot now?\"", "to": "work", "effects": [{ "setFlag": "heard-wolf-359-camp" }] }]
+      },
+      "searching": {
+        "text": "\"People go out past Vega all the time. Fewer come back every year.\" Her voice softens. \"There's a waystation at Vega that logs every ship going out. If they passed through, it'll be in there.\"",
+        "choices": [{ "text": "\"Thank you. Truly.\"", "to": "work", "effects": [{ "setFlag": "vega-log-lead" }] }]
+      },
+      "flirt": {
+        "text": "Mara laughs, low and warm. \"Only the ones with interesting ships.\" She leans on the bar, close enough that her rings catch the light. \"And interesting eyes. Stick around a while, captain. I get off at midnight, and nobody tells better stories than a bartender after closing.\"",
+        "choices": [
+          { "text": "\"I might take you up on that.\"", "to": "flirt2", "effects": [{ "setFlag": "mara-interested" }] },
+          { "text": "Smile. \"Business first. What have you heard lately?\"", "to": "rumors" }
+        ]
+      },
+      "flirt2": {
+        "text": "\"I'll hold you to it.\" She writes something on a napkin and tucks it into your jacket pocket, fingers lingering a moment longer than they need to. \"For later. Now, before my manager notices I'm enjoying myself: are you looking for work?\"",
+        "choices": [{ "text": "\"Real work. Not hauling.\"", "to": "work" }]
+      },
+      "work": {
+        "text": "\"Real work.\" She nods toward the far corner of the lounge. \"The Bessel Archive at 61 Cygni pays captains to recover lost records from wrecks and ruins. It's dangerous, it's strange, and it pays better than cargo. Tell the archivists Mara sent you.\"",
+        "choices": [
+          { "text": "\"I'll head there. Thanks, Mara.\"", "to": null, "effects": [{ "setFlag": "archive-lead" }] }
+        ]
+      }
+    }
+  }
+]

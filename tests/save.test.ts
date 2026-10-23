@@ -16,6 +16,7 @@ const sample: SaveData = {
   upgrades: { engines: 2 },
   cargo: { ore: 5 },
   locker: {},
+  flags: ['met-mara'],
 };
 
 describe('save system', () => {

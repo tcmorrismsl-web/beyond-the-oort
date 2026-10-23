@@ -11,6 +11,7 @@ import { gameData } from '../data/schema';
 import { canJump, depart, jump, land, type JumpCheck } from '../systems/travel';
 import { buy, sell, type TradeResult } from '../systems/market';
 import { canUpgrade, upgrade, type UpgradeCheck } from '../systems/ship';
+import { choose, type ChooseResult } from '../systems/dialogue';
 import type { StorageResult } from './storage';
 
 export interface SaveBackend {
@@ -157,6 +158,18 @@ export class Session {
     this.bus.emit('departed', { siteId });
     this.save(now);
     return true;
+  }
+
+  /** Pick a dialogue choice; applies its effects. Saves whenever the story moved (flags/credits/items). */
+  talk(dialogueId: string, nodeId: string, choiceIndex: number, now: number): ChooseResult {
+    const d = gameData.dialogues.get(dialogueId);
+    if (!d) return { ok: false, reason: 'unknown-node' };
+    const r = choose(d, nodeId, choiceIndex, this.state);
+    if (!r.ok) return r;
+    const changed = r.state !== this.state;
+    this.state = r.state;
+    if (changed) this.save(now);
+    return r;
   }
 
   setMode(to: GameMode): TransitionResult {
