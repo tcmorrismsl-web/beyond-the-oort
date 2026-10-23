@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- viewport-fit=cover lets the canvas reach under the notch/Dynamic Island;
+         safe-area insets in CSS keep UI clear of it. No zooming in a game. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#05060a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Beyond the Oort" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="./icons/icon-192.png" />
+    <title>Beyond the Oort</title>
+    <style>
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: #05060a;
+        overflow: hidden;
+        overscroll-behavior: none;   /* no rubber-band bounce */
+        touch-action: none;          /* no pinch/double-tap zoom, no scroll */
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none; /* no long-press callout menu */
+        -webkit-tap-highlight-color: transparent;
+      }
+      #game {
+        position: fixed;
+        inset: 0;
+        height: 100dvh;
+      }
+      #game canvas { display: block; }
+    </style>
+  </head>
+  <body>
+    <div id="game"></div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

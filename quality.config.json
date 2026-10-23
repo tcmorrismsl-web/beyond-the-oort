@@ -1,0 +1,8 @@
+{
+  "maxEntryGzipKB": 120,
+  "maxEngineGzipKB": 450,
+  "maxTotalDistMB": 25,
+  "maxImageKB": 600,
+  "maxTextureDimension": 4096,
+  "maxAudioKB": 1500
+}
