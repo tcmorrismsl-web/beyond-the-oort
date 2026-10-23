@@ -1,0 +1,694 @@
+[
+ {
+  "id": "aurum-teague",
+  "title": "Director Teague",
+  "speaker": "Director Lucan Teague",
+  "role": "Aurum Meridian",
+  "site": "gate-concourse",
+  "character": "teague",
+  "if": {
+   "flag": "beacon-located",
+   "notFlag": "heard-aurum"
+  },
+  "start": "lift",
+  "nodes": {
+   "lift": {
+    "text": "Noori Castellan meets you at the top of the concourse and escorts you, without a word, to an office at the very top of Sirius Gate. One wall is a single window full of Sirius's blinding white light, filtered down to something you can look at.\n\nA silver-haired man rises from behind a desk made of a single slab of meteorite. \"Captain {name}. Thank you for coming. Noori tells me you were polite. She finds that suspicious.\"",
+    "choices": [
+     {
+      "text": "\"I was told it would cost me nothing.\"",
+      "to": "offer"
+     },
+     {
+      "text": "\"Get to the point.\"",
+      "to": "offer"
+     }
+    ]
+   },
+   "offer": {
+    "text": "\"Your drive core,\" Teague says, \"is the most valuable object a human being has ever owned. I don't want to take it. I'm not a thief, whatever you've heard at Tranquility.\" He slides a slate across the desk. \"I want a copy of what it knows. Two hundred and fifty thousand credits.\"",
+    "choices": [
+     {
+      "text": "\"That would clear everything I owe.\"",
+      "to": "debt",
+      "if": {
+       "moment": [
+        "the-debt"
+       ]
+      }
+     },
+     {
+      "text": "\"What would you do with it?\"",
+      "to": "plan"
+     },
+     {
+      "text": "\"Not for sale.\"",
+      "to": "notforsale"
+     }
+    ]
+   },
+   "debt": {
+    "text": "\"I know.\" He smiles gently. \"I bought your debt last week. Consider it a gesture of good faith: it's yours to tear up the moment we shake hands.\"",
+    "choices": [
+     {
+      "text": "\"What would you do with the data?\"",
+      "to": "plan"
+     }
+    ]
+   },
+   "notforsale": {
+    "text": "\"Everything is for sale, Captain. The only question is the currency.\" He gestures at the window. \"Let me tell you what I'd do with it, and then you can name yours.\"",
+    "choices": [
+     {
+      "text": "Listen.",
+      "to": "plan"
+     }
+    ]
+   },
+   "plan": {
+    "text": "\"Talk to them.\" He says it the way other men say *pray*. \"Every civilization the core has named went quiet. Quiet isn't dead, Captain. Quiet is... absorbed. Joined. Perhaps uplifted. The worlds it names are the worlds it wants. When it reaches Sol, I intend that it finds a partner rather than a meal.\"",
+    "choices": [
+     {
+      "text": "\"You can't negotiate with something that eats worlds.\"",
+      "to": "eat"
+     },
+     {
+      "text": "\"And if you're wrong?\"",
+      "to": "wrong"
+     },
+     {
+      "text": "\"Forty-one people at Tallis Camp tried talking to it.\"",
+      "to": "tallis",
+      "if": {
+       "flag": "camp-searched"
+      }
+     }
+    ]
+   },
+   "eat": {
+    "text": "\"Everyone can be negotiated with. It's the first thing Sirius teaches you.\" He sits back, perfectly at ease. \"Take your time. The offer stands.\" The smallest pause. \"Until it doesn't.\"",
+    "choices": [
+     {
+      "text": "Leave.",
+      "to": "out"
+     }
+    ]
+   },
+   "wrong": {
+    "text": "\"Then I'll be wrong very loudly, and it won't much matter what anyone else did.\" He says it lightly. By the door, Noori doesn't move, but her eyes flick to him and stay there.",
+    "choices": [
+     {
+      "text": "Leave.",
+      "to": "out",
+      "effects": [
+       {
+        "setFlag": "noori-noticed"
+       }
+      ]
+     }
+    ]
+   },
+   "tallis": {
+    "text": "\"Forty-one miners with a dish made of scrap, shouting into the dark.\" For the first time something cold shows through the charm. \"I won't be shouting, Captain. I'll be making an offer. There's a difference.\"\n\nBy the door, Noori's jaw tightens almost invisibly.",
+    "choices": [
+     {
+      "text": "Leave.",
+      "to": "out",
+      "effects": [
+       {
+        "setFlag": "noori-noticed"
+       }
+      ]
+     }
+    ]
+   },
+   "out": {
+    "text": "Noori walks you to the lift. The doors close. For three floors she says nothing at all. Then, very quietly, eyes on the doors: \"I've worked for him for nine years. He has never been wrong about a price.\" A beat. \"I've never seen him this excited.\"",
+    "choices": [
+     {
+      "text": "\"Do you agree with him?\"",
+      "to": "agree",
+      "effects": [
+       {
+        "affinity": {
+         "who": "noori",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Thanks for the escort, Officer Castellan.\"",
+      "to": "bye"
+     }
+    ]
+   },
+   "agree": {
+    "text": "\"I agree with my paycheck.\" The doors open. She doesn't step out right away. \"Goodbye, Captain. Mind how you go.\"",
+    "choices": [
+     {
+      "text": "Go.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "heard-aurum"
+       }
+      ]
+     }
+    ]
+   },
+   "bye": {
+    "text": "\"Noori,\" she says, as the doors open. \"Since we're being polite.\"",
+    "choices": [
+     {
+      "text": "Go.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "heard-aurum"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "academy-brandt",
+  "title": "Commander Brandt",
+  "speaker": "Commander Elias Brandt",
+  "role": "Tranquility Academy",
+  "site": "tranquility",
+  "character": "brandt",
+  "if": {
+   "flag": "beacon-located",
+   "notFlag": "heard-academy"
+  },
+  "start": "hall",
+  "nodes": {
+   "hall": {
+    "text": "A cadet who can't be more than nineteen salutes your ship as you land and then marches you, very correctly, to an office lined with portraits of every commandant since the Academy was founded. Commander Elias Brandt doesn't stand. He doesn't need to.\n\n\"Captain {name}. Sit down.\"",
+    "choices": [
+     {
+      "text": "Look at the portrait wall. Your family is up there.",
+      "to": "family",
+      "if": {
+       "origin": [
+        "academy-legacy"
+       ]
+      }
+     },
+     {
+      "text": "\"We've met. You signed my discharge.\"",
+      "to": "discharge",
+      "if": {
+       "moment": [
+        "decorated-discharged"
+       ]
+      }
+     },
+     {
+      "text": "Sit.",
+      "to": "order"
+     }
+    ]
+   },
+   "family": {
+    "text": "\"Three generations of them,\" Brandt says, following your gaze. \"Your grandmother taught me to fly. She'd be ashamed of how you're using that ship.\" A pause. \"Or proud. She was hard to predict too.\"",
+    "choices": [
+     {
+      "text": "\"Say what you brought me here to say.\"",
+      "to": "order"
+     }
+    ]
+   },
+   "discharge": {
+    "text": "\"I did. And I pinned the medal on you the same week.\" His expression doesn't change. \"You were right to disobey that order. You were also wrong. Both things went in your file. Sit down.\"",
+    "choices": [
+     {
+      "text": "Sit.",
+      "to": "order"
+     }
+    ]
+   },
+   "order": {
+    "text": "\"The Academy is requisitioning your ship for quarantine at Tranquility. The New Horizons recording, your Tallis Camp report, and anything else you've gathered will be sealed. The public will be told the transmission was a hoax.\" He folds his hands. \"You'll be compensated. Generously.\"",
+    "choices": [
+     {
+      "text": "\"A hoax? People are disappearing.\"",
+      "to": "hoax"
+     },
+     {
+      "text": "\"Why bury it?\"",
+      "to": "why"
+     },
+     {
+      "text": "\"You'll have to take her from me.\"",
+      "to": "take"
+     }
+    ]
+   },
+   "hoax": {
+    "text": "\"People panic, Captain. Panic kills more people than any signal ever has.\"",
+    "choices": [
+     {
+      "text": "\"Why bury it?\"",
+      "to": "why"
+     }
+    ]
+   },
+   "take": {
+    "text": "\"If I have to.\" He doesn't blink. \"I'd rather you volunteer. It reads better in both our files.\"",
+    "choices": [
+     {
+      "text": "\"Why bury it?\"",
+      "to": "why"
+     }
+    ]
+   },
+   "why": {
+    "text": "He looks at you for a long moment. Then he says, quietly, \"Because this isn't the first time, Captain.\"\n\nHe doesn't elaborate, and his face says he's already said too much.\n\n\"Some doors stay shut for a reason. Quarantine is safety. Out there, you're just a loud ship in a very quiet galaxy.\" He stands. \"Think about it. Don't take long.\"",
+    "choices": [
+     {
+      "text": "\"Not the first time? What does that mean?\"",
+      "to": "first"
+     },
+     {
+      "text": "Leave.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "heard-academy"
+       },
+       {
+        "setFlag": "academy-knows"
+       }
+      ]
+     }
+    ]
+   },
+   "first": {
+    "text": "\"Dismissed, Captain.\" The cadet is already holding the door.",
+    "choices": [
+     {
+      "text": "Leave.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "heard-academy"
+       },
+       {
+        "setFlag": "academy-knows"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "sump-vesper",
+  "title": "Auntie Vesper",
+  "speaker": "Auntie Vesper",
+  "role": "The Sump",
+  "site": "the-sump",
+  "character": "vesper",
+  "if": {
+   "flag": "beacon-located",
+   "notFlag": "heard-undercity"
+  },
+  "start": "den",
+  "nodes": {
+   "den": {
+    "text": "The data den is a noodle stall with three hundred screens bolted to the ceiling. In the middle of it, in an armchair that clearly came from somewhere much nicer, an old woman is knitting something enormous and purple.\n\n\"Sit down, sweetheart, you look starved.\" She doesn't look up from her needles. \"I'm Vesper. Everyone calls me Auntie. Noodles are on the house.\"",
+    "choices": [
+     {
+      "text": "\"Auntie. It's been a long time.\"",
+      "to": "home",
+      "if": {
+       "origin": [
+        "sol-undercity"
+       ]
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "moth",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"I heard you want to talk about my beacon.\"",
+      "to": "offer"
+     },
+     {
+      "text": "Sit and eat.",
+      "to": "eat"
+     }
+    ]
+   },
+   "home": {
+    "text": "Now she looks up, and her face crinkles with delight. \"Oh, look at you. One of ours, all grown up with a ship.\" She pats your hand. \"You always did climb too high. Eat, then we'll talk business.\"",
+    "choices": [
+     {
+      "text": "Eat.",
+      "to": "eat"
+     }
+    ]
+   },
+   "eat": {
+    "text": "The noodles are extremely good. Vesper waits until you've finished, which you suspect is a negotiating tactic.",
+    "choices": [
+     {
+      "text": "\"You want to talk about my beacon.\"",
+      "to": "offer"
+     }
+    ]
+   },
+   "offer": {
+    "text": "\"Everybody wants your beacon, sweetheart. Sirius wants it. The Academy wants it.\" The needles click. \"When everybody wants something, you don't give it to one of them. You hold an auction. You make them bid against each other, and you take a very generous cut, and nobody owns it, which is the safest thing for everyone.\"",
+    "choices": [
+     {
+      "text": "\"And how do you know I've found anything?\"",
+      "to": "how"
+     }
+    ]
+   },
+   "how": {
+    "text": "\"Moth,\" Vesper says mildly. \"Say hello.\"\n\nA ventilation panel above you pops open and a young man with bright blue hair drops out of it, landing in a crouch. \"Hi! Big fan. I've been in your ship's array since you docked at New Geneva. Love what you've done with the encryption.\" He grins. \"By which I mean nothing. You've done nothing.\"",
+    "choices": [
+     {
+      "text": "\"You hacked my ship?\"",
+      "to": "hacked"
+     },
+     {
+      "text": "Laugh. \"Okay, that's impressive.\"",
+      "to": "impressed",
+      "effects": [
+       {
+        "affinity": {
+         "who": "moth",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "hacked": {
+    "text": "\"Gently! With love!\" Moth holds up both hands. \"Also your drive core talks in its sleep, did you know that? Primes. It counts in primes.\"",
+    "choices": [
+     {
+      "text": "\"Seven, a rest, then eleven.\"",
+      "to": "primes",
+      "if": {
+       "crew": "ilse"
+      }
+     },
+     {
+      "text": "\"I know.\"",
+      "to": "moth"
+     }
+    ]
+   },
+   "primes": {
+    "text": "Moth's mouth falls open. Behind you, Ilse says dryly, \"Some of us use a stethoscope.\" Moth looks at her with naked admiration. \"A *stethoscope*. That's so old it's new. I love her. Can I keep her?\"\n\n\"No,\" says Ilse.",
+    "choices": [
+     {
+      "text": "Grin.",
+      "to": "moth",
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       },
+       {
+        "affinity": {
+         "who": "moth",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "impressed": {
+    "text": "\"Thank you! Finally, someone who appreciates the craft.\" He bows. \"Your core counts in primes, by the way. In its sleep. Did you know? It's adorable.\"",
+    "choices": [
+     {
+      "text": "\"I know.\"",
+      "to": "moth"
+     }
+    ]
+   },
+   "moth": {
+    "text": "\"So.\" Moth flops into the seat beside you. \"I've cracked half your data, and the other half is the most interesting thing I have ever seen in my entire life, and everyone in the Sump owes me money or wants to kill me, so.\" He spreads his hands. \"Can I come? On the ship? I'm very useful and I barely eat.\"\n\nVesper doesn't stop knitting. \"Take him, sweetheart. He's a good boy. He'll steal from you, but only little things.\"",
+    "choices": [
+     {
+      "text": "\"Welcome aboard, Moth.\"",
+      "to": "yes",
+      "effects": [
+       {
+        "affinity": {
+         "who": "moth",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Can I trust you?\"",
+      "to": "trust"
+     }
+    ]
+   },
+   "trust": {
+    "text": "\"With your life? Absolutely.\" Moth considers. \"With your snacks? Less so. With your passwords? You don't have any, so, moot.\"",
+    "choices": [
+     {
+      "text": "\"Fine. Welcome aboard.\"",
+      "to": "yes"
+     }
+    ]
+   },
+   "yes": {
+    "text": "\"Yes!\" Moth punches the air, then turns to Vesper with sudden seriousness and kisses the top of her head. \"Bye, Auntie. Don't sell my room.\"\n\n\"I already have,\" says Vesper. To you: \"Think about the auction, sweetheart. It's the only way nobody wins. Which is the only way everybody lives.\"",
+    "choices": [
+     {
+      "text": "\"I'll think about it.\"",
+      "to": null,
+      "effects": [
+       {
+        "join": "moth"
+       },
+       {
+        "setFlag": "heard-undercity"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "noori-defects",
+  "title": "Incoming call: private channel",
+  "speaker": "Noori Castellan",
+  "role": "Aurum Meridian security",
+  "character": "noori",
+  "trigger": {
+   "if": {
+    "allFlags": [
+     "heard-aurum",
+     "heard-academy",
+     "heard-undercity"
+    ],
+    "notFlag": "race-chosen"
+   }
+  },
+  "start": "call",
+  "nodes": {
+   "call": {
+    "text": "An unregistered channel. Noori Castellan's face, without the uniform jacket, hair coming loose. Behind her, the cramped cockpit of a shuttle.\n\n\"Captain. This line isn't Aurum's. I'm forty kilometers off your bow, and in about an hour Aurum security is going to notice what I took.\" She holds up a data chit. \"You should see this before you decide anything.\"",
+    "choices": [
+     {
+      "text": "\"Show me.\"",
+      "to": "proof"
+     },
+     {
+      "text": "\"Why should I trust you?\"",
+      "to": "why"
+     }
+    ]
+   },
+   "why": {
+    "text": "\"You shouldn't. I wouldn't.\" She doesn't look away. \"But I've spent nine years being very good at reading people, and I read the Director this week, and I didn't like what I saw. Look at the files, Captain. Then decide what I am.\"",
+    "choices": [
+     {
+      "text": "\"Show me.\"",
+      "to": "proof",
+      "effects": [
+       {
+        "affinity": {
+         "who": "noori",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "proof": {
+    "text": "Schematics fill your screen. The great dish at Sirius Gate, the biggest transmitter humans have ever built, refitted. A broadcast plan. A message, already composed, aimed at the galactic core.\n\nIt's a list of names. Sirius. Sol. Every colony. And at the bottom, Teague's personal signature line: *We are ready to talk.*\n\n\"He isn't negotiating,\" Noori says quietly. \"He's ringing the dinner bell. And he means to do it in eleven weeks.\"",
+    "choices": [
+     {
+      "text": "\"Then we stop him.\"",
+      "to": "stop"
+     },
+     {
+      "text": "\"Why bring this to me?\"",
+      "to": "me"
+     }
+    ]
+   },
+   "me": {
+    "text": "\"Because the Academy would bury it, and Vesper would sell it, and you're the only one who flew to Tallis Camp to see for yourself.\" A pause. \"And because you're the only one with a ship that can get to that beacon first.\"",
+    "choices": [
+     {
+      "text": "\"Then we stop him.\"",
+      "to": "stop",
+      "effects": [
+       {
+        "affinity": {
+         "who": "noori",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "stop": {
+    "text": "\"So.\" Noori folds her arms. \"Everyone's made you an offer. Before I ask to come aboard, I'd like to know whose side I'm joining. Who are you going to trust?\"",
+    "choices": [
+     {
+      "text": "\"The Academy. Lock it down. They get the beacon's position.\"",
+      "to": "academy"
+     },
+     {
+      "text": "\"Vesper. Auction the position, so nobody owns it.\"",
+      "to": "vesper"
+     },
+     {
+      "text": "\"Aurum. They're paying, and they'll try it anyway.\"",
+      "to": "aurum"
+     },
+     {
+      "text": "\"Nobody. We get to the beacon ourselves, first.\"",
+      "to": "nobody",
+      "effects": [
+       {
+        "affinity": {
+         "who": "noori",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "academy": {
+    "text": "\"Brandt will bury it so deep nobody finds it, including us.\" She considers. \"That might even be right. For now.\" A nod. \"Then I'll help you hold them to their word.\"",
+    "choices": [
+     {
+      "text": "\"Come aboard, Noori.\"",
+      "to": "aboard",
+      "effects": [
+       {
+        "setFlag": "race-academy"
+       }
+      ]
+     }
+    ]
+   },
+   "vesper": {
+    "text": "\"An auction. Every buyer watching every other buyer.\" The corner of her mouth moves. \"Chaos as a safety system. I hate it. It might work.\"",
+    "choices": [
+     {
+      "text": "\"Come aboard, Noori.\"",
+      "to": "aboard",
+      "effects": [
+       {
+        "setFlag": "race-undercity"
+       }
+      ]
+     }
+    ]
+   },
+   "aurum": {
+    "text": "Her face goes very still. \"Then you'll need someone aboard who knows exactly how they cheat,\" she says evenly. \"Because they will. They always do.\"",
+    "choices": [
+     {
+      "text": "\"Then come aboard and watch my back.\"",
+      "to": "aboard",
+      "effects": [
+       {
+        "setFlag": "race-aurum"
+       },
+       {
+        "affinity": {
+         "who": "noori",
+         "by": -1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "nobody": {
+    "text": "For the first time, Noori Castellan smiles. It changes her whole face. \"Good answer, Captain.\"",
+    "choices": [
+     {
+      "text": "\"Come aboard, Noori.\"",
+      "to": "aboard",
+      "effects": [
+       {
+        "setFlag": "race-nobody"
+       }
+      ]
+     }
+    ]
+   },
+   "aboard": {
+    "text": "Her shuttle docks twenty minutes later. She steps through the hatch with one bag and a sidearm, looks around your ship with a professional eye, and says, \"Your security is a disgrace. I'll fix it.\" Then, more quietly: \"Thank you, Captain.\"\n\nIn the far distance, Sirius Gate's great dish is already turning.",
+    "choices": [
+     {
+      "text": "\"Welcome aboard. Next stop: the beacon.\"",
+      "to": null,
+      "effects": [
+       {
+        "join": "noori"
+       },
+       {
+        "locker": {
+         "item": "aurum-proof",
+         "qty": 1
+        }
+       },
+       {
+        "setFlag": "noori-proof"
+       },
+       {
+        "setFlag": "race-chosen"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+]

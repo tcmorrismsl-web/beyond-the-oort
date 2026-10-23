@@ -3,7 +3,7 @@ import { gameData, type Dialogue } from '../src/data/schema';
 import { DEFAULT_LOOK, newGame, type Captain, type GameState, type Pronouns } from '../src/core/state';
 import { deserialize } from '../src/core/save';
 import { Session } from '../src/core/session';
-import { choose, conditionMet, crewTalks, dialogueAtPoi, dialoguesAt, pendingTransmission, shownChoices } from '../src/systems/dialogue';
+import { choose, crewTalks, dialogueAtPoi, dialoguesAt, pendingTransmission, shownChoices } from '../src/systems/dialogue';
 import { romanceOpen, romanceThreshold, waitingAt, withinLean } from '../src/systems/crew';
 import { journal, poiInRange, progressOf, routeTo, trackedObjective, visiblePois } from '../src/systems/missions';
 
@@ -164,15 +164,36 @@ describe('Act 1 playthrough', () => {
   const captains: Partial<Captain>[] = [];
   for (const o of c.origins) for (const m of c.moments) for (const mo of c.motives) for (const p of pronouns) captains.push({ origin: o.id, moment: m.id, motive: mo.id, pronouns: p });
 
-  it(`every captain (${captains.length} combinations) can play from the signal to Tallis Camp`, () => {
+  it(`every captain (${captains.length} combinations) can play Act 1 from the signal to the beacon`, () => {
     for (const cap of captains) {
       const label = `${cap.origin}/${cap.moment}/${cap.motive}/${cap.pronouns}`;
       let s: GameState = { ...stateFor(cap), flags: ['landed-once'] };
+      const site = (siteId: string, id?: string) => (): Dialogue | undefined => {
+        s = at(s, siteId);
+        const here = dialoguesAt(siteId, gameData.dialogues, s);
+        return id === undefined ? here[0] : here.find((d) => d.id === id);
+      };
+      const poi = (systemId: string, poiId: string) => (): Dialogue | null => {
+        const p = gameData.pois.get(poiId);
+        s = inSpace(s, systemId, p?.x, p?.y);
+        expect(visiblePois(systemId, s, gameData).map((v) => v.id), `${label}: ${poiId} hidden`).toContain(poiId);
+        return dialogueAtPoi(poiId, gameData.dialogues, s);
+      };
+      const call = () => (): Dialogue | null => pendingTransmission((s = inSpace(s, s.systemId)), gameData.dialogues);
       const beats: [() => Dialogue | null | undefined, string][] = [
-        [() => pendingTransmission(s, gameData.dialogues), 'okafor-archive-lead'],
-        [() => dialoguesAt('archive-halls', gameData.dialogues, (s = at(s, 'archive-halls'))).find((d) => d.id === 'ilse-archive'), 'ilse-hired'],
-        [() => dialogueAtPoi('ninefold-wreck', gameData.dialogues, (s = inSpace(s, 'wolf-359', 1650, -1250))), 'ninefold-recorder'],
-        [() => dialoguesAt('tallis-camp', gameData.dialogues, (s = at(s, 'tallis-camp')))[0], 'camp-searched'],
+        [call(), 'okafor-archive-lead'],
+        [site('archive-halls', 'ilse-archive'), 'ilse-hired'],
+        [poi('wolf-359', 'ninefold-wreck'), 'ninefold-recorder'],
+        [site('tallis-camp'), 'camp-searched'],
+        [call(), 'okafor-two-voices'],
+        [site('halcyon-post-deck'), 'reading-barnard'],
+        [poi('alpha-centauri', 'centauri-reading'), 'reading-centauri'],
+        [poi('sirius', 'sirius-reading'), 'beacon-located'],
+        [site('gate-concourse', 'aurum-teague'), 'heard-aurum'],
+        [site('tranquility', 'academy-brandt'), 'heard-academy'],
+        [site('the-sump', 'sump-vesper'), 'heard-undercity'],
+        [call(), 'race-chosen'],
+        [poi('sol', 'hush-beacon'), 'act1-complete'],
       ];
       for (const [find, flag] of beats) {
         const obj = trackedObjective(s, gameData);
@@ -185,24 +206,37 @@ describe('Act 1 playthrough', () => {
         if (!next) return;
         s = next;
       }
-      expect(s.crew, label).toEqual(['ilse', 'quin']);
-      expect(s.locker['ninefold-recorder'], label).toBe(1);
-      const done = journal(s, gameData).filter((p) => p.done).map((p) => p.mission.id);
-      expect(done, label).toEqual(expect.arrayContaining(['static', 'the-quiet-camp']));
+      expect([...s.crew].sort(), label).toEqual(['celeste', 'ilse', 'moth', 'noori', 'quin']);
+      expect(s.locker['hush-starmap'], label).toBe(1);
+      expect(journal(s, gameData).every((p) => p.done), label).toBe(true);
+      expect(trackedObjective(s, gameData), label).toBeNull();
     }
   });
 
   it('Mara and Celeste can both reach a fade to black in the same playthrough', () => {
     const marasNight = dialogue('mara-regular');
-    let s = at({ ...stateFor({ pronouns: 'he' }), flags: ['met-mara', 'mara-interested', 'camp-searched'], affinity: { mara: 3 } }, 'new-geneva');
-    expect(conditionMet(marasNight.if, s)).toBe(true);
-    const after = playTo(marasNight, s, 'mara-night');
-    expect(after).not.toBeNull();
-    s = after ?? s;
-    const fades = Object.values(marasNight.nodes).filter((n) => n.mood === 'fade');
-    expect(fades.length).toBeGreaterThan(0);
-    // Nothing Mara set blocks anyone else (see "never exclusive" above).
-    expect(s.flags).toContain('mara-night');
+    const celestesNight = dialogue('celeste-night');
+    for (const pronouns of ['she', 'he', 'they'] as const) {
+      let s = at({ ...stateFor({ pronouns }), flags: ['met-mara', 'mara-interested', 'camp-searched', 'race-chosen', 'celeste-flirted'], affinity: { mara: 3, celeste: 4 }, crew: ['celeste'] }, 'new-geneva');
+      const afterMara = playTo(marasNight, s, 'mara-night');
+      expect(afterMara, pronouns).not.toBeNull();
+      s = afterMara ?? s;
+      expect(crewTalks('celeste', gameData.dialogues, s).map((d) => d.id), pronouns).toContain('celeste-night');
+      const afterCeleste = playTo(celestesNight, s, 'celeste-night');
+      expect(afterCeleste, pronouns).not.toBeNull();
+      expect(afterCeleste?.flags).toEqual(expect.arrayContaining(['mara-night', 'celeste-night']));
+    }
+    for (const d of [marasNight, celestesNight]) expect(Object.values(d.nodes).some((n) => n.mood === 'fade'), d.id).toBe(true);
+  });
+});
+
+describe('names in notices', () => {
+  it('uses nicknames and drops titles ("Moth liked that", not "Teo liked that" or "Dr. liked that")', async () => {
+    const { shortName } = await import('../src/ui/panels');
+    expect(shortName('Teo "Moth" Basri')).toBe('Moth');
+    expect(shortName('Dr. Celeste Amari')).toBe('Celeste');
+    expect(shortName('Commander Elias Brandt')).toBe('Elias');
+    expect(shortName('Mara')).toBe('Mara');
   });
 });
 

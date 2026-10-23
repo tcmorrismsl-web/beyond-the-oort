@@ -7,5 +7,44 @@
   "x": 1650,
   "y": -1250,
   "description": "A consortium survey tender, NINEFOLD stenciled on her flank, tumbling slowly in the red light. Her hatches are welded shut. From the inside."
+ },
+ {
+  "id": "centauri-reading",
+  "name": "Quiet point",
+  "kind": "signal",
+  "system": "alpha-centauri",
+  "x": -250,
+  "y": 1350,
+  "description": "A patch of space between the twin suns where Okafor says the Oort signal comes through clearest.",
+  "if": {
+   "flag": "okafor-two-voices"
+  }
+ },
+ {
+  "id": "sirius-reading",
+  "name": "White dwarf shadow",
+  "kind": "signal",
+  "system": "sirius",
+  "x": 1700,
+  "y": -950,
+  "description": "In the lee of Sirius B, shielded from the big star's glare. Quiet enough to hear something very far away.",
+  "if": {
+   "allFlags": [
+    "reading-barnard",
+    "reading-centauri"
+   ]
+  }
+ },
+ {
+  "id": "hush-beacon",
+  "name": "The beacon",
+  "kind": "beacon",
+  "system": "sol",
+  "x": -8200,
+  "y": -6400,
+  "description": "Out past every planet, past the comets, in the dark. Something vast and very old, waiting.",
+  "if": {
+   "flag": "beacon-located"
+  }
  }
 ]

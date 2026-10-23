@@ -53,5 +53,50 @@
     "flag": "camp-searched",
     "title": "Tallis Camp",
     "text": "Forty-one miners at Wolf 359 built a receiver from the Ninefold's scrap, heard the core, and answered. Their last transmission was the camp's own name, over and over."
+  },
+  {
+    "flag": "okafor-two-voices",
+    "title": "Two voices",
+    "text": "Since New Horizons woke, the DSN has caught a second signal from the Oort Cloud. It's built like a warning. Dr. Okafor needs readings from your ship's array at Barnard's Star, Alpha Centauri and Sirius to find its source."
+  },
+  {
+    "flag": "reading-barnard",
+    "title": "A finger to the lips",
+    "text": "Decoded as a picture, the Oort signal shows a ring of stars, one going dark, and a hand raised to a mouth. Hush."
+  },
+  {
+    "flag": "reading-centauri",
+    "title": "It holds its breath",
+    "text": "Every night, when the core signal says \"Alpha Centauri,\" the Oort signal falls silent until it's finished. The Oort is listening to the core too."
+  },
+  {
+    "flag": "beacon-located",
+    "title": "The source",
+    "text": "Three readings put the Oort signal's source just beyond Sol's own Oort Cloud. Something has been whispering a warning at our front door all along."
+  },
+  {
+    "flag": "heard-aurum",
+    "title": "Aurum Meridian's offer",
+    "text": "Director Teague wants your drive core's data and believes the core can be negotiated with. Quiet, he says, isn't dead."
+  },
+  {
+    "flag": "heard-academy",
+    "title": "The Academy's order",
+    "text": "Commander Brandt wants your ship quarantined at Tranquility and the signal buried, for everyone's safety."
+  },
+  {
+    "flag": "heard-undercity",
+    "title": "Auntie Vesper's auction",
+    "text": "Auntie Vesper wants the beacon's location to sell to the highest bidder. Her hacker, Moth, has already cracked half your data."
+  },
+  {
+    "flag": "noori-proof",
+    "title": "Aurum will answer",
+    "text": "Noori Castellan stole Aurum Meridian's plan: they mean to answer the core from Sirius, as loudly as they can."
+  },
+  {
+    "flag": "act1-complete",
+    "title": "We hear you",
+    "text": "Your drive core answered the Hush beacon on its own. The reply came from the core: \"WE HEAR YOU, LITTLE LANTERN.\""
   }
 ]

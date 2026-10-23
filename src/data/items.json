@@ -8,5 +8,20 @@
     "id": "ninefold-recorder",
     "name": "Ninefold flight recorder",
     "description": "The last logs of a consortium survey tender lost at Wolf 359. Your drive core hums when it plays."
+  },
+  {
+    "id": "halcyon-decode",
+    "name": "Celeste's decode",
+    "description": "The Oort signal, rendered as a picture: a ring of stars, one going dark, and a hand raised to a mouth."
+  },
+  {
+    "id": "aurum-proof",
+    "name": "Aurum Meridian's broadcast plan",
+    "description": "Noori's stolen files: Aurum intends to answer the core from Sirius, as loudly as it can."
+  },
+  {
+    "id": "hush-starmap",
+    "name": "The Hush star map",
+    "description": "A map the beacon gave you, reaching far past Vega. Dozens of stars are marked. Most of them have gone quiet."
   }
 ]

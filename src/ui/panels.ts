@@ -288,7 +288,7 @@ function crewTab(body: HTMLElement, session: Session, card: HTMLDivElement, redr
         return;
       }
       const home = who.home === undefined ? undefined : gameData.sites.get(who.home)?.site.name;
-      if (session.dismiss(id, Date.now())) showToast(`${who.name.split(' ')[0]} will wait at ${home ?? 'their home port'}`);
+      if (session.dismiss(id, Date.now())) showToast(`${shortName(who.name)} will wait at ${home ?? 'their home port'}`);
       redraw();
     }, 'small');
     const info = el(
@@ -392,7 +392,7 @@ function logTab(body: HTMLElement, state: GameState): void {
  */
 export function storyNotices(before: GameState, after: GameState): string[] {
   const out: string[] = [];
-  const name = (id: string): string => gameData.characters.get(id)?.name.split(' ')[0] ?? id;
+  const name = (id: string): string => shortName(gameData.characters.get(id)?.name ?? id);
   for (const id of Object.keys(after.affinity)) {
     const d = (after.affinity[id] ?? 0) - (before.affinity[id] ?? 0);
     if (d > 0) out.push(`${name(id)} liked that`);
@@ -407,6 +407,14 @@ export function storyNotices(before: GameState, after: GameState): string[] {
   }
   for (const e of gameData.log) if (after.flags.includes(e.flag) && !before.flags.includes(e.flag)) out.push(`Log: ${e.title}`);
   return out;
+}
+
+/** What people call someone day to day: a nickname in quotes, else the first name without a title. */
+export function shortName(full: string): string {
+  const nick = /"([^"]+)"/.exec(full)?.[1];
+  if (nick) return nick;
+  const words = full.split(' ').filter((w) => !['Dr.', 'Director', 'Commander', 'Officer', 'Captain'].includes(w));
+  return words[0] ?? full;
 }
 
 /** Show notices one after another (toasts replace each other, so space them out). */

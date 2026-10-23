@@ -1,0 +1,736 @@
+[
+ {
+  "id": "celeste-cockpit",
+  "title": "Celeste in the cockpit",
+  "speaker": "Dr. Celeste Amari",
+  "role": "Signals researcher",
+  "crew": "celeste",
+  "character": "celeste",
+  "if": {
+   "notFlag": "celeste-t1"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Celeste is curled up in the co-pilot's seat with her knees under her chin, watching the stars stream past the canopy with her mouth slightly open.\n\n\"I'd forgotten,\" she says, without turning around. \"Out at the post you only ever see the same stars. I'd forgotten they move.\"",
+    "choices": [
+     {
+      "text": "Sit beside her.",
+      "to": "sit",
+      "effects": [
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"How are you settling in?\"",
+      "to": "settle"
+     }
+    ]
+   },
+   "sit": {
+    "text": "She shifts over to make room, which in a co-pilot's seat means she ends up mostly leaning against you. She doesn't seem to mind. Neither, you find, do you.\n\n\"Is this all right?\" she asks quietly. \"You can tell me if it isn't. I'm out of practice at people.\"",
+    "choices": [
+     {
+      "text": "\"It's more than all right.\"",
+      "to": "close",
+      "if": {
+       "romance": "celeste"
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       },
+       {
+        "setFlag": "celeste-flirted"
+       }
+      ]
+     },
+     {
+      "text": "\"It's fine. Tell me about the stars you used to see.\"",
+      "to": "stars"
+     },
+     {
+      "text": "Gently make a little space. \"I'm right here, but I need room to fly.\"",
+      "to": "space"
+     }
+    ]
+   },
+   "settle": {
+    "text": "\"Everyone's so kind.\" She sounds almost bewildered by it. \"Quin fixed my bunk light. Ilse lent me a book. A *paper* book.\" She hugs her knees tighter. \"I keep waiting for someone to tell me I can't stay.\"",
+    "choices": [
+     {
+      "text": "\"Nobody's going to tell you that.\"",
+      "to": "stars",
+      "effects": [
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "close": {
+    "text": "Her head finds your shoulder. After a while you realize she's fallen asleep there, breathing slow and easy, her hand resting on your sleeve as if to make sure you don't disappear.\n\nYou fly on through the stars for a long time without moving.",
+    "choices": [
+     {
+      "text": "Let her sleep.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "celeste-t1"
+       }
+      ]
+     }
+    ]
+   },
+   "stars": {
+    "text": "\"Barnard's Star, mostly. Red and dim and patient.\" She smiles. \"I used to name the dishes. Big Susan, Little Susan, Gerald.\" A pause. \"Ilse says she has an air recycler called Gerald. I think we're going to be friends.\"",
+    "choices": [
+     {
+      "text": "\"I think you are.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "celeste-t1"
+       }
+      ]
+     }
+    ]
+   },
+   "space": {
+    "text": "\"Of course. Sorry.\" She shifts back into her own seat, cheeks warm, but she smiles at you as she does. \"Thank you for telling me instead of just going quiet. People went quiet on me for a long time.\"",
+    "choices": [
+     {
+      "text": "\"Any time.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "celeste-t1"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "celeste-night",
+  "title": "Celeste, the night before",
+  "speaker": "Dr. Celeste Amari",
+  "role": "Signals researcher",
+  "crew": "celeste",
+  "character": "celeste",
+  "if": {
+   "allFlags": [
+    "race-chosen",
+    "celeste-flirted"
+   ],
+   "notFlag": "celeste-night",
+   "romance": "celeste"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "It's the ship's night. The corridors are dim. Celeste knocks on your cabin door, softly, twice, and when you open it she's standing there in an oversized sweater with her arms wrapped around herself.\n\n\"I couldn't sleep,\" she says. \"Tomorrow we go out to the thing that's been whispering at us my whole life, and I keep thinking...\" She stops. Starts again. \"I spent a very long time alone, waiting. I don't want to wait anymore. Not for this.\"",
+    "choices": [
+     {
+      "text": "Take her hand and draw her inside.",
+      "to": "in",
+      "effects": [
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Celeste. Are you sure?\"",
+      "to": "sure"
+     },
+     {
+      "text": "\"Not tonight. But stay and talk with me.\"",
+      "to": "talk"
+     }
+    ]
+   },
+   "sure": {
+    "text": "\"I've never been more sure of anything.\" Then, with a small, brave smile: \"I thought about it a lot. I had a lot of time to think.\"",
+    "choices": [
+     {
+      "text": "Draw her inside.",
+      "to": "in"
+     }
+    ]
+   },
+   "talk": {
+    "text": "\"Talking is good.\" She means it. She sits on the end of your bunk and talks about Big Susan and Little Susan and the first time she saw a comet, until she falls asleep mid-sentence, still holding your hand.",
+    "choices": [
+     {
+      "text": "Let her sleep.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "celeste-talked"
+       }
+      ]
+     }
+    ]
+   },
+   "in": {
+    "text": "The door slides shut behind her. She touches your face first, carefully, the way she touched your hand that first day at the post, as if you might not be real. Then she kisses you, and there is nothing careful about it at all.\n\nThe sweater ends up somewhere on the floor. She laughs, breathless, when you find the spot just under her ear that makes her gasp, and she pulls you down with her.",
+    "choices": [
+     {
+      "text": "...",
+      "to": "fade"
+     }
+    ]
+   },
+   "fade": {
+    "text": "The ship hums around you. Out past the hull the stars turn, slow and patient. For once, Celeste isn't listening for anything at all.",
+    "choices": [
+     {
+      "text": "...",
+      "to": "morning"
+     }
+    ],
+    "mood": "fade"
+   },
+   "morning": {
+    "text": "You wake to find her already awake, propped on one elbow, watching you with an expression of enormous contentment.\n\n\"Good morning,\" she says. \"I'm going to remember this one. I'm going to count it.\" She kisses your shoulder. \"Now go and be a captain. I'll be right behind you.\"",
+    "choices": [
+     {
+      "text": "\"I'll hold you to that.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "celeste-night"
+       },
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "Pull her back for one more minute.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "celeste-night"
+       },
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "ilse-kiss",
+  "title": "Ilse, the night before",
+  "speaker": "Ilse Varga",
+  "role": "Archivist",
+  "crew": "ilse",
+  "character": "ilse",
+  "if": {
+   "allFlags": [
+    "race-chosen",
+    "ilse-flirted"
+   ],
+   "notFlag": "ilse-kiss",
+   "romance": "ilse"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "You find Ilse in the observation lounge, not reading. The paper books are stacked untouched. She's watching the dark ahead, where the beacon is.\n\n\"I finished cataloguing you,\" she says without turning. \"You asked me to let you know.\"",
+    "choices": [
+     {
+      "text": "\"And?\"",
+      "to": "and"
+     },
+     {
+      "text": "Sit down beside her.",
+      "to": "and",
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "and": {
+    "text": "\"You don't fit any of my categories.\" She turns, and she is very close, and her hands are not quite steady. \"I find that I don't mind. I find that I mind very much the idea of you flying out there tomorrow without my having done something about it.\"\n\nShe takes your face in both hands, and kisses you: once, carefully, like a first edition.",
+    "choices": [
+     {
+      "text": "Kiss her back.",
+      "to": "back",
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Ilse. I like you. I'm just not there yet.\"",
+      "to": "slow"
+     }
+    ]
+   },
+   "back": {
+    "text": "The second kiss isn't careful at all. When it ends she rests her forehead against yours and laughs, very quietly, surprised at herself.\n\n\"That,\" she says, \"is going in the record.\" A pause. \"The private one. After the beacon, Captain. Ask me again after the beacon.\"",
+    "choices": [
+     {
+      "text": "\"Count on it.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "ilse-kiss"
+       }
+      ]
+     }
+    ]
+   },
+   "slow": {
+    "text": "\"Then I'll wait.\" No hurt in it, only that dry warmth. \"Archivists are very patient. Ask anyone. Ask the air recyclers.\"",
+    "choices": [
+     {
+      "text": "\"Goodnight, Ilse.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "ilse-kiss-waiting"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "quin-mateo",
+  "title": "Quin and Mateo",
+  "speaker": "Quin Reyes",
+  "role": "Ice miner",
+  "crew": "quin",
+  "character": "quin",
+  "if": {
+   "flag": "reading-centauri",
+   "notFlag": "quin-t2"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Quin is in the mess with a battered photo propped against a coffee mug: two men in mining suits, arms around each other's necks, one of them clearly Quin, the other slimmer and laughing at whoever's holding the camera.\n\n\"Mateo,\" he says, when he sees you looking. \"That's the day we got our claim. Worst ice on Cinder. Best day of my life.\"",
+    "choices": [
+     {
+      "text": "\"Tell me about him.\"",
+      "to": "tell",
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Do you think he's still out there? Taken, not dead?\"",
+      "to": "taken"
+     }
+    ]
+   },
+   "tell": {
+    "text": "He does. Mateo sang badly and constantly. Mateo cheated at cards and gave the winnings back. Mateo was going to quit mining and open a bar on Cinder called The Last Flare. Quin talks for a long time, and you let him, and by the end he's laughing more than he isn't.\n\n\"Thanks, Captain,\" he says finally. \"Nobody's asked me about him. They ask about what happened. Not about him.\"",
+    "choices": [
+     {
+      "text": "\"He sounds like he was a lot of fun.\"",
+      "to": "end"
+     },
+     {
+      "text": "\"You're a lot like him, you know.\"",
+      "to": "flirt",
+      "if": {
+       "romance": "quin"
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "taken": {
+    "text": "He goes very still. \"Celeste says some of the signals look like... like voices still in them.\" He rubs his jaw. \"I don't know if that makes it better or worse. Yeah. Maybe. I think about it every night.\"",
+    "choices": [
+     {
+      "text": "\"If he's out there, we'll find him.\"",
+      "to": "end",
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       },
+       {
+        "setFlag": "quin-promise"
+       }
+      ]
+     }
+    ]
+   },
+   "flirt": {
+    "text": "\"Me?\" He laughs. \"I don't sing. Well. Not where people can hear.\" He looks at you for a long moment, and the laughter softens into something else. \"You keep doing that, you know. Saying things that make me feel like a person again.\"",
+    "choices": [
+     {
+      "text": "\"You are a person, Quin. A good one.\"",
+      "to": "end",
+      "effects": [
+       {
+        "setFlag": "quin-flirted"
+       }
+      ]
+     }
+    ]
+   },
+   "end": {
+    "text": "He tucks the photo carefully into his shirt pocket, over his heart. \"Right,\" he says, standing, all business again. \"Your port thruster's making a noise I don't like. Go away, I've got swearing to do.\"",
+    "choices": [
+     {
+      "text": "Leave him to it.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "quin-t2"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "quin-kiss",
+  "title": "Quin, the night before",
+  "speaker": "Quin Reyes",
+  "role": "Ice miner",
+  "crew": "quin",
+  "character": "quin",
+  "if": {
+   "allFlags": [
+    "race-chosen",
+    "quin-flirted"
+   ],
+   "notFlag": "quin-kiss",
+   "romance": "quin"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Quin finds you in the cargo bay late in the ship's night. He's showered, shaved, and wearing a clean shirt, and he looks deeply uncomfortable about all three.\n\n\"You said ask again when I'd had a shower.\" He rubs the back of his neck. \"So. I've had a shower.\"",
+    "choices": [
+     {
+      "text": "Close the distance.",
+      "to": "kiss",
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Quin, I'm flattered. I'm just not ready.\"",
+      "to": "slow"
+     }
+    ]
+   },
+   "kiss": {
+    "text": "He's big and careful and smells like ship soap, and when he kisses you it's with the slow certainty of a man who checks every bolt twice. His hand is warm on the small of your back. You can feel his heart going like an engine at full burn.\n\n\"Okay,\" he says, a little hoarse, when he finally pulls back. \"Okay. That's... yeah.\" A grin breaks through. \"Ask me again after the beacon, Captain. I'll wear the shirt.\"",
+    "choices": [
+     {
+      "text": "\"Wear it. I'll take it off you myself.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "quin-kiss"
+       },
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"It's a date.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "quin-kiss"
+       }
+      ]
+     }
+    ]
+   },
+   "slow": {
+    "text": "\"Yeah. Course.\" No hurt in it; Quin isn't built for sulking. \"Offer stands. So does the shirt.\"",
+    "choices": [
+     {
+      "text": "\"Goodnight, Quin.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "quin-kiss-waiting"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "noori-settling",
+  "title": "Noori on watch",
+  "speaker": "Noori Castellan",
+  "role": "Former Aurum Meridian security",
+  "crew": "noori",
+  "character": "noori",
+  "if": {
+   "notFlag": "noori-t1"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Noori has rewired your ship's internal sensors, reorganized the weapons locker, and taken the night watch without asking. You find her on the bridge, sitting very straight, watching the scopes.\n\n\"Your ship has eleven security flaws,\" she says. \"I've fixed nine. The other two are Moth.\"",
+    "choices": [
+     {
+      "text": "\"Thank you. Get some sleep, Noori.\"",
+      "to": "sleep",
+      "effects": [
+       {
+        "affinity": {
+         "who": "noori",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Why did you really leave Aurum?\"",
+      "to": "why"
+     },
+     {
+      "text": "\"You know, you're very good at this.\"",
+      "to": "good"
+     }
+    ]
+   },
+   "sleep": {
+    "text": "\"Later.\" A pause. \"Nobody has said that to me in a long time.\" She doesn't look away from the scopes, but her shoulders come down half an inch.",
+    "choices": [
+     {
+      "text": "Leave her to the watch.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "noori-t1"
+       }
+      ]
+     }
+    ]
+   },
+   "why": {
+    "text": "\"Because I flagged your ship to Teague.\" She says it flatly, the way people say things they've rehearsed. \"Nine weeks ago. I saw an unknown hull at Lalande on a sensor sweep and I reported it, because that's my job. Everything since then started with me.\"",
+    "choices": [
+     {
+      "text": "\"You couldn't have known.\"",
+      "to": "known",
+      "effects": [
+       {
+        "affinity": {
+         "who": "noori",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"I appreciate you telling me.\"",
+      "to": "known",
+      "effects": [
+       {
+        "affinity": {
+         "who": "noori",
+         "by": 1
+        }
+       },
+       {
+        "setFlag": "noori-confessed"
+       }
+      ]
+     }
+    ]
+   },
+   "good": {
+    "text": "\"I know.\" Then, almost a smile: \"But thank you. In Sirius, compliments usually come with an invoice.\"",
+    "choices": [
+     {
+      "text": "\"No invoice. Just true.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "noori-t1"
+       },
+       {
+        "affinity": {
+         "who": "noori",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "known": {
+    "text": "\"No. But I know now.\" She finally looks at you. \"So I'm going to make it right. That's all. Goodnight, Captain.\"",
+    "choices": [
+     {
+      "text": "\"Goodnight, Noori.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "noori-t1"
+       },
+       {
+        "setFlag": "noori-confessed"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "moth-hello",
+  "title": "Moth makes himself at home",
+  "speaker": "Teo \"Moth\" Basri",
+  "role": "Hacker",
+  "crew": "moth",
+  "character": "moth",
+  "if": {
+   "notFlag": "moth-t1"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Moth has built a nest in the comms alcove out of blankets, three screens and what you're fairly sure is Ilse's second-best scarf. He waves at you with a noodle.\n\n\"Captain! Great ship. Terrible snacks. I've rewritten the coffee machine's firmware, you're welcome.\"",
+    "choices": [
+     {
+      "text": "\"Is that Ilse's scarf?\"",
+      "to": "scarf"
+     },
+     {
+      "text": "\"What have you found in the data?\"",
+      "to": "data"
+     },
+     {
+      "text": "\"Glad you're here, Moth.\"",
+      "to": "glad",
+      "effects": [
+       {
+        "affinity": {
+         "who": "moth",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "scarf": {
+    "text": "\"Borrowed. Indefinitely. Archivally.\" He wraps it tighter. \"She knows. She gave me a look that I'm pretty sure meant 'I am cataloguing your death.' I've never felt so seen.\"",
+    "choices": [
+     {
+      "text": "\"What have you found in the data?\"",
+      "to": "data"
+     }
+    ]
+   },
+   "glad": {
+    "text": "He blinks, caught off guard, and for a second the patter stops. \"...Yeah?\" Then, quickly: \"Yeah. Me too. Don't make it weird.\"",
+    "choices": [
+     {
+      "text": "\"What have you found in the data?\"",
+      "to": "data"
+     }
+    ]
+   },
+   "data": {
+    "text": "\"Okay, so.\" He spins a screen toward you. \"Your core counts in primes. But it's not counting *up*. It's counting *down*. Every night, one less.\" He taps the screen. \"I don't know to what. But I really, really want to be here when it gets there.\"",
+    "choices": [
+     {
+      "text": "\"That's not ominous at all.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "moth-t1"
+       },
+       {
+        "setFlag": "core-countdown"
+       }
+      ]
+     },
+     {
+      "text": "\"Keep watching it.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "moth-t1"
+       },
+       {
+        "setFlag": "core-countdown"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+]

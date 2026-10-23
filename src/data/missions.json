@@ -56,5 +56,114 @@
     }
    }
   ]
+ },
+ {
+  "id": "two-voices",
+  "title": "Two Voices",
+  "kind": "main",
+  "summary": "There's a second signal, from the Oort Cloud, and it's a warning. Find where it comes from.",
+  "startIf": {
+   "flag": "okafor-two-voices"
+  },
+  "steps": [
+   {
+    "text": "Take a reading at Barnard's Star (the Halcyon Array)",
+    "doneIf": {
+     "flag": "reading-barnard"
+    },
+    "target": {
+     "system": "barnards-star",
+     "site": "halcyon-post-deck"
+    }
+   },
+   {
+    "text": "Take a reading at Alpha Centauri",
+    "doneIf": {
+     "flag": "reading-centauri"
+    },
+    "target": {
+     "system": "alpha-centauri",
+     "poi": "centauri-reading"
+    }
+   },
+   {
+    "text": "Take the last reading at Sirius",
+    "doneIf": {
+     "flag": "reading-sirius"
+    },
+    "target": {
+     "system": "sirius",
+     "poi": "sirius-reading"
+    }
+   }
+  ]
+ },
+ {
+  "id": "the-race-begins",
+  "title": "The Race Begins",
+  "kind": "main",
+  "summary": "Everyone wants what your ship can do. Hear them out, then decide who to trust.",
+  "startIf": {
+   "flag": "beacon-located"
+  },
+  "steps": [
+   {
+    "text": "Hear Aurum Meridian's offer at Sirius Gate",
+    "doneIf": {
+     "flag": "heard-aurum"
+    },
+    "target": {
+     "system": "sirius",
+     "site": "gate-concourse"
+    }
+   },
+   {
+    "text": "Answer the Academy's summons at Tranquility",
+    "doneIf": {
+     "flag": "heard-academy"
+    },
+    "target": {
+     "system": "sol",
+     "site": "tranquility"
+    }
+   },
+   {
+    "text": "Find Auntie Vesper in the Sump, under New Geneva",
+    "doneIf": {
+     "flag": "heard-undercity"
+    },
+    "target": {
+     "system": "sol",
+     "site": "the-sump"
+    }
+   },
+   {
+    "text": "Decide who to trust",
+    "doneIf": {
+     "flag": "race-chosen"
+    }
+   }
+  ]
+ },
+ {
+  "id": "beyond-the-oort",
+  "title": "Beyond the Oort",
+  "kind": "main",
+  "summary": "The source of the warning is out past Sol's Oort Cloud. Go and see what's been whispering at our door.",
+  "startIf": {
+   "flag": "race-chosen"
+  },
+  "steps": [
+   {
+    "text": "Fly out to the beacon, far beyond Sol's planets",
+    "doneIf": {
+     "flag": "act1-complete"
+    },
+    "target": {
+     "system": "sol",
+     "poi": "hush-beacon"
+    }
+   }
+  ]
  }
 ]

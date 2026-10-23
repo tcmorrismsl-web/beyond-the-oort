@@ -1,0 +1,685 @@
+[
+ {
+  "id": "okafor-two-voices",
+  "title": "Incoming call: Deep Space Network",
+  "speaker": "Dr. Ines Okafor",
+  "role": "Deep Space Network",
+  "character": "okafor",
+  "trigger": {
+   "if": {
+    "flag": "camp-searched",
+    "notFlag": "okafor-two-voices"
+   }
+  },
+  "start": "call",
+  "nodes": {
+   "call": {
+    "text": "\"Captain {name}. Ines Okafor.\" She sounds like she hasn't slept. \"I read your report on Tallis Camp. Forty-one people.\" A long breath. \"I need to show you something.\"\n\nA waveform scrolls across your screen: soft, patient, repeating.\n\n\"Since New Horizons woke up, my outer dishes have been catching a second signal. Not from the core. From our own Oort Cloud.\"",
+    "choices": [
+     {
+      "text": "\"That's the signal I've been hearing for years.\"",
+      "to": "yours",
+      "if": {
+       "motive": [
+        "the-signal"
+       ]
+      }
+     },
+     {
+      "text": "\"Ilse and I heard something like it under the core signal.\"",
+      "to": "under",
+      "if": {
+       "crew": "ilse"
+      }
+     },
+     {
+      "text": "\"What is it?\"",
+      "to": "what"
+     }
+    ]
+   },
+   "yours": {
+    "text": "\"Then you've been listening to it longer than anyone alive.\" She almost laughs. \"And nobody believed you. Welcome to my whole career.\"",
+    "choices": [
+     {
+      "text": "\"What is it?\"",
+      "to": "what"
+     }
+    ]
+   },
+   "under": {
+    "text": "\"The carrier tone. Yes. Ilse would find it.\" A beat. \"Tell her I said thank you. She'll pretend not to care.\"",
+    "choices": [
+     {
+      "text": "\"What is it?\"",
+      "to": "what",
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "what": {
+    "text": "\"The core signal is a list of names. It's hungry. This one is different.\" She overlays the two waveforms. \"Same family. Same alphabet, if you like. But the core signal says *we are coming*. This one is built like a warning. Short. Repeating. The kind of thing you nail to a door.\"",
+    "choices": [
+     {
+      "text": "\"Where is it coming from?\"",
+      "to": "where"
+     }
+    ]
+   },
+   "where": {
+    "text": "\"That's the problem. It's too faint for my dishes to fix a position. But your ship's array heard New Horizons cleaner than the entire DSN.\" Papers rustle. \"I need three readings from three different stars to triangulate. Barnard's Star: there's an old listening post there, the Halcyon Array, if anyone's still home. Alpha Centauri. And Sirius.\"",
+    "choices": [
+     {
+      "text": "\"On my way.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "okafor-two-voices"
+       }
+      ]
+     },
+     {
+      "text": "\"If anyone's still home?\"",
+      "to": "home"
+     }
+    ]
+   },
+   "home": {
+    "text": "\"The Halcyon group were signals researchers. Eight of them. They stopped filing reports years ago and nobody went to check, because nobody ever does.\" Her voice is very tired. \"Go carefully, Captain.\"",
+    "choices": [
+     {
+      "text": "\"I will.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "okafor-two-voices"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "celeste-halcyon",
+  "title": "Celeste Amari",
+  "speaker": "Dr. Celeste Amari",
+  "role": "Halcyon listening post",
+  "site": "halcyon-post-deck",
+  "character": "celeste",
+  "if": {
+   "notFlag": "joined-celeste"
+  },
+  "start": "door",
+  "nodes": {
+   "door": {
+    "text": "The airlock opens before you touch it. The habitat beyond is warm and smells faintly of bread, and a woman in faded coveralls is standing in the corridor with both hands pressed over her mouth.\n\nShe lowers them slowly. \"Oh,\" she says. \"Oh, you're real. Hello. Hello! Sorry. I'm Celeste. Please come in. Please.\"",
+    "choices": [
+     {
+      "text": "\"You remember me. I came by before.\"",
+      "to": "again",
+      "if": {
+       "flag": "celeste-met"
+      }
+     },
+     {
+      "text": "\"Captain {name}. Are you all right?\"",
+      "to": "hello"
+     },
+     {
+      "text": "\"Is anyone else here?\"",
+      "to": "others"
+     }
+    ]
+   },
+   "again": {
+    "text": "\"Of course I remember you.\" She laughs, and it cracks a little in the middle. \"You're the only person who's come through that door in... a while.\" She takes your hand in both of hers and holds it, just for a moment too long, then lets go, embarrassed. \"Sorry. Habit I'm trying to break. Come in.\"",
+    "choices": [
+     {
+      "text": "\"Don't apologize.\"",
+      "to": "galley",
+      "effects": [
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "Follow her in.",
+      "to": "galley"
+     }
+    ]
+   },
+   "hello": {
+    "text": "\"Am I all right?\" She considers it with real seriousness. \"I think so. I'm much better now.\" She reaches out, stops, and looks at you. \"Could I... would it be strange if I shook your hand? I haven't touched another person in a long time.\"",
+    "choices": [
+     {
+      "text": "Take her hand.",
+      "to": "hand",
+      "effects": [
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "Pull her into a hug.",
+      "to": "hug",
+      "effects": [
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 2
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Maybe later. Is anyone else here?\"",
+      "to": "others",
+      "effects": [
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": -1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "hand": {
+    "text": "Her fingers are warm, and they hold on. She closes her eyes briefly, like someone stepping into sunlight. \"Thank you,\" she says quietly. \"Come and sit down. I'll make tea. I've got so much tea.\"",
+    "choices": [
+     {
+      "text": "Follow her to the galley.",
+      "to": "galley"
+     }
+    ]
+   },
+   "hug": {
+    "text": "She makes a small sound against your shoulder and hugs you back hard enough to creak. She smells of bread and machine oil. It goes on a little longer than a hug usually does, and neither of you seems to mind.\n\n\"Sorry,\" she says finally, stepping back and wiping her eyes, not sorry at all. \"Tea. I'll make tea.\"",
+    "choices": [
+     {
+      "text": "Follow her to the galley.",
+      "to": "galley"
+     }
+    ]
+   },
+   "others": {
+    "text": "Something passes over her face and is gone. \"There were eight of us. The Halcyon group.\" She smiles brightly. \"Now there's me. Come and sit down, I'll make tea.\"",
+    "choices": [
+     {
+      "text": "Follow her to the galley.",
+      "to": "galley"
+     }
+    ]
+   },
+   "galley": {
+    "text": "The galley is spotless. One mug on the drying rack. A calendar on the wall that stopped being turned years ago. Through the porthole the great dishes of the Array turn slowly outward, listening.\n\nCeleste sets down two mugs and sits across from you with her chin in her hands, watching you drink as if it's the most interesting thing she's ever seen.",
+    "choices": [
+     {
+      "text": "\"How long have you been out here alone?\"",
+      "to": "howlong"
+     },
+     {
+      "text": "\"What happened to the rest of the group?\"",
+      "to": "group"
+     },
+     {
+      "text": "\"I need a reading of the Oort signal. Dr. Okafor sent me.\"",
+      "to": "reading",
+      "if": {
+       "flag": "okafor-two-voices"
+      }
+     }
+    ]
+   },
+   "howlong": {
+    "text": "\"A while.\" The smile doesn't move at all. \"Time's funny out here. You stop counting.\" She tops up your mug, though you've barely touched it. \"Have some more tea.\"\n\nBehind her, you notice the supply log on the galley wall. The last delivery was signed off six years ago. The hydroponics bay you passed was dark.",
+    "choices": [
+     {
+      "text": "Let it go. \"What happened to the rest of the group?\"",
+      "to": "group",
+      "effects": [
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Celeste, how have you been eating?\"",
+      "to": "eating"
+     }
+    ]
+   },
+   "eating": {
+    "text": "\"I manage.\" Gently, the way you'd close a door on a sleeping child. \"Please don't ask me that one yet. I like you. I'd like to keep liking this.\"",
+    "choices": [
+     {
+      "text": "\"All right. Not yet.\"",
+      "to": "group",
+      "effects": [
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       },
+       {
+        "setFlag": "celeste-secret-noticed"
+       }
+      ]
+     },
+     {
+      "text": "\"All right.\"",
+      "to": "group",
+      "effects": [
+       {
+        "setFlag": "celeste-secret-noticed"
+       }
+      ]
+     }
+    ]
+   },
+   "group": {
+    "text": "\"We were listening for the Oort signal. Eight of us, and we were good.\" Pride, briefly. \"One night the big dish swung around by itself, toward the core. Everyone went out to the dish housing to see.\" She turns her mug in a slow circle. \"I stayed in to finish my soup. That's the whole story. I stayed in to finish my soup.\"",
+    "choices": [
+     {
+      "text": "\"I'm so sorry, Celeste.\"",
+      "to": "sorry",
+      "effects": [
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"I need a reading of the Oort signal. Dr. Okafor sent me.\"",
+      "to": "reading",
+      "if": {
+       "flag": "okafor-two-voices"
+      }
+     },
+     {
+      "text": "\"I should go. I'll come back.\"",
+      "to": "leave"
+     }
+    ]
+   },
+   "sorry": {
+    "text": "\"Thank you.\" She means it. Then, brightening with obvious effort: \"Is there anything I can do for you? Anything at all? It's been so long since I was useful to someone.\"",
+    "choices": [
+     {
+      "text": "\"I need a reading of the Oort signal. Dr. Okafor sent me.\"",
+      "to": "reading",
+      "if": {
+       "flag": "okafor-two-voices"
+      }
+     },
+     {
+      "text": "\"I just came to see who was here. I'll come back.\"",
+      "to": "leave"
+     }
+    ]
+   },
+   "leave": {
+    "text": "\"Oh.\" Her face falls, then rallies. \"Of course. Of course you will.\" She walks you to the airlock and stands in the corridor, waving, until the door closes. \"I'll be here,\" you hear her say through it. \"I'm always here.\"",
+    "choices": [
+     {
+      "text": "Go.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "celeste-met"
+       }
+      ]
+     }
+    ]
+   },
+   "reading": {
+    "text": "Celeste lights up like you've handed her a present. \"The Oort signal? Oh, I know that one. I know that one better than my own voice.\" She's already up, pulling cables, talking fast. \"Your array plus the Halcyon dishes. We'll get the cleanest copy anyone's ever had.\"\n\nIt takes an hour. She works beside you, shoulder to shoulder, more often than strictly necessary. Then the signal comes in, clear as a bell.",
+    "choices": [
+     {
+      "text": "\"What are we looking at?\"",
+      "to": "picture"
+     }
+    ]
+   },
+   "picture": {
+    "text": "\"Everyone treats it like sound. It isn't.\" She taps a key and the waveform folds into a grid, then into an image, pixel by pixel.\n\nA ring of stars. One of them going dark.\n\nAnd beside it, unmistakable, a hand raised to a mouth.\n\n\"Shh,\" Celeste whispers. \"It's saying shh. It's been saying it for longer than we've had radio.\" Her voice wobbles. \"We were so busy trying to answer it.\"",
+    "choices": [
+     {
+      "text": "\"Ilse. Are you seeing this?\"",
+      "to": "ilse",
+      "if": {
+       "crew": "ilse"
+      }
+     },
+     {
+      "text": "\"Then whoever sent this was warning us.\"",
+      "to": "warn"
+     }
+    ]
+   },
+   "ilse": {
+    "text": "Ilse has gone very quiet in the hatchway. \"Yes,\" she says. \"I'm seeing it.\" She doesn't say anything else, and she doesn't look at you, and she writes something down on paper.",
+    "choices": [
+     {
+      "text": "\"Then whoever sent this was warning us.\"",
+      "to": "warn",
+      "effects": [
+       {
+        "setFlag": "ilse-hush-seen"
+       }
+      ]
+     }
+    ]
+   },
+   "warn": {
+    "text": "\"Warning us not to do exactly what my group did.\" Celeste hugs her own arms. Then she looks at you, at your ship through the porthole, and says in a rush: \"Take me with you. Please. I know this signal better than anyone alive. I'll be useful. I'll be so useful. And I can't—\" She stops. \"I don't want to be the last one here anymore.\"",
+    "choices": [
+     {
+      "text": "\"Pack your things. You're coming with us.\"",
+      "to": "pack",
+      "effects": [
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Are you sure you're ready to leave?\"",
+      "to": "sure"
+     }
+    ]
+   },
+   "sure": {
+    "text": "She looks around the galley: the one mug, the dead calendar, the porthole full of dishes. \"I've been ready for a very long time,\" she says. \"I just needed somewhere to go.\"",
+    "choices": [
+     {
+      "text": "\"Then come with us.\"",
+      "to": "pack"
+     }
+    ]
+   },
+   "pack": {
+    "text": "Celeste packs one bag. At the airlock she turns back once and switches off the galley light, very gently, like someone saying goodnight.\n\nThen she takes your arm, as if it's the most natural thing in the world, and walks aboard.",
+    "choices": [
+     {
+      "text": "Welcome her aboard.",
+      "to": null,
+      "effects": [
+       {
+        "locker": {
+         "item": "halcyon-decode",
+         "qty": 1
+        }
+       },
+       {
+        "setFlag": "reading-barnard"
+       },
+       {
+        "join": "celeste"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "centauri-reading-scene",
+  "title": "Take a reading",
+  "speaker": "Quiet point",
+  "role": "Alpha Centauri",
+  "poi": "centauri-reading",
+  "if": {
+   "flag": "okafor-two-voices",
+   "notFlag": "reading-centauri"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "You kill the engines between the twin suns and let the array open wide. For a while there's nothing but the hiss of two stars.\n\nThen the Oort signal comes in, faint and patient. And under it, far fainter, the core signal, reciting its list.",
+    "choices": [
+     {
+      "text": "Record both.",
+      "to": "b"
+     }
+    ]
+   },
+   "b": {
+    "text": "WOLF 359. BARNARD'S STAR. ALPHA CENTAURI.\n\nAnd as the core says the name of the star you're sitting between, the Oort signal stops.\n\nIt doesn't fade. It stops, like someone holding their breath, and waits until the core has moved on to the next name. Then, softly, it starts again.",
+    "choices": [
+     {
+      "text": "\"Celeste?\"",
+      "to": "celeste",
+      "if": {
+       "crew": "celeste"
+      }
+     },
+     {
+      "text": "\"Quin. Tell me you saw that.\"",
+      "to": "quin",
+      "if": {
+       "crew": "quin"
+      }
+     },
+     {
+      "text": "Save the reading.",
+      "to": "end"
+     }
+    ]
+   },
+   "celeste": {
+    "text": "Celeste is staring at the screen with her hand over her own mouth, unconsciously copying the picture. \"It's listening to the core too,\" she whispers. \"It goes quiet so it won't be heard. Every night. For centuries.\"",
+    "choices": [
+     {
+      "text": "Save the reading.",
+      "to": "end",
+      "effects": [
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "quin": {
+    "text": "\"I saw it.\" Quin's jaw is tight. \"Something out there is scared, Captain. And it's a lot older than us.\"",
+    "choices": [
+     {
+      "text": "Save the reading.",
+      "to": "end",
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "end": {
+    "text": "Two readings down. One to go: Sirius.",
+    "choices": [
+     {
+      "text": "Set a course.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "reading-centauri"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "sirius-reading-scene",
+  "title": "Take the last reading",
+  "speaker": "White dwarf shadow",
+  "role": "Sirius",
+  "poi": "sirius-reading",
+  "if": {
+   "notFlag": "reading-sirius"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "You tuck the ship into the shadow of Sirius B, a dead star's cinder no bigger than a planet, and the glare of its brilliant companion falls away. Your array opens. The third reading comes in clean.\n\nThree stars. Three angles. The numbers fall into place.",
+    "choices": [
+     {
+      "text": "Run the triangulation.",
+      "to": "fix"
+     }
+    ]
+   },
+   "fix": {
+    "text": "The point blinks onto your chart, and for a moment you think it's a mistake.\n\nThe source of the warning isn't out past Vega, or anywhere exotic. It's in Sol. Just past our own Oort Cloud, far out in the dark beyond Pluto, where no one has had a reason to look in a hundred years.\n\nSomething has been whispering *shh* at humanity's front door the whole time.",
+    "choices": [
+     {
+      "text": "\"Ilse, you've gone quiet.\"",
+      "to": "ilse",
+      "if": {
+       "crew": "ilse"
+      }
+     },
+     {
+      "text": "Send the position to Okafor.",
+      "to": "hail"
+     }
+    ]
+   },
+   "ilse": {
+    "text": "\"I'm thinking.\" She has the paper she's been writing on all this time folded tight in one fist. \"When we get there, Captain... I'll have something to tell you. Not yet. Please.\"",
+    "choices": [
+     {
+      "text": "\"I'll hold you to that.\"",
+      "to": "hail",
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       },
+       {
+        "setFlag": "ilse-promised"
+       }
+      ]
+     }
+    ]
+   },
+   "hail": {
+    "text": "Before you can transmit, every proximity alarm on the ship goes off at once.\n\nA corvette in the gold-and-black of Aurum Meridian slides out of Sirius B's shadow, close enough to read the rivets. Your screen fills with a woman in a sharp uniform, dark hair slicked back, face perfectly composed.\n\n\"Captain {name}. Noori Castellan, Aurum Meridian security. Please don't run, it would be undignified for both of us.\" A small pause. \"The Director would like a word. Sirius Gate, concourse level. He's very interested in your ship.\"",
+    "choices": [
+     {
+      "text": "\"And if I say no?\"",
+      "to": "no"
+     },
+     {
+      "text": "\"How long have you been following me?\"",
+      "to": "follow"
+     },
+     {
+      "text": "\"Tell the Director I'll think about it.\"",
+      "to": "think"
+     }
+    ]
+   },
+   "no": {
+    "text": "\"Then I'll be very disappointed, and so will he, and you'll be the most interesting person on Aurum's watch list, which is not a list anyone enjoys being on.\" Something that might almost be amusement. \"Come and hear him out, Captain. It costs you nothing. That's rare at Sirius.\"",
+    "choices": [
+     {
+      "text": "\"Fine. I'll hear him out.\"",
+      "to": "end",
+      "effects": [
+       {
+        "affinity": {
+         "who": "noori",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "follow": {
+    "text": "\"Since 61 Cygni.\" No hesitation. \"Your ship is the only one of her kind. She stands out on every sensor in human space.\" Her eyes flick over something off-screen. \"So do you, for what it's worth.\"",
+    "choices": [
+     {
+      "text": "\"I'll hear him out.\"",
+      "to": "end",
+      "effects": [
+       {
+        "affinity": {
+         "who": "noori",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "think": {
+    "text": "\"Think quickly.\" The corvette peels away as smoothly as it arrived. \"Concourse level, Captain. Ask for me.\"",
+    "choices": [
+     {
+      "text": "Watch her go.",
+      "to": "end"
+     }
+    ]
+   },
+   "end": {
+    "text": "The position of the beacon sits on your chart, glowing. And everyone, it seems, already knows you've found something.",
+    "choices": [
+     {
+      "text": "Send the position to Okafor.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "reading-sirius"
+       },
+       {
+        "setFlag": "beacon-located"
+       },
+       {
+        "setFlag": "noori-hail"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+]

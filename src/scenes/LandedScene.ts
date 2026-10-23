@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { gameData, type Service, type Site } from '../data/schema';
 import type { Session } from '../core/session';
 import { button, createLayer, credits, el, type Layer } from '../ui/dom';
-import { openSheet, renderDialogue, renderDrydock, renderMarket } from '../ui/panels';
+import { openSheet, renderDialogue, renderDrydock, renderMarket, shortName } from '../ui/panels';
 import { dialoguesAt } from '../systems/dialogue';
 import { waitingAt } from '../systems/crew';
 import { portraitSvg, setSvg } from '../ui/art';
@@ -153,8 +153,8 @@ export class LandedScene extends Phaser.Scene {
     for (const c of waitingAt(site.id, state, gameData)) {
       const face = el('div', 'portrait-box tiny');
       setSvg(face, portraitSvg(c.look));
-      const invite = button(`Invite ${c.name.split(' ')[0]} back aboard`, () => {
-        if (this.session.invite(c.id, Date.now())) showToast(`${c.name.split(' ')[0]} is back aboard`);
+      const invite = button(`Invite ${shortName(c.name)} back aboard`, () => {
+        if (this.session.invite(c.id, Date.now())) showToast(`${shortName(c.name)} is back aboard`);
         refresh();
       }, 'small');
       invite.style.marginTop = '8px';

@@ -1,0 +1,216 @@
+[
+ {
+  "id": "hush-beacon-scene",
+  "title": "The beacon",
+  "speaker": "The beacon",
+  "role": "Beyond the Oort Cloud",
+  "poi": "hush-beacon",
+  "if": {
+   "flag": "race-chosen",
+   "notFlag": "act1-complete"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Sol is just a bright star behind you now. Out here there is no light but your own running lights and the faint smear of the Milky Way.\n\nThen something blots out the stars ahead. A spindle of black material a kilometer long, ridged like the inside of a shell, drifting end over end so slowly you can barely see it move. It was here before there were people on Earth to look up.\n\nAs you watch, it stops turning, and points its narrow end at you.",
+    "choices": [
+     {
+      "text": "\"Everyone. Stay sharp.\"",
+      "to": "b"
+     },
+     {
+      "text": "Bring her closer.",
+      "to": "b"
+     }
+    ]
+   },
+   "b": {
+    "text": "The beacon doesn't transmit. It *shows*. Every screen on your ship fills with the picture Celeste decoded: the ring of stars, one going dark, the hand raised to the mouth.\n\nThen the picture widens into a map. Stars you know, then stars you don't, reaching far past Vega, past anywhere a human ship has been. Dozens of them carry the same small mark.\n\nYou don't need anyone to translate it. *Quiet.*",
+    "choices": [
+     {
+      "text": "\"Celeste, what am I looking at?\"",
+      "to": "celeste",
+      "if": {
+       "crew": "celeste"
+      }
+     },
+     {
+      "text": "\"Ilse. You said you'd tell me something.\"",
+      "to": "ilse",
+      "if": {
+       "crew": "ilse",
+       "flag": "ilse-promised"
+      }
+     },
+     {
+      "text": "\"Ilse. You've seen this before, haven't you?\"",
+      "to": "ilse",
+      "if": {
+       "crew": "ilse",
+       "notFlag": "ilse-promised"
+      }
+     },
+     {
+      "text": "\"Moth, can you save this?\"",
+      "to": "moth",
+      "if": {
+       "crew": "moth"
+      }
+     },
+     {
+      "text": "Save the map.",
+      "to": "c"
+     }
+    ]
+   },
+   "celeste": {
+    "text": "\"Every world it found.\" Celeste's voice is very small. \"Every world that answered. They're not warning us about one disaster, Captain. They're showing us a graveyard.\" She reaches for your hand without looking, and holds on.",
+    "choices": [
+     {
+      "text": "Hold on.",
+      "to": "c",
+      "effects": [
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "ilse": {
+    "text": "Ilse unfolds the paper she's been writing on since the Archive. It's a list of dates and places, in three different handwritings.\n\n\"The Bessel Archive keeps a sealed collection,\" she says. \"We call it the Quiet Record. Sixty years of reports like Tallis Camp. My grandmother started it. I'm its keeper.\" She looks up at the map on the screen. \"I have been looking for this beacon my entire life. I'm sorry I didn't tell you sooner. I'll show you all of it. I promise.\"",
+    "choices": [
+     {
+      "text": "\"Thank you for telling me now.\"",
+      "to": "c",
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 2
+        }
+       },
+       {
+        "setFlag": "quiet-record-revealed"
+       }
+      ]
+     },
+     {
+      "text": "\"You should have told me at the Archive.\"",
+      "to": "c",
+      "effects": [
+       {
+        "setFlag": "quiet-record-revealed"
+       }
+      ]
+     }
+    ]
+   },
+   "moth": {
+    "text": "\"Saving it? Captain, I'm *framing* it.\" Moth's fingers fly. \"Got it. All of it. Oh, that's so much further than our charts go. Oh, that's terrifying. Got it, though.\"",
+    "choices": [
+     {
+      "text": "\"Good work.\"",
+      "to": "c",
+      "effects": [
+       {
+        "affinity": {
+         "who": "moth",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "c": {
+    "text": "Then, without anyone touching anything, every light on your ship comes on at once.\n\nDeep in the drive section, the core wakes up. Not a hum this time. A voice: seven beats, a rest, eleven, then a long rising chord that rattles the deck plates under your boots.\n\nYour ship is answering the beacon.",
+    "choices": [
+     {
+      "text": "\"Quin! Shut it down!\"",
+      "to": "quin",
+      "if": {
+       "crew": "quin"
+      }
+     },
+     {
+      "text": "Try to cut power to the drive.",
+      "to": "cut"
+     },
+     {
+      "text": "Let her speak.",
+      "to": "speak"
+     }
+    ]
+   },
+   "quin": {
+    "text": "\"I'm trying!\" Quin's voice over the intercom, then a crash of something heavy. \"It won't shut down! It's like it's not even wired to us anymore!\"",
+    "choices": [
+     {
+      "text": "\"Let her finish.\"",
+      "to": "speak",
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "cut": {
+    "text": "The breakers trip. The power cuts. And the core keeps singing anyway, as if it never needed your power at all.",
+    "choices": [
+     {
+      "text": "Let her finish.",
+      "to": "speak"
+     }
+    ]
+   },
+   "speak": {
+    "text": "The song goes on for a long time. When Celeste finally speaks, she sounds like she's crying.\n\n\"It's not answering the core, Captain. It's answering the beacon. It's saying...\" She listens. \"It's saying, *I'm home*.\"\n\nThe song ends. The beacon goes dark. And for one long moment, there is perfect silence.",
+    "choices": [
+     {
+      "text": "Breathe.",
+      "to": "reply"
+     }
+    ]
+   },
+   "reply": {
+    "text": "Then every speaker on the ship crackles at once. Not from the beacon. From the other direction: toward the center of the galaxy, twenty-six thousand light-years away, and it has arrived in no time at all.\n\nText crawls across every screen.\n\nWE HEAR YOU, LITTLE LANTERN.",
+    "choices": [
+     {
+      "text": "...",
+      "to": "end"
+     }
+    ]
+   },
+   "end": {
+    "text": "END OF ACT 1\n\nBEYOND THE OORT\n\nThe story continues in Act 2. Your ship, your crew, and every choice you've made will carry over.",
+    "choices": [
+     {
+      "text": "Keep exploring.",
+      "to": null,
+      "effects": [
+       {
+        "locker": {
+         "item": "hush-starmap",
+         "qty": 1
+        }
+       },
+       {
+        "setFlag": "act1-complete"
+       }
+      ]
+     }
+    ],
+    "mood": "title"
+   }
+  }
+ }
+]

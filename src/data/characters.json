@@ -151,5 +151,56 @@
    "beard": "stubble"
   },
   "home": "the-sump"
+ },
+ {
+  "id": "teague",
+  "name": "Director Lucan Teague",
+  "pronouns": "he",
+  "role": "Aurum Meridian, Sirius",
+  "bio": "Silver-haired, soft-spoken, and certain that everything has a price, including the end of the world.",
+  "look": {
+   "face": "narrow",
+   "skin": "#eac0a0",
+   "hair": "slick",
+   "hairColor": "#b8b8b8",
+   "eyes": "#7a8a96",
+   "outfit": "uniform",
+   "outfitColor": "#3a3a40",
+   "beard": "none"
+  }
+ },
+ {
+  "id": "brandt",
+  "name": "Commander Elias Brandt",
+  "pronouns": "he",
+  "role": "Tranquility Academy",
+  "bio": "Thirty years of service, a spine like a ruler, and orders to make this whole thing go away.",
+  "look": {
+   "face": "square",
+   "skin": "#7a4a2c",
+   "hair": "crew",
+   "hairColor": "#b8b8b8",
+   "eyes": "#3b2a1d",
+   "outfit": "uniform",
+   "outfitColor": "#2b3a55",
+   "beard": "mustache"
+  }
+ },
+ {
+  "id": "vesper",
+  "name": "Auntie Vesper",
+  "pronouns": "she",
+  "role": "Broker, the Sump",
+  "bio": "Everybody's favorite auntie. Nobody in the Sump has ever seen her lose a deal, or her temper.",
+  "look": {
+   "face": "round",
+   "skin": "#c08559",
+   "hair": "bun",
+   "hairColor": "#f0ede6",
+   "eyes": "#3f7a4a",
+   "outfit": "longcoat",
+   "outfitColor": "#6b4a8a",
+   "beard": "none"
+  }
  }
 ]
