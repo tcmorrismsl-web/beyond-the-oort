@@ -25,6 +25,26 @@ const game = new Phaser.Game({
   callbacks: { preBoot: (g) => g.registry.set(SESSION_KEY, session) },
 });
 
+// iOS often reports the new size a moment after a rotation event, so Phaser
+// can lock onto a stale, half-rotated size. Re-check the real size several
+// times after any rotation/resize, plus a cheap watchdog as a safety net.
+const gameParent = document.getElementById('game');
+function syncGameSize(): void {
+  if (!gameParent) return;
+  const w = gameParent.clientWidth;
+  const h = gameParent.clientHeight;
+  if (w > 0 && h > 0 && (w !== Math.round(game.scale.width) || h !== Math.round(game.scale.height))) {
+    game.scale.refresh();
+  }
+}
+function scheduleSizeChecks(): void {
+  for (const ms of [0, 100, 300, 700, 1200]) setTimeout(syncGameSize, ms);
+}
+window.addEventListener('resize', scheduleSizeChecks);
+window.addEventListener('orientationchange', scheduleSizeChecks);
+window.visualViewport?.addEventListener('resize', scheduleSizeChecks);
+setInterval(syncGameSize, 500);
+
 // Brief on-screen confirmation for saves, so the player can trust them.
 const toast = document.getElementById('toast');
 let toastTimer: ReturnType<typeof setTimeout> | undefined;
@@ -80,12 +100,25 @@ void requestPersistence();
 // Test hook for scripts/smoke-test.mjs; only exists when the URL has ?smoke.
 declare global {
   interface Window {
-    __smoke?: { frame: () => number; activeScenes: () => string[] };
+    __smoke?: {
+      frame: () => number;
+      activeScenes: () => string[];
+      /** Knocks every camera to a wrong size, as a missed resize would. */
+      breakCameras: (w: number, h: number) => void;
+      size: () => { game: [number, number]; cameras: [number, number][] };
+    };
   }
 }
 if (new URLSearchParams(window.location.search).has('smoke')) {
   window.__smoke = {
     frame: () => game.loop.frame,
     activeScenes: () => game.scene.getScenes(true).map((s) => s.scene.key),
+    breakCameras: (w, h) => {
+      for (const sc of game.scene.getScenes(true)) for (const c of sc.cameras.cameras) c.setSize(w, h);
+    },
+    size: () => ({
+      game: [game.scale.width, game.scale.height],
+      cameras: game.scene.getScenes(true).flatMap((sc) => sc.cameras.cameras.map((c): [number, number] => [c.width, c.height])),
+    }),
   };
 }

@@ -96,6 +96,11 @@ export class FlightScene extends Phaser.Scene {
         this.easeLookAhead(cam, kin);
       }
       Object.assign(ship, kin);
+      // Safety net: if a resize was missed, the cameras no longer match the
+      // screen (the ship drifts off-center or vanishes). Repair it here.
+      if (cam.width !== this.scale.width || cam.height !== this.scale.height || this.hudCam.width !== this.scale.width) {
+        this.fitToScreen();
+      }
       this.ship.setPosition(ship.x, ship.y).setRotation(ship.angle);
       this.updateFlame();
       this.updateBackdrop();
@@ -142,18 +147,23 @@ export class FlightScene extends Phaser.Scene {
    * resize the cameras and background ourselves and re-center on the ship.
    */
   private handleResize(): void {
-    const onResize = (gameSize: Phaser.Structs.Size): void => {
-      const { width, height } = gameSize;
-      this.cameras.resize(width, height);
-      this.cameras.main.centerOn(this.ship.x, this.ship.y);
-      this.farStars.setSize(width, height);
-      this.nearStars.setSize(width, height);
-      this.resetStick();
+    const onResize = (): void => {
+      this.fitToScreen();
     };
     this.scale.on(Phaser.Scale.Events.RESIZE, onResize);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off(Phaser.Scale.Events.RESIZE, onResize);
     });
+  }
+
+  /** Match both cameras and the star layers to the current game size and re-center. */
+  private fitToScreen(): void {
+    const { width, height } = this.scale;
+    this.cameras.resize(width, height);
+    this.cameras.main.centerOn(this.ship.x, this.ship.y);
+    this.farStars.setSize(width, height);
+    this.nearStars.setSize(width, height);
+    this.resetStick();
   }
 
   private updateFlame(): void {

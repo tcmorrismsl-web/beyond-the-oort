@@ -83,6 +83,39 @@ try {
     if (layout.cw < layout.vw - 1 || layout.ch < layout.vh - 1) problems.push(`${tag} canvas ${layout.cw}x${layout.ch} does not fill ${layout.vw}x${layout.vh}`);
     if (layout.sw > layout.vw + 1 || layout.sh > layout.vh + 1) problems.push(`${tag} page scrolls (${layout.sw}x${layout.sh} > viewport)`);
 
+    // Rotation (a real bug twice on iPhone): rotate, and also imitate iOS
+    // laying out the new size late, after the last resize event. Within a
+    // moment the game and every camera must match the screen again.
+    const sizesMatch = async () => page.evaluate(() => {
+      const s = window.__smoke?.size();
+      if (!s) return 'smoke hook has no size()';
+      const want = [window.innerWidth, window.innerHeight];
+      const all = [s.game, ...s.cameras];
+      const bad = all.find(([w, h]) => Math.abs(w - want[0]) > 1 || Math.abs(h - want[1]) > 1);
+      return bad ? `game/cameras ${JSON.stringify(all)} vs screen ${want.join('x')}` : '';
+    });
+    const vp = page.viewportSize();
+    if (vp) {
+      await page.setViewportSize({ width: vp.height, height: vp.width });
+      await page.waitForTimeout(800);
+      const afterRotate = await sizesMatch();
+      if (afterRotate) problems.push(`${tag} after rotating: ${afterRotate}`);
+
+      await page.evaluate(([w, h]) => {
+        const g = document.getElementById('game');
+        if (g) { g.style.width = `${w}px`; g.style.height = `${h}px`; }
+      }, [vp.height, vp.width]);
+      await page.setViewportSize({ width: vp.width, height: vp.height });
+      await page.waitForTimeout(1500);
+      await page.evaluate(() => {
+        const g = document.getElementById('game');
+        if (g) { g.style.width = ''; g.style.height = ''; }
+      });
+      await page.waitForTimeout(800);
+      const afterLate = await sizesMatch();
+      if (afterLate) problems.push(`${tag} after late (iOS-style) layout: ${afterLate}`);
+    }
+
     // Touch the movement zone and the right side; nothing should throw.
     await page.touchscreen.tap(layout.vw * 0.25, layout.vh * 0.6);
     await page.touchscreen.tap(layout.vw * 0.85, layout.vh * 0.6);
