@@ -10,6 +10,8 @@ import { canRepaint, canUpgrade, statsFor, upgradeBlockText } from '../systems/s
 import { nodeText, shownChoices } from '../systems/dialogue';
 import { button, chips, credits, el, swatches } from './dom';
 import { portraitSvg, setSvg, shipSvg } from './art';
+import { freshSeed, Rng } from '../core/rng';
+import type { Look, Paint } from '../core/state';
 import { showToast } from './toast';
 
 /** Open a sheet over the given layer; returns a function that closes it. */
@@ -184,12 +186,26 @@ export function renderShip(card: HTMLDivElement, session: Session, close: () => 
 
   const art = el('div', 'ship-box');
   setSvg(art, shipSvg(state.paint));
-  card.append(art);
+  card.append(art, el('div', 'note', 'Repaint her at any drydock: Highport, Olympus Yards, Centauri Yards or Sirius Gate.'));
   const cap = state.captain;
   if (cap) {
     const portrait = el('div', 'portrait-box small');
     setSvg(portrait, portraitSvg(cap.look));
-    card.append(portrait);
+    const changeLook = button('Change look', () => {
+      openSheet(card.closest('.layer') ?? card, (sheet, close) => {
+        const look = { ...cap.look };
+        sheet.append(el('h1', '', 'Change look'), el('div', 'sub', `Captain ${cap.name}`), lookEditor(look));
+        const save = button('Save', () => {
+          if (session.setLook(look, Date.now())) {
+            setSvg(portrait, portraitSvg(look));
+            showToast('Looking sharp, captain');
+          }
+          close();
+        }, 'primary');
+        sheet.append(el('div', 'row nav-row', button('Cancel', close), save));
+      });
+    }, 'small');
+    card.append(el('div', 'row look-row', portrait, changeLook));
     const c = gameData.creation;
     const origin = c.origins.find((o) => o.id === cap.origin)?.name ?? '';
     const moment = c.moments.find((m) => m.id === cap.moment)?.name ?? '';
@@ -268,9 +284,7 @@ const REPAINT_TEXT = { 'no-drydock': 'Needs a drydock', credits: 'Not enough cre
 
 /** Repaint editor inside the drydock sheet. Applying charges the repaint cost. */
 export function renderPaintShop(card: HTMLDivElement, session: Session, back: () => void): void {
-  const a = gameData.appearance.ship;
   const paint = { ...session.state.paint };
-  const preview = el('div', 'ship-box');
   const apply = button('', () => {
     const r = session.repaintShip(paint, Date.now());
     if (r.ok) {
@@ -278,39 +292,97 @@ export function renderPaintShop(card: HTMLDivElement, session: Session, back: ()
       back();
     } else showToast(REPAINT_TEXT[r.reason]);
   }, 'primary');
-  apply.style.width = '100%';
   const update = (): void => {
-    setSvg(preview, shipSvg(paint));
     const check = canRepaint(session.state, paint, gameData);
     apply.disabled = !check.ok;
     apply.textContent = check.ok ? `Apply · ${credits(check.cost)}` : REPAINT_TEXT[check.reason];
   };
-  const row = (label: string, build: (refresh: () => void) => HTMLElement): HTMLElement => {
-    const slot = el('div');
-    const refresh = (): void => {
-      slot.replaceChildren(build(refresh));
-      update();
-    };
-    slot.append(build(refresh));
-    return el('div', 'opt-row', el('div', 'sub section', label), slot);
-  };
   card.replaceChildren(
     el('h1', '', 'Paint shop'),
     el('div', 'sub', `${session.state.shipName} · ${credits(session.state.credits)}`),
-    el(
-      'div',
-      'look-grid',
-      el('div', 'look-preview', preview),
+    paintEditor(paint, update),
+    el('div', 'row nav-row', button('Back', back), apply),
+  );
+  update();
+}
+
+// ------------------------------------------------------------------ Look & paint editors (shared)
+
+/** An option row that rebuilds only itself on pick (no jump back to the top on a phone). */
+function optionRow(label: string, build: (refresh: () => void) => HTMLElement, onChange: () => void): HTMLElement {
+  const slot = el('div');
+  const refresh = (): void => {
+    slot.replaceChildren(build(refresh));
+    onChange();
+  };
+  slot.append(build(refresh));
+  return el('div', 'opt-row', el('div', 'sub section', label), slot);
+}
+
+/** Captain portrait editor: live preview, "Surprise me", and every option. Edits `look` in place. */
+export function lookEditor(look: Look, onChange: () => void = () => undefined): HTMLDivElement {
+  const a = gameData.appearance.captain;
+  const root = el('div', 'look-grid');
+  const build = (): void => {
+    const preview = el('div', 'portrait-box');
+    const update = (): void => {
+      setSvg(preview, portraitSvg(look));
+      onChange();
+    };
+    setSvg(preview, portraitSvg(look));
+    const randomize = button('Surprise me', () => {
+      const rng = new Rng(freshSeed());
+      look.face = rng.pick(a.faces).id;
+      look.skin = rng.pick(a.skinTones);
+      look.hair = rng.pick(a.hairStyles).id;
+      look.hairColor = rng.pick(a.hairColors);
+      look.eyes = rng.pick(a.eyeColors);
+      look.outfit = rng.pick(a.outfits).id;
+      look.outfitColor = rng.pick(a.outfitColors);
+      look.beard = rng.pick(a.beards).id;
+      build();
+      onChange();
+    }, 'small');
+    root.replaceChildren(
+      el('div', 'look-preview', preview, randomize),
       el(
         'div',
         'look-options',
-        row('Hull', (r) => swatches(a.hullColors, paint.hull, (v) => { paint.hull = v; r(); }, 'Hull color')),
-        row('Accent', (r) => swatches(a.accentColors, paint.accent, (v) => { paint.accent = v; r(); }, 'Accent color')),
-        row('Pattern', (r) => chips(a.patterns, paint.pattern, (v) => { paint.pattern = v; r(); })),
-        row('Engine glow', (r) => swatches(a.glowColors, paint.glow, (v) => { paint.glow = v; r(); }, 'Engine glow')),
+        optionRow('Face', (r) => chips(a.faces, look.face, (v) => { look.face = v; r(); }), update),
+        optionRow('Skin', (r) => swatches(a.skinTones, look.skin, (v) => { look.skin = v; r(); }, 'Skin tone'), update),
+        optionRow('Hair', (r) => chips(a.hairStyles, look.hair, (v) => { look.hair = v; r(); }), update),
+        optionRow('Hair color', (r) => swatches(a.hairColors, look.hairColor, (v) => { look.hairColor = v; r(); }, 'Hair color'), update),
+        optionRow('Facial hair', (r) => chips(a.beards, look.beard, (v) => { look.beard = v; r(); }), update),
+        optionRow('Eyes', (r) => swatches(a.eyeColors, look.eyes, (v) => { look.eyes = v; r(); }, 'Eye color'), update),
+        optionRow('Outfit', (r) => chips(a.outfits, look.outfit, (v) => { look.outfit = v; r(); }), update),
+        optionRow('Outfit color', (r) => swatches(a.outfitColors, look.outfitColor, (v) => { look.outfitColor = v; r(); }, 'Outfit color'), update),
       ),
+    );
+  };
+  build();
+  return root;
+}
+
+/** Ship paint editor: big live preview and every option. Edits `paint` in place. */
+export function paintEditor(paint: Paint, onChange: () => void = () => undefined): HTMLDivElement {
+  const a = gameData.appearance.ship;
+  const preview = el('div', 'ship-box big');
+  const update = (): void => {
+    setSvg(preview, shipSvg(paint));
+    onChange();
+  };
+  setSvg(preview, shipSvg(paint));
+  return el(
+    'div',
+    'look-grid',
+    el('div', 'look-preview', preview),
+    el(
+      'div',
+      'look-options',
+      optionRow('Hull', (r) => swatches(a.hullColors, paint.hull, (v) => { paint.hull = v; r(); }, 'Hull color'), update),
+      optionRow('Accent', (r) => swatches(a.accentColors, paint.accent, (v) => { paint.accent = v; r(); }, 'Accent color'), update),
+      optionRow('Pattern', (r) => chips(a.patterns, paint.pattern, (v) => { paint.pattern = v; r(); }), update),
+      optionRow('Engine glow', (r) => swatches(a.glowColors, paint.glow, (v) => { paint.glow = v; r(); }, 'Engine glow'), update),
     ),
-    el('div', 'row', button('Back', back), apply),
   );
-  update();
 }

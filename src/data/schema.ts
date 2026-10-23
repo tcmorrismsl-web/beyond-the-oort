@@ -201,6 +201,7 @@ export const AppearanceSchema = z.object({
     eyeColors: z.array(hexColor).min(1),
     outfits: z.array(NamedOption).min(1),
     outfitColors: z.array(hexColor).min(1),
+    beards: z.array(NamedOption).min(1),
   }),
   ship: z.object({
     hullColors: z.array(hexColor).min(1),
@@ -253,6 +254,7 @@ const DEFAULT_APPEARANCE = {
     eyeColors: ['#3b2a1d'],
     outfits: [{ id: 'flight-jacket', name: 'Flight jacket' }],
     outfitColors: ['#2b3a55'],
+    beards: [{ id: 'none', name: 'None' }],
   },
   ship: { hullColors: ['#dfe8ff'], accentColors: ['#4fc3ff'], patterns: [{ id: 'plain', name: 'Plain' }], glowColors: ['#ffa040'] },
   repaintCost: 0,

@@ -8,7 +8,7 @@ import { readKey, writeKey, type StorageResult } from './storage';
  *    is the most valuable thing in the game.
  *  - Every load is validated. A corrupt save is reported, never half-loaded.
  */
-export const SAVE_VERSION = 5;
+export const SAVE_VERSION = 6;
 const SAVE_KEY = 'game.save';
 
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/);
@@ -20,6 +20,7 @@ export const LookSchema = z.object({
   eyes: hex,
   outfit: z.string().min(1),
   outfitColor: hex,
+  beard: z.string().min(1),
 });
 export const PaintSchema = z.object({ hull: hex, accent: hex, pattern: z.string().min(1), glow: hex });
 
@@ -104,6 +105,12 @@ const migrations: Record<number, Migration> = {
         : null,
       paint: { hull: '#dfe8ff', accent: '#4fc3ff', pattern: 'plain', glow: '#ffa040' },
     };
+  },
+  // v5 → v6: facial hair (none by default).
+  5: (old) => {
+    const captain = typeof old['captain'] === 'object' && old['captain'] !== null ? (old['captain'] as Record<string, unknown>) : null;
+    const look = captain && typeof captain['look'] === 'object' && captain['look'] !== null ? (captain['look'] as Record<string, unknown>) : null;
+    return { ...old, captain: captain && look ? { ...captain, look: { ...look, beard: 'none' } } : captain };
   },
 };
 

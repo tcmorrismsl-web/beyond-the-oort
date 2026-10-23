@@ -1,43 +1,228 @@
 {
   "captain": {
     "faces": [
-      { "id": "oval", "name": "Oval" },
-      { "id": "round", "name": "Round" },
-      { "id": "square", "name": "Square" },
-      { "id": "narrow", "name": "Narrow" }
+      {
+        "id": "oval",
+        "name": "Oval"
+      },
+      {
+        "id": "round",
+        "name": "Round"
+      },
+      {
+        "id": "square",
+        "name": "Square"
+      },
+      {
+        "id": "narrow",
+        "name": "Narrow"
+      }
     ],
-    "skinTones": ["#f6d7c3", "#eac0a0", "#d9a37e", "#c08559", "#9c6640", "#7a4a2c", "#5a3420", "#3f2416"],
+    "skinTones": [
+      "#f6d7c3",
+      "#eac0a0",
+      "#d9a37e",
+      "#c08559",
+      "#9c6640",
+      "#7a4a2c",
+      "#5a3420",
+      "#3f2416"
+    ],
     "hairStyles": [
-      { "id": "short", "name": "Short" },
-      { "id": "buzz", "name": "Buzzed" },
-      { "id": "long", "name": "Long" },
-      { "id": "ponytail", "name": "Ponytail" },
-      { "id": "curls", "name": "Curls" },
-      { "id": "undercut", "name": "Undercut" },
-      { "id": "bun", "name": "Bun" },
-      { "id": "bald", "name": "Shaved" }
+      {
+        "id": "crew",
+        "name": "Crew cut"
+      },
+      {
+        "id": "sidepart",
+        "name": "Side part"
+      },
+      {
+        "id": "slick",
+        "name": "Slicked back"
+      },
+      {
+        "id": "quiff",
+        "name": "Quiff"
+      },
+      {
+        "id": "messy",
+        "name": "Messy"
+      },
+      {
+        "id": "fade",
+        "name": "Fade"
+      },
+      {
+        "id": "buzz",
+        "name": "Buzzed"
+      },
+      {
+        "id": "bald",
+        "name": "Shaved"
+      },
+      {
+        "id": "afro",
+        "name": "Afro"
+      },
+      {
+        "id": "locs",
+        "name": "Locs"
+      },
+      {
+        "id": "curls",
+        "name": "Curls"
+      },
+      {
+        "id": "short",
+        "name": "Swept bangs"
+      },
+      {
+        "id": "undercut",
+        "name": "Undercut"
+      },
+      {
+        "id": "long",
+        "name": "Long"
+      },
+      {
+        "id": "ponytail",
+        "name": "Ponytail"
+      },
+      {
+        "id": "bun",
+        "name": "Bun"
+      },
+      {
+        "id": "topknot",
+        "name": "Top knot"
+      }
     ],
-    "hairColors": ["#1b1410", "#3b2416", "#6b4226", "#a8703b", "#d9b46b", "#b8b8b8", "#f0ede6", "#8f2f2a", "#3f6fd1", "#b04fb0"],
-    "eyeColors": ["#3b2a1d", "#6b4a2b", "#3f7a4a", "#3f6fa8", "#7a8a96", "#a07b2a"],
+    "hairColors": [
+      "#1b1410",
+      "#3b2416",
+      "#6b4226",
+      "#a8703b",
+      "#d9b46b",
+      "#b8b8b8",
+      "#f0ede6",
+      "#8f2f2a",
+      "#3f6fd1",
+      "#b04fb0"
+    ],
+    "eyeColors": [
+      "#3b2a1d",
+      "#6b4a2b",
+      "#3f7a4a",
+      "#3f6fa8",
+      "#7a8a96",
+      "#a07b2a"
+    ],
     "outfits": [
-      { "id": "flight-jacket", "name": "Flight jacket" },
-      { "id": "uniform", "name": "Officer's coat" },
-      { "id": "mechanic", "name": "Work coveralls" },
-      { "id": "longcoat", "name": "Long coat" }
+      {
+        "id": "flight-jacket",
+        "name": "Flight jacket"
+      },
+      {
+        "id": "uniform",
+        "name": "Officer's coat"
+      },
+      {
+        "id": "mechanic",
+        "name": "Work coveralls"
+      },
+      {
+        "id": "longcoat",
+        "name": "Long coat"
+      }
     ],
-    "outfitColors": ["#2b3a55", "#4a3b2a", "#1f2a24", "#5a2a2a", "#3a3a40", "#c2b59b", "#6b4a8a"]
+    "outfitColors": [
+      "#2b3a55",
+      "#4a3b2a",
+      "#1f2a24",
+      "#5a2a2a",
+      "#3a3a40",
+      "#c2b59b",
+      "#6b4a8a"
+    ],
+    "beards": [
+      {
+        "id": "none",
+        "name": "None"
+      },
+      {
+        "id": "stubble",
+        "name": "Stubble"
+      },
+      {
+        "id": "mustache",
+        "name": "Mustache"
+      },
+      {
+        "id": "goatee",
+        "name": "Goatee"
+      },
+      {
+        "id": "short-beard",
+        "name": "Short beard"
+      },
+      {
+        "id": "full-beard",
+        "name": "Full beard"
+      }
+    ]
   },
   "ship": {
-    "hullColors": ["#dfe8ff", "#c9ccd2", "#5d6470", "#2b2f38", "#d8c7a6", "#8a3b34", "#2f5a8a", "#3d6b4f"],
-    "accentColors": ["#4fc3ff", "#ffd27a", "#ff7a4d", "#e04f5f", "#7ee08a", "#c084fc", "#f4f4f4", "#1b1d22"],
-    "patterns": [
-      { "id": "plain", "name": "Plain" },
-      { "id": "stripe", "name": "Center stripe" },
-      { "id": "split", "name": "Split" },
-      { "id": "tips", "name": "Wingtips" },
-      { "id": "chevron", "name": "Chevron" }
+    "hullColors": [
+      "#dfe8ff",
+      "#c9ccd2",
+      "#5d6470",
+      "#2b2f38",
+      "#d8c7a6",
+      "#8a3b34",
+      "#2f5a8a",
+      "#3d6b4f"
     ],
-    "glowColors": ["#ffa040", "#4fc3ff", "#7ee08a", "#c084fc", "#ff5a7a", "#f4f4f4"]
+    "accentColors": [
+      "#4fc3ff",
+      "#ffd27a",
+      "#ff7a4d",
+      "#e04f5f",
+      "#7ee08a",
+      "#c084fc",
+      "#f4f4f4",
+      "#1b1d22"
+    ],
+    "patterns": [
+      {
+        "id": "plain",
+        "name": "Plain"
+      },
+      {
+        "id": "stripe",
+        "name": "Center stripe"
+      },
+      {
+        "id": "split",
+        "name": "Split"
+      },
+      {
+        "id": "tips",
+        "name": "Wingtips"
+      },
+      {
+        "id": "chevron",
+        "name": "Chevron"
+      }
+    ],
+    "glowColors": [
+      "#ffa040",
+      "#4fc3ff",
+      "#7ee08a",
+      "#c084fc",
+      "#ff5a7a",
+      "#f4f4f4"
+    ]
   },
   "repaintCost": 500
 }

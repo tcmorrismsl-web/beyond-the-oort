@@ -6,7 +6,7 @@
 import { EventBus } from './events';
 import { transition, type GameMode, type TransitionResult } from './flow';
 import { backupCorruptSave, loadGame, saveGame, type LoadResult } from './save';
-import { fromSave, newGame, repairAgainstContent, toSave, type GameState, type NewCareer } from './state';
+import { fromSave, isValidLook, newGame, repairAgainstContent, toSave, type GameState, type Look, type NewCareer } from './state';
 import { gameData } from '../data/schema';
 import { canJump, depart, jump, land, type JumpCheck } from '../systems/travel';
 import { buy, sell, type TradeResult } from '../systems/market';
@@ -160,6 +160,15 @@ export class Session {
     this.state = next.flags.includes('landed-once') ? next : { ...next, flags: [...next.flags, 'landed-once'] };
     this.setMode('flight');
     this.bus.emit('departed', { siteId });
+    this.save(now);
+    return true;
+  }
+
+  /** Change the captain's look (free, any time). Saves. */
+  setLook(look: Look, now: number): boolean {
+    const cap = this.state.captain;
+    if (!cap || !isValidLook(look)) return false;
+    this.state = { ...this.state, captain: { ...cap, look: { ...look } } };
     this.save(now);
     return true;
   }

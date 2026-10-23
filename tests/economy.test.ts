@@ -181,3 +181,30 @@ describe('appearance', () => {
     expect(a.captain.outfits.map((x) => x.id)).toContain(DEFAULT_LOOK.outfit);
   });
 });
+
+describe('changing your look', () => {
+  it('saves a valid new look any time, and refuses made-up options', () => {
+    const saves: unknown[] = [];
+    const s = Session.start(1, 1, { load: () => ({ status: 'empty' }), save: (d) => (saves.push(d), { ok: true }), backupCorrupt: () => ({ ok: true }) });
+    s.startCareer(7, 2, { captain, shipName: 'Lantern' });
+    const look = { ...captain.look, hair: 'quiff', beard: 'full-beard' };
+    expect(s.setLook(look, 3)).toBe(true);
+    expect(s.state.captain?.look).toMatchObject({ hair: 'quiff', beard: 'full-beard' });
+    expect(s.setLook({ ...look, hair: 'mullet-of-destiny' }, 4)).toBe(false);
+    expect(s.state.captain?.look.hair).toBe('quiff');
+    expect(saves).toHaveLength(2);
+  });
+
+  it('every hair style and facial hair option draws without errors', async () => {
+    const { portraitSvg } = await import('../src/ui/art');
+    const a = gameData.appearance.captain;
+    for (const h of a.hairStyles) {
+      for (const b of a.beards) {
+        const svg = portraitSvg({ ...DEFAULT_LOOK, hair: h.id, beard: b.id });
+        expect(svg.startsWith('<svg'), `${h.id}/${b.id}`).toBe(true);
+        expect(svg).not.toContain('NaN');
+        expect(svg).not.toContain('undefined');
+      }
+    }
+  });
+});

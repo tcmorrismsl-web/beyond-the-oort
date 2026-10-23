@@ -11,7 +11,7 @@ const sample: SaveData = {
   ship: { defId: 'shuttle', x: 10, y: -5, angle: 1.2 },
   visited: ['sol'],
   landedAt: null,
-  captain: { name: 'Ada Kell', pronouns: 'they', origin: 'freighter-born', moment: 'the-debt', motive: 'running', look: { face: 'round', skin: '#5a3420', hair: 'curls', hairColor: '#1b1410', eyes: '#3b2a1d', outfit: 'mechanic', outfitColor: '#4a3b2a' } },
+  captain: { name: 'Ada Kell', pronouns: 'they', origin: 'freighter-born', moment: 'the-debt', motive: 'running', look: { face: 'round', skin: '#5a3420', hair: 'curls', hairColor: '#1b1410', eyes: '#3b2a1d', outfit: 'mechanic', outfitColor: '#4a3b2a', beard: 'stubble' } },
   shipName: 'Kestrel',
   upgrades: { engines: 2 },
   cargo: { ore: 5 },
@@ -64,6 +64,7 @@ describe('save system', () => {
     if (r.status !== 'ok') return;
     expect(r.data.captain?.name).toBe('Rhea');
     expect(r.data.captain?.look.face).toBe('oval');
+    expect(r.data.captain?.look.beard).toBe('none');
     expect(r.data.paint).toEqual({ hull: '#dfe8ff', accent: '#4fc3ff', pattern: 'plain', glow: '#ffa040' });
     expect(r.data.flags).toEqual(['archive-lead']);
   });

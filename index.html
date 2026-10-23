@@ -212,8 +212,8 @@
       #ui .sheet-screen { background: rgba(4, 6, 12, 0.7); z-index: 1; }
       #ui .sheet-card { background: #0b0f1b; }
       #ui button.small { white-space: nowrap; }
-      /* Creation: Back/Next stay reachable without scrolling. */
-      #ui .create .nav-row {
+      /* Creation and editor sheets: Back/Next/Save stay reachable without scrolling. */
+      #ui .create .nav-row, #ui .sheet-card .nav-row {
         position: sticky; bottom: 0; margin: 16px -20px -20px; padding: 12px 20px 16px;
         background: var(--ui-bg-strong); border-top: 1px solid var(--ui-line); border-radius: 0 0 20px 20px;
       }
@@ -221,7 +221,7 @@
         #ui .create { width: min(820px, 100%); }
         #ui .create .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         #ui .create .choices .pick { margin-top: 0; }
-        #ui .create .nav-row { margin: 12px -20px -16px; padding: 10px 20px 12px; }
+        #ui .create .nav-row, #ui .sheet-card .nav-row { margin: 12px -20px -16px; padding: 10px 20px 12px; }
       }
       #ui .dialogue-text { font-size: 17px; line-height: 1.45; color: #eef3ff; }
       #ui .pick.special { border-color: rgba(143, 216, 255, 0.55); background: rgba(143, 216, 255, 0.08); }
@@ -238,6 +238,9 @@
       #ui .portrait-box.small svg { width: 96px; }
       #ui .ship-box svg { width: 180px; height: auto; display: block; }
       #ui .ship-box.small svg { width: 110px; }
+      #ui .ship-box.big svg { width: 220px; }
+      #ui .look-row { align-items: center; }
+      #ui .look-row button { flex: none; }
       #ui .summary-head { display: flex; gap: 14px; align-items: center; }
       #ui .paint-row { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
       @media (orientation: landscape) and (max-height: 500px) {

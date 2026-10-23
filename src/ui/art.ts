@@ -41,11 +41,43 @@ export function portraitSvg(look: Look): string {
   const cy = 62;
   const top = cy - face.ry;
 
-  // Hair drawn behind the head (long styles).
-  let back = '';
-  if (look.hair === 'long') back = `<path d="M${cx - face.rx - 5} ${cy - 6} Q${cx - face.rx - 8} ${cy + 40} ${cx - 16} ${cy + 46} L${cx + 16} ${cy + 46} Q${cx + face.rx + 8} ${cy + 40} ${cx + face.rx + 5} ${cy - 6} Z" fill="${hair}"/>`;
-  if (look.hair === 'ponytail') back = `<path d="M${cx + face.rx - 2} ${cy - 10} Q${cx + face.rx + 18} ${cy + 4} ${cx + face.rx + 8} ${cy + 34} Q${cx + face.rx + 2} ${cy + 14} ${cx + face.rx - 6} ${cy + 2} Z" fill="${hair}"/>`;
-  if (look.hair === 'bun') back = `<circle cx="${cx}" cy="${top - 4}" r="11" fill="${hair}"/>`;
+  // Hair drawn behind the head (long styles, afro, locs, bun).
+  const L = cx - face.rx;
+  const R = cx + face.rx;
+  let back: string;
+  switch (look.hair) {
+    case 'long':
+      back = `<path d="M${L - 5} ${cy - 6} Q${L - 8} ${cy + 40} ${cx - 16} ${cy + 46} L${cx + 16} ${cy + 46} Q${R + 8} ${cy + 40} ${R + 5} ${cy - 6} Z" fill="${hair}"/>`;
+      break;
+    case 'ponytail':
+      back = `<path d="M${R - 2} ${cy - 10} Q${R + 18} ${cy + 4} ${R + 8} ${cy + 34} Q${R + 2} ${cy + 14} ${R - 6} ${cy + 2} Z" fill="${hair}"/>`;
+      break;
+    case 'bun':
+      back = `<circle cx="${cx}" cy="${top - 4}" r="11" fill="${hair}"/>`;
+      break;
+    case 'topknot':
+      back = `<circle cx="${cx}" cy="${top - 5}" r="8" fill="${hair}"/>`;
+      break;
+    case 'afro':
+      back = `<ellipse cx="${cx}" cy="${top + 12}" rx="${face.rx + 15}" ry="${face.ry + 4}" fill="${hair}"/>`;
+      break;
+    case 'locs':
+      // Rope-like locs falling past the shoulders on both sides.
+      back = [-1, 1]
+        .map((side) =>
+          [0, 1, 2, 3]
+            .map((i) => {
+              const x = cx + side * (face.rx - 4 + i * 4.5);
+              const len = face.ry + 26 + (i % 2) * 8;
+              return `<path d="M${x} ${top + 6} Q${x + side * 3} ${cy + 10} ${x + side * 1} ${top + 6 + len}" stroke="${shade(hair, i % 2 ? 0.8 : 1)}" stroke-width="5.5" stroke-linecap="round" fill="none"/>`;
+            })
+            .join(''),
+        )
+        .join('');
+      break;
+    default:
+      back = '';
+  }
 
   // Outfit (shoulders) by style.
   const shoulders = `M14 140 Q16 104 ${cx - 22} 98 L${cx + 22} 98 Q104 104 106 140 Z`;
@@ -73,6 +105,11 @@ export function portraitSvg(look: Look): string {
   const nose = `<path d="M${cx} ${eyeY + 3} L${cx - 3} ${eyeY + 12} L${cx + 2} ${eyeY + 13}" stroke="${shade(skin, 0.72)}" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
   const mouth = `<path d="M${cx - 7} ${eyeY + 20} Q${cx} ${eyeY + 24} ${cx + 7} ${eyeY + 20}" stroke="${shade(skin, 0.55)}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
 
+  // A close-fitting cap of hair: outer edge `lift` above the skull, hairline `hl` below the top of the head.
+  const cap = (lift: number, hl: number, fill = hair, extra = ''): string =>
+    `<path d="M${L - 1} ${cy - 4} Q${L - 1} ${top - lift} ${cx} ${top - lift} Q${R + 1} ${top - lift} ${R + 1} ${cy - 4} L${R - 1} ${cy - 9} Q${R - 2} ${top + hl} ${cx} ${top + hl} Q${L + 2} ${top + hl} ${L + 1} ${cy - 9} Z" fill="${fill}" ${extra}/>`;
+  const sideburns = `<rect x="${L - 1}" y="${cy - 10}" width="4" height="12" rx="1.5" fill="${hair}"/><rect x="${R - 3}" y="${cy - 10}" width="4" height="12" rx="1.5" fill="${hair}"/>`;
+
   // Hair on top of the head.
   let front: string;
   switch (look.hair) {
@@ -80,25 +117,85 @@ export function portraitSvg(look: Look): string {
     case 'long':
     case 'ponytail':
     case 'bun':
-      front = `<path d="M${cx - face.rx - 2} ${cy - 4} Q${cx - face.rx - 2} ${top - 6} ${cx} ${top - 6} Q${cx + face.rx + 2} ${top - 6} ${cx + face.rx + 2} ${cy - 4} Q${cx + face.rx - 4} ${top + 8} ${cx + 4} ${top + 9} Q${cx - 10} ${top + 12} ${cx - face.rx + 3} ${cy - 2} Z" fill="${hair}"/>`;
+      // Side-swept bangs.
+      front = `<path d="M${L - 2} ${cy - 4} Q${L - 2} ${top - 6} ${cx} ${top - 6} Q${R + 2} ${top - 6} ${R + 2} ${cy - 4} Q${R - 4} ${top + 8} ${cx + 4} ${top + 9} Q${cx - 10} ${top + 12} ${L + 3} ${cy - 2} Z" fill="${hair}"/>`;
+      break;
+    case 'crew':
+      front = cap(3, 7) + sideburns;
+      break;
+    case 'sidepart':
+      front = `${cap(6, 9)}${sideburns}<path d="M${cx - 7} ${top - 5} Q${cx - 6} ${top + 2} ${cx - 8} ${top + 8}" stroke="${shade(hair, 0.6)}" stroke-width="1.5" fill="none"/><path d="M${cx - 7} ${top - 5} Q${cx + 10} ${top - 10} ${R + 1} ${top + 4} Q${cx + 8} ${top - 2} ${cx - 7} ${top + 1} Z" fill="${shade(hair, 1.15)}"/>`;
+      break;
+    case 'slick':
+      front = `${cap(5, 6)}${sideburns}<path d="M${cx - 12} ${top - 1} Q${cx} ${top - 6} ${cx + 12} ${top - 1}" stroke="${shade(hair, 1.6)}" stroke-width="1.5" fill="none" opacity="0.6"/><path d="M${cx - 8} ${top + 3} Q${cx} ${top - 1} ${cx + 8} ${top + 3}" stroke="${shade(hair, 1.6)}" stroke-width="1.2" fill="none" opacity="0.45"/>`;
+      break;
+    case 'quiff':
+      front = `${cap(4, 9)}${sideburns}<path d="M${L + 2} ${top + 4} Q${cx - 8} ${top - 11} ${cx + 8} ${top - 10} Q${R + 4} ${top - 7} ${R} ${top + 5} Q${cx + 4} ${top} ${L + 2} ${top + 4} Z" fill="${hair}"/><path d="M${cx - 6} ${top - 5} Q${cx + 4} ${top - 9} ${R - 3} ${top - 2}" stroke="${shade(hair, 1.5)}" stroke-width="1.2" fill="none" opacity="0.5"/>`;
+      break;
+    case 'messy': {
+      // Tousled: overlapping tufts of different sizes along the top, leaning one way.
+      const tufts = [
+        [-17, 6, 6], [-11, 1, 7], [-4, -2, 7], [3, -2, 7], [10, 0, 7], [16, 4, 6], [-1, 3, 6], [7, 4, 5],
+      ]
+        .map(([dx = 0, dy = 0, r = 6]) => `<ellipse cx="${cx + dx}" cy="${top + dy}" rx="${r}" ry="${r - 2}" transform="rotate(-18 ${cx + dx} ${top + dy})" fill="${hair}"/>`)
+        .join('');
+      front = `${cap(3, 9)}${sideburns}${tufts}`;
+      break;
+    }
+    case 'fade':
+      // Full on top, faded on the sides.
+      front = `${cap(2, 8, hair, 'opacity="0.35"')}<path d="M${L + 6} ${top + 6} Q${L + 6} ${top - 7} ${cx} ${top - 7} Q${R - 6} ${top - 7} ${R - 6} ${top + 6} Q${cx} ${top + 9} ${L + 6} ${top + 6} Z" fill="${hair}"/>`;
       break;
     case 'buzz':
-      front = `<path d="M${cx - face.rx + 1} ${cy - 8} Q${cx - face.rx} ${top - 1} ${cx} ${top - 1} Q${cx + face.rx} ${top - 1} ${cx + face.rx - 1} ${cy - 8} Q${cx} ${top + 6} ${cx - face.rx + 1} ${cy - 8} Z" fill="${hair}" opacity="0.85"/>`;
+      front = cap(1, 6, hair, 'opacity="0.8"');
+      break;
+    case 'afro':
+      front = cap(6, 9);
+      break;
+    case 'locs':
+    case 'topknot':
+      front = cap(3, 8);
       break;
     case 'curls':
       front = Array.from({ length: 9 }, (_, i) => {
-        const a = Math.PI + (i / 8) * Math.PI;
-        return `<circle cx="${(cx + Math.cos(a) * (face.rx + 1)).toFixed(1)}" cy="${(cy - 6 + Math.sin(a) * (face.ry - 2)).toFixed(1)}" r="8" fill="${hair}"/>`;
+        const ang = Math.PI + (i / 8) * Math.PI;
+        return `<circle cx="${(cx + Math.cos(ang) * (face.rx + 1)).toFixed(1)}" cy="${(cy - 6 + Math.sin(ang) * (face.ry - 2)).toFixed(1)}" r="8" fill="${hair}"/>`;
       }).join('');
       break;
     case 'undercut':
-      front = `<path d="M${cx - face.rx + 2} ${cy - 10} Q${cx - 6} ${top - 10} ${cx + face.rx + 4} ${top + 2} Q${cx + face.rx + 2} ${top + 10} ${cx + face.rx - 2} ${cy - 10} Q${cx} ${top + 4} ${cx - face.rx + 2} ${cy - 10} Z" fill="${hair}"/>`;
+      front = `<path d="M${L + 2} ${cy - 10} Q${cx - 6} ${top - 10} ${R + 4} ${top + 2} Q${R + 2} ${top + 10} ${R - 2} ${cy - 10} Q${cx} ${top + 4} ${L + 2} ${cy - 10} Z" fill="${hair}"/>`;
       break;
     default:
       front = '';
   }
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140" class="portrait" role="img" aria-label="Captain portrait"><rect width="120" height="140" rx="16" fill="#141b2c"/><circle cx="60" cy="58" r="52" fill="#1c2640"/>${back}${outfit}${neck}${ears}${head}${eyeRow}${brows}${nose}${mouth}${front}</svg>`;
+  // Facial hair (drawn over the face; the mouth is redrawn on top so it stays readable).
+  const jawFill = (opacity: number): string =>
+    `<path d="M${L + 1} ${cy + 1} Q${L + 2} ${cy + face.ry + 3} ${cx} ${cy + face.ry + 4} Q${R - 2} ${cy + face.ry + 3} ${R - 1} ${cy + 1} L${R - 5} ${cy + 4} Q${cx + 6} ${eyeY + 13} ${cx} ${eyeY + 14} Q${cx - 6} ${eyeY + 13} ${L + 5} ${cy + 4} Z" fill="${hair}" opacity="${opacity}"/>`;
+  const stache = `<path d="M${cx - 9} ${eyeY + 18} Q${cx - 4} ${eyeY + 13} ${cx} ${eyeY + 16} Q${cx + 4} ${eyeY + 13} ${cx + 9} ${eyeY + 18} Q${cx} ${eyeY + 17} ${cx - 9} ${eyeY + 18} Z" fill="${hair}"/>`;
+  let beard: string;
+  switch (look.beard) {
+    case 'stubble':
+      beard = jawFill(0.3);
+      break;
+    case 'mustache':
+      beard = stache;
+      break;
+    case 'goatee':
+      beard = `${stache}<path d="M${cx - 7} ${eyeY + 22} Q${cx} ${eyeY + 34} ${cx + 7} ${eyeY + 22} Q${cx} ${eyeY + 25} ${cx - 7} ${eyeY + 22} Z" fill="${hair}"/>`;
+      break;
+    case 'short-beard':
+      beard = `${jawFill(0.92)}${stache}`;
+      break;
+    case 'full-beard':
+      beard = `${jawFill(1)}<path d="M${L + 3} ${cy + 10} Q${cx} ${cy + face.ry + 16} ${R - 3} ${cy + 10} Q${cx} ${cy + face.ry + 6} ${L + 3} ${cy + 10} Z" fill="${hair}"/>${stache}`;
+      break;
+    default:
+      beard = '';
+  }
+  const lips = beard === '' ? mouth : `<path d="M${cx - 6} ${eyeY + 20} Q${cx} ${eyeY + 23} ${cx + 6} ${eyeY + 20}" stroke="${shade(skin, 0.7)}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140" class="portrait" role="img" aria-label="Captain portrait"><rect width="120" height="140" rx="16" fill="#141b2c"/><circle cx="60" cy="58" r="52" fill="#1c2640"/>${back}${outfit}${neck}${ears}${head}${eyeRow}${brows}${nose}${beard}${lips}${front}</svg>`;
 }
 
 // ------------------------------------------------------------------ ship

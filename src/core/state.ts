@@ -24,6 +24,7 @@ export interface Look {
   eyes: string;
   outfit: string;
   outfitColor: string;
+  beard: string;
 }
 
 /** Ship paint job. */
@@ -34,7 +35,7 @@ export interface Paint {
   glow: string;
 }
 
-export const DEFAULT_LOOK: Look = { face: 'oval', skin: '#c08559', hair: 'short', hairColor: '#3b2416', eyes: '#6b4a2b', outfit: 'flight-jacket', outfitColor: '#2b3a55' };
+export const DEFAULT_LOOK: Look = { face: 'oval', skin: '#c08559', hair: 'short', hairColor: '#3b2416', eyes: '#6b4a2b', outfit: 'flight-jacket', outfitColor: '#2b3a55', beard: 'none' };
 export const DEFAULT_PAINT: Paint = { hull: '#dfe8ff', accent: '#4fc3ff', pattern: 'plain', glow: '#ffa040' };
 
 /** Who you are, from character creation. Ids point into data/origins.json. */
@@ -211,10 +212,26 @@ export function repairAgainstContent(state: GameState, data: GameData = gameData
     if (!a.captain.faces.some((o) => o.id === look.face)) look.face = DEFAULT_LOOK.face;
     if (!a.captain.hairStyles.some((o) => o.id === look.hair)) look.hair = DEFAULT_LOOK.hair;
     if (!a.captain.outfits.some((o) => o.id === look.outfit)) look.outfit = DEFAULT_LOOK.outfit;
+    if (!a.captain.beards.some((o) => o.id === look.beard)) look.beard = DEFAULT_LOOK.beard;
   }
   if (!a.ship.patterns.some((o) => o.id === state.paint.pattern)) state.paint.pattern = DEFAULT_PAINT.pattern;
   state.visited = state.visited.filter((id) => data.systems.has(id));
   if (!state.visited.includes(state.systemId)) state.visited.push(state.systemId);
   state.mode = state.landedAt === null ? 'flight' : 'landed';
   return fixed;
+}
+
+/** True if every part of a look is a real option (used before saving a look change). */
+export function isValidLook(look: Look, data: GameData = gameData): boolean {
+  const a = data.appearance.captain;
+  return (
+    a.faces.some((o) => o.id === look.face) &&
+    a.skinTones.includes(look.skin) &&
+    a.hairStyles.some((o) => o.id === look.hair) &&
+    a.hairColors.includes(look.hairColor) &&
+    a.eyeColors.includes(look.eyes) &&
+    a.outfits.some((o) => o.id === look.outfit) &&
+    a.outfitColors.includes(look.outfitColor) &&
+    a.beards.some((o) => o.id === look.beard)
+  );
 }
