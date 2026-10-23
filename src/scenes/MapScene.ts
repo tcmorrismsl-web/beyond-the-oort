@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { gameData, type StarSystem } from '../data/schema';
 import type { Session } from '../core/session';
 import { canJump, jumpBlockText } from '../systems/travel';
+import { routeTo, trackedObjective } from '../systems/missions';
 import { button, createLayer, el, type Layer } from '../ui/dom';
 import { getSession } from './sessionAccess';
 import { addStarBackdrop, onScreenResize } from './resize';
@@ -21,6 +22,7 @@ const LABEL_SCALE = 1.6;
 /** Screen space kept clear of stars at the bottom for the info panel. */
 const PANEL_SPACE_LANDSCAPE = 140;
 const PANEL_SPACE_PORTRAIT = 190;
+const OBJECTIVE = 0x7ee08a;
 
 /**
  * Star chart, opened while FlightScene sleeps. Drag to pan, pinch to zoom,
@@ -124,6 +126,7 @@ export class MapScene extends Phaser.Scene {
     const visited = new Set(state.visited);
     const g = this.gfx;
     g.clear();
+    const route = this.objectiveRoute();
 
     // Lanes: bright if they leave the current system, dim otherwise.
     const drawn = new Set<string>();
@@ -139,6 +142,25 @@ export class MapScene extends Phaser.Scene {
         const fromHere = s.id === here || link === here;
         g.lineStyle(fromHere ? 3 : 2, fromHere ? 0x8fd8ff : 0x5b6b8c, fromHere ? 0.9 : 0.4);
         g.lineBetween(a.x, a.y, b.x, b.y);
+      }
+    }
+
+    // The way to your current objective, in green.
+    if (route) {
+      g.lineStyle(5, OBJECTIVE, 0.85);
+      for (let i = 1; i < route.length; i += 1) {
+        const a = gameData.systems.get(route[i - 1] ?? '');
+        const b = gameData.systems.get(route[i] ?? '');
+        if (!a || !b) continue;
+        const pa = this.toScreen(a);
+        const pb = this.toScreen(b);
+        g.lineBetween(pa.x, pa.y, pb.x, pb.y);
+      }
+      const goal = gameData.systems.get(route[route.length - 1] ?? '');
+      if (goal) {
+        const p = this.toScreen(goal);
+        g.lineStyle(3, OBJECTIVE, 1);
+        g.strokeCircle(p.x, p.y, 24);
       }
     }
 
@@ -160,10 +182,18 @@ export class MapScene extends Phaser.Scene {
       if (label) {
         label
           .setPosition(p.x, p.y + 14)
-          .setVisible(near || this.zoom >= LABEL_SCALE)
+          .setVisible(near || this.zoom >= LABEL_SCALE || (route?.includes(s.id) ?? false))
           .setColor(known ? '#e4ecff' : '#8e9ab5');
       }
     }
+  }
+
+  /** Jump route from here to the tracked objective's system (null if none or you're there). */
+  private objectiveRoute(): string[] | null {
+    const state = this.session.state;
+    const target = trackedObjective(state, gameData)?.target;
+    if (!target || target.system === state.systemId) return null;
+    return routeTo(state.systemId, target.system, gameData);
   }
 
   // ------------------------------------------------------------------ gestures
@@ -269,7 +299,21 @@ export class MapScene extends Phaser.Scene {
     const state = this.session.state;
     this.panel.replaceChildren();
     const sys: StarSystem | undefined = this.selected === null ? undefined : gameData.systems.get(this.selected);
+    const obj = trackedObjective(state, gameData);
+    const route = this.objectiveRoute();
     if (!sys) {
+      if (obj) this.panel.append(el('div', 'objective', obj.text));
+      const next = route?.[1];
+      const nextSys = next === undefined ? undefined : gameData.systems.get(next);
+      if (nextSys) {
+        const go = button(`Jump to ${nextSys.name}${route && route.length > 2 ? ` (1 of ${route.length - 1})` : ''}`, () => {
+          this.jump(nextSys.id);
+        }, 'primary');
+        go.style.width = '100%';
+        go.style.marginTop = '8px';
+        this.panel.append(go);
+        return;
+      }
       this.panel.append(el('div', 'sub', 'Drag to pan, pinch to zoom, tap a star. Bright lanes lead out of your current system.'));
       return;
     }
@@ -284,6 +328,7 @@ export class MapScene extends Phaser.Scene {
       this.panel.append(el('div', 'sub', "You're here."));
       return;
     }
+    if (route?.includes(sys.id)) this.panel.append(el('div', 'objective', sys.id === route[route.length - 1] ? `Your objective: ${obj?.text ?? ''}` : 'On the way to your objective'));
     const check = canJump(state, sys.id, gameData);
     const go = button(check.ok ? `Jump to ${sys.name}` : jumpBlockText(check.reason), () => {
       this.jump(sys.id);

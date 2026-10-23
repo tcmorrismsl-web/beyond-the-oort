@@ -3,5 +3,10 @@
     "id": "nh-recording",
     "name": "New Horizons recording",
     "description": "A clean copy of the core signal, caught by your ship's long-range array more clearly than any receiver in Sol."
+  },
+  {
+    "id": "ninefold-recorder",
+    "name": "Ninefold flight recorder",
+    "description": "The last logs of a consortium survey tender lost at Wolf 359. Your drive core hums when it plays."
   }
 ]

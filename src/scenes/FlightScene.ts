@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { gameData, type Body, type StarSystem } from '../data/schema';
+import { gameData, type Body, type Poi, type StarSystem } from '../data/schema';
 import type { Session } from '../core/session';
 import { CRUISE_IDLE, consumeSteps, stepShip, STEP, updateCruise, type CruiseState, type FlightStats, type ShipKinematics } from '../systems/flight';
 import { statsFor } from '../systems/ship';
@@ -7,8 +7,9 @@ import { canJump, jumpBlockText, JUMP_CHARGE_SECONDS, landingTarget } from '../s
 import { IDLE, readStick, type StickReading } from '../ui/joystick';
 import { button, createLayer, credits, el, type Layer } from '../ui/dom';
 import { showToast } from '../ui/toast';
-import { openSheet, renderDialogue } from '../ui/panels';
-import { pendingTransmission } from '../systems/dialogue';
+import { crewHasNews, openSheet, renderDialogue } from '../ui/panels';
+import { dialogueAtPoi, pendingTransmission } from '../systems/dialogue';
+import { poiInRange, routeTo, targetPosition, trackedObjective, visiblePois } from '../systems/missions';
 import { getSession } from './sessionAccess';
 import { onScreenResize, onSceneEvent } from './resize';
 import { ensureBodyTexture, ensureStarTexture, hexToNumber } from './systemTextures';
@@ -32,6 +33,8 @@ const LOOK_AHEAD_SECONDS = 0.3;
 const LOOK_AHEAD_MAX = 0.25;
 const LOOK_AHEAD_EASE = 0.08;
 const FLAME_CRUISE = { r: 0x8f, g: 0xd8, b: 0xff };
+/** Tint for each kind of point of interest. */
+const POI_TINT: Record<Poi['kind'], number> = { derelict: 0xc9ccd2, beacon: 0xb38cff, signal: 0x8fd8ff, anomaly: 0xff9f7a };
 
 /** Data passed when the star chart closes and wakes flight. */
 export interface FlightResumeData {
@@ -66,6 +69,17 @@ export class FlightScene extends Phaser.Scene {
   /** Edge arrows toward every body you can land on, so new systems aren't empty space. */
   private portArrows: { body: Body; arrow: Phaser.GameObjects.Image }[] = [];
   private hudCam!: Phaser.Cameras.Scene2D.Camera;
+  /** Points of interest showing in this system (rebuilt when the story changes what's visible). */
+  private poiViews: { poi: Poi; parts: Phaser.GameObjects.GameObject[]; arrow: Phaser.GameObjects.Image }[] = [];
+  private objectiveArrow!: Phaser.GameObjects.Image;
+  /** Where the tracked objective is in this system (null if elsewhere or none). */
+  private objectivePos: { x: number; y: number } | null = null;
+  private objectiveLine!: HTMLDivElement;
+  /** The point of interest the objective points at (its own arrow is hidden in favor of the objective arrow). */
+  private objectivePoi: string | null = null;
+  private shipBtn!: HTMLButtonElement;
+  private investigateBtn!: HTMLButtonElement;
+  private shownPoi: Poi | null = null;
 
   // DOM HUD
   private ui!: Layer;
@@ -136,6 +150,9 @@ export class FlightScene extends Phaser.Scene {
         body,
         arrow: this.hud(this.add.image(0, 0, 'port-arrow').setTint(hexToNumber(body.color)).setAlpha(0.9).setDepth(5).setVisible(false)),
       }));
+    this.objectiveArrow = this.hud(this.add.image(0, 0, 'objective-arrow').setDepth(6).setVisible(false));
+    this.poiViews = [];
+    this.shownPoi = null;
     this.ring = this.hud(this.add.image(0, 0, 'stick-ring').setVisible(false).setDepth(10));
     this.knob = this.hud(this.add.image(0, 0, 'stick-knob').setVisible(false).setDepth(11));
 
@@ -150,6 +167,8 @@ export class FlightScene extends Phaser.Scene {
     });
     this.setupInput();
     this.buildHud();
+    this.refreshStory();
+    this.refreshHud();
     this.checkTransmission();
 
     // The star chart puts flight to sleep (no update, no rendering) and wakes
@@ -158,8 +177,12 @@ export class FlightScene extends Phaser.Scene {
       this.ui.root.style.display = '';
       this.accumulator = 0;
       this.resetStick();
+      this.refreshStory();
+      this.refreshHud();
       const jumpTo = (data as FlightResumeData | undefined)?.jumpTo;
       if (jumpTo !== undefined) this.beginJump(jumpTo);
+      // A talk aboard (Ship screen) can move the story on and set off a call.
+      else this.checkTransmission();
     });
   }
 
@@ -186,6 +209,7 @@ export class FlightScene extends Phaser.Scene {
     this.updateFlame();
     this.updateBackdrop();
     this.updateLandingButton();
+    this.updateInvestigateButton();
     this.updateJumpCharge();
 
     this.sinceSave += steps * STEP;
@@ -205,20 +229,25 @@ export class FlightScene extends Phaser.Scene {
     const state = this.session.state;
 
     this.creditsChip = el('span', 'dim', `  ·  ${credits(state.credits)}`);
-    const info = el('div', 'chip hud-tl', el('b', '', this.system.name), this.creditsChip);
-    const shipBtn = button('Ship', () => {
+    this.objectiveLine = el('div', 'objective');
+    const info = el('div', 'hud-tl', el('div', 'chip', el('b', '', this.system.name), this.creditsChip), this.objectiveLine);
+    this.shipBtn = button('Ship', () => {
       this.openOverlay('ship');
     });
     const mapBtn = button('Map', () => {
       this.openOverlay('map');
     });
-    const tr = el('div', 'hud-tr', shipBtn, mapBtn);
+    const tr = el('div', 'hud-tr', this.shipBtn, mapBtn);
 
     this.landBtn = button('Land', () => {
       this.tryLand();
     }, 'primary land-btn');
     this.landBtn.style.display = 'none';
-    const br = el('div', 'hud-br', this.landBtn);
+    this.investigateBtn = button('Investigate', () => {
+      this.investigate();
+    }, 'primary land-btn');
+    this.investigateBtn.style.display = 'none';
+    const br = el('div', 'hud-br hud-stack', this.investigateBtn, this.landBtn);
 
     this.chargeFill = el('div');
     this.chargeBox = el('div', 'center-msg', el('div', '', ''), el('div', 'bar', this.chargeFill));
@@ -250,14 +279,109 @@ export class FlightScene extends Phaser.Scene {
         renderDialogue(card, this.session, d.id, () => {
           close();
           this.picking = false;
-          this.refreshHud();
+          this.afterConversation();
         });
       });
     });
   }
 
+  /** After any conversation in flight: the story may have moved (new objective, new things in space, another call). */
+  private afterConversation(): void {
+    this.refreshStory();
+    this.refreshHud();
+    this.checkTransmission();
+  }
+
   private refreshHud(): void {
     this.creditsChip.textContent = `  ·  ${credits(this.session.state.credits)}`;
+    this.shipBtn.classList.toggle('dot', crewHasNews(this.session.state));
+  }
+
+  /** Objective line + arrow target, and which points of interest are showing. */
+  private refreshStory(): void {
+    const state = this.session.state;
+    const obj = trackedObjective(state, gameData);
+    this.objectivePos = obj?.target ? targetPosition(obj.target, state, gameData) : null;
+    const text = obj?.text ?? '';
+    let where = '';
+    if (obj?.target && obj.target.system !== state.systemId) {
+      const route = routeTo(state.systemId, obj.target.system, gameData);
+      const next = route?.[1];
+      const dest = gameData.systems.get(obj.target.system)?.name ?? obj.target.system;
+      if (route && next !== undefined) {
+        const hop = gameData.systems.get(next)?.name ?? next;
+        where = route.length > 2 ? `${dest} · next jump: ${hop} (${route.length - 1} jumps)` : `Jump to ${dest}`;
+      }
+    }
+    this.objectiveLine.replaceChildren(el('div', '', text), ...(where ? [el('div', 'objective-where', where)] : []));
+    this.objectiveLine.style.display = text ? '' : 'none';
+    this.objectivePoi = obj?.target?.system === state.systemId ? (obj.target.poi ?? null) : null;
+    this.buildPois();
+  }
+
+  /** (Re)draw the points of interest that are visible right now, each with an edge arrow. */
+  private buildPois(): void {
+    for (const v of this.poiViews) {
+      this.tweens.killTweensOf(v.parts);
+      for (const part of v.parts) part.destroy();
+      v.arrow.destroy();
+    }
+    this.poiViews = visiblePois(this.system.id, this.session.state, gameData).map((poi) => {
+      const tint = POI_TINT[poi.kind];
+      const img = this.world(this.add.image(poi.x, poi.y, `poi-${poi.kind}`).setTint(tint).setDepth(-4));
+      const halo = this.world(this.add.circle(poi.x, poi.y, 34).setStrokeStyle(2, tint, 0.6).setDepth(-4));
+      this.tweens.add({ targets: halo, scale: 1.6, alpha: 0, duration: 1600, repeat: -1 });
+      const label = this.world(
+        this.add
+          .text(poi.x, poi.y + 34, poi.name, { fontFamily: '-apple-system, system-ui, sans-serif', fontSize: '14px', color: '#e4ecff' })
+          .setOrigin(0.5, 0)
+          .setResolution(Math.min(3, window.devicePixelRatio || 1))
+          .setDepth(-4),
+      );
+      const arrow = this.hud(this.add.image(0, 0, 'port-arrow').setTint(tint).setDepth(5).setVisible(false));
+      return { poi, parts: [img, halo, label], arrow };
+    });
+    this.shownPoi = null;
+  }
+
+  private updateInvestigateButton(): void {
+    const poi = this.jumpTarget === null ? poiInRange(this.session.state, gameData) : null;
+    if (poi === this.shownPoi) return;
+    this.shownPoi = poi;
+    if (poi) {
+      this.investigateBtn.textContent = `Investigate · ${poi.name}`;
+      this.investigateBtn.style.display = '';
+    } else {
+      this.investigateBtn.style.display = 'none';
+    }
+  }
+
+  /** Fly close to a wreck, beacon or reading point and look around (a conversation with the place). */
+  private investigate(): void {
+    const poi = this.shownPoi;
+    if (!poi || this.jumpTarget !== null || this.picking) return;
+    const d = dialogueAtPoi(poi.id, gameData.dialogues, this.session.state);
+    this.picking = true;
+    this.resetStick();
+    const ship = this.session.state.ship;
+    ship.vx = 0;
+    ship.vy = 0;
+    openSheet(this.ui.root, (card, close) => {
+      if (!d) {
+        card.append(el('h1', '', poi.name), el('p', 'dialogue-text', poi.description));
+        const ok = button('Move on', () => {
+          close();
+          this.picking = false;
+        }, 'pick');
+        card.append(ok);
+        return;
+      }
+      renderDialogue(card, this.session, d.id, () => {
+        close();
+        this.picking = false;
+        this.afterConversation();
+      });
+    });
   }
 
   private updateLandingButton(): void {
@@ -445,6 +569,21 @@ export class FlightScene extends Phaser.Scene {
       this.homeArrow.setPosition(cam.width / 2 + Math.cos(angle) * r, cam.height / 2 + Math.sin(angle) * r).setRotation(angle);
     }
     const pr = r * 0.88;
+    for (const { poi, arrow } of this.poiViews) {
+      const visible = cam.worldView.contains(poi.x, poi.y) || poi.id === this.objectivePoi;
+      arrow.setVisible(!visible);
+      if (visible) continue;
+      const angle = Math.atan2(poi.y - this.ship.y, poi.x - this.ship.x);
+      arrow.setPosition(cam.width / 2 + Math.cos(angle) * pr, cam.height / 2 + Math.sin(angle) * pr).setRotation(angle);
+    }
+    const target = this.objectivePos;
+    const showObjective = target !== null && !cam.worldView.contains(target.x, target.y);
+    this.objectiveArrow.setVisible(showObjective);
+    if (target && showObjective) {
+      const angle = Math.atan2(target.y - this.ship.y, target.x - this.ship.x);
+      const or = r * 0.76;
+      this.objectiveArrow.setPosition(cam.width / 2 + Math.cos(angle) * or, cam.height / 2 + Math.sin(angle) * or).setRotation(angle);
+    }
     for (const { body, arrow } of this.portArrows) {
       const visible = cam.worldView.contains(body.x, body.y);
       arrow.setVisible(!visible);

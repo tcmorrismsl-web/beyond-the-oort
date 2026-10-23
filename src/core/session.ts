@@ -12,6 +12,7 @@ import { canJump, depart, jump, land, type JumpCheck } from '../systems/travel';
 import { buy, sell, type TradeResult } from '../systems/market';
 import { canRepaint, canUpgrade, repaint, upgrade, type RepaintCheck, type UpgradeCheck } from '../systems/ship';
 import { choose, type ChooseResult } from '../systems/dialogue';
+import { joinCrew, leaveCrew, waitingAt } from '../systems/crew';
 import type { StorageResult } from './storage';
 
 export interface SaveBackend {
@@ -192,6 +193,23 @@ export class Session {
     this.state = r.state;
     if (changed) this.save(now);
     return r;
+  }
+
+  /** Ask a crew member to leave the ship; they wait at their home port. Saves. */
+  dismiss(who: string, now: number): boolean {
+    if (!this.state.crew.includes(who)) return false;
+    this.state = leaveCrew(this.state, who);
+    this.save(now);
+    return true;
+  }
+
+  /** Invite someone who has sailed with you back aboard, at the port where they wait. Saves. */
+  invite(who: string, now: number): boolean {
+    const site = this.state.landedAt;
+    if (site === null || !waitingAt(site, this.state, gameData).some((c) => c.id === who)) return false;
+    this.state = joinCrew(this.state, who);
+    this.save(now);
+    return true;
   }
 
   setMode(to: GameMode): TransitionResult {

@@ -3,15 +3,17 @@
  * game state; every action goes through the Session (which saves), then the
  * panel re-renders itself. Shown as a sheet over the port screen.
  */
-import { gameData, type UpgradeEffect } from '../data/schema';
+import { gameData, type Target, type UpgradeEffect } from '../data/schema';
 import type { Session } from '../core/session';
 import { cargoUsed, holdSize, maxBuyable, quote, tradeBlockText } from '../systems/market';
 import { canRepaint, canUpgrade, statsFor, upgradeBlockText } from '../systems/ship';
-import { nodeText, shownChoices } from '../systems/dialogue';
+import { crewTalks, nodeText, shownChoices } from '../systems/dialogue';
+import { feelingWord } from '../systems/crew';
 import { button, chips, credits, el, swatches } from './dom';
 import { portraitSvg, setSvg, shipSvg } from './art';
 import { freshSeed, Rng } from '../core/rng';
-import type { Look, Paint } from '../core/state';
+import type { GameState, Look, Paint } from '../core/state';
+import { journal, routeTo } from '../systems/missions';
 import { showToast } from './toast';
 
 /** Open a sheet over the given layer; returns a function that closes it. */
@@ -174,19 +176,149 @@ export function renderDrydock(card: HTMLDivElement, session: Session, close: () 
   draw();
 }
 
-// ------------------------------------------------------------------ Ship summary
+// ------------------------------------------------------------------ Ship screen
 
 const PRONOUN_LABEL = { she: 'she/her', he: 'he/him', they: 'they/them' } as const;
+export type ShipTab = 'journal' | 'crew' | 'ship' | 'log';
+const TABS: { id: ShipTab; label: string }[] = [
+  { id: 'journal', label: 'Journal' },
+  { id: 'crew', label: 'Crew' },
+  { id: 'ship', label: 'Ship' },
+  { id: 'log', label: 'Log' },
+];
 
-export function renderShip(card: HTMLDivElement, session: Session, close: () => void): void {
+/** True if anyone aboard has something new to talk about. */
+export function crewHasNews(state: GameState): boolean {
+  return state.crew.some((id) => crewTalks(id, gameData.dialogues, state).length > 0);
+}
+
+/**
+ * Your ship and everything aboard, in tabs: the mission journal, your crew
+ * (talk to them, Mass Effect-style), the ship itself, and the story log.
+ * Opens on Crew when someone wants a word.
+ */
+export function renderShip(card: HTMLDivElement, session: Session, close: () => void, start?: ShipTab): void {
+  let tab: ShipTab = start ?? (crewHasNews(session.state) ? 'crew' : 'journal');
+  const draw = (): void => {
+    const state = session.state;
+    card.replaceChildren(el('h1', '', state.shipName), el('div', 'sub', `${state.captain ? `Captain ${state.captain.name} · ` : ''}${credits(state.credits)}`));
+    const bar = el('div', 'tabs');
+    for (const t of TABS) {
+      const cls = [t.id === tab ? 'primary' : '', t.id === 'crew' && t.id !== tab && crewHasNews(state) ? 'dot' : ''].filter(Boolean).join(' ');
+      bar.append(
+        button(t.label, () => {
+          tab = t.id;
+          draw();
+        }, cls),
+      );
+    }
+    card.append(bar);
+    const body = el('div', 'tab-body');
+    if (tab === 'journal') journalTab(body, state);
+    else if (tab === 'crew') crewTab(body, session, card, draw);
+    else if (tab === 'ship') shipTab(body, session, card);
+    else logTab(body, state);
+    card.append(body);
+    const done = button('Close', close, 'primary');
+    done.style.width = '100%';
+    done.style.marginTop = '12px';
+    card.append(done);
+  };
+  draw();
+}
+
+/** Where a target is, in words: "Archive Halls · 61 Cygni (3 jumps)". */
+export function targetText(target: Target, state: GameState): string {
+  const sys = gameData.systems.get(target.system)?.name ?? target.system;
+  const place = target.poi !== undefined ? gameData.pois.get(target.poi)?.name : target.site !== undefined ? gameData.sites.get(target.site)?.site.name : undefined;
+  const route = routeTo(state.systemId, target.system, gameData);
+  const jumps = route ? route.length - 1 : 0;
+  const far = jumps === 0 ? 'this system' : `${jumps} jump${jumps === 1 ? '' : 's'}`;
+  return `${place ? `${place} · ` : ''}${sys} (${far})`;
+}
+
+function journalTab(body: HTMLElement, state: GameState): void {
+  const all = journal(state, gameData);
+  if (all.length === 0) {
+    body.append(el('p', '', 'No missions yet. Talk to people in bars and ports. Someone always needs a captain with a ship like yours.'));
+    return;
+  }
+  const kindLabel = { main: 'Main story', companion: 'Crew', side: 'Side story' } as const;
+  for (const p of all) {
+    const m = p.mission;
+    const row = el('div', p.done ? 'svc mission done' : 'svc mission', el('b', '', m.title), el('span', 'sub', `  ·  ${p.done ? 'Complete' : kindLabel[m.kind]}`));
+    if (!p.done) {
+      row.append(el('div', 'svc-note', m.summary));
+      for (const s of m.steps.slice(0, p.step)) row.append(el('div', 'step-done', s.text));
+      const now = m.steps[p.step];
+      if (now) {
+        row.append(el('div', 'svc-note step-now', `◆ ${now.text}`));
+        if (now.target) row.append(el('div', 'sub', targetText(now.target, state)));
+      }
+    }
+    body.append(row);
+  }
+}
+
+function crewTab(body: HTMLElement, session: Session, card: HTMLDivElement, redraw: () => void): void {
+  const state = session.state;
+  if (state.crew.length === 0) body.append(el('p', '', "It's just you aboard for now. People you meet on your travels may ask to come along."));
+  for (const id of state.crew) {
+    const who = gameData.characters.get(id);
+    if (!who) continue;
+    const face = el('div', 'portrait-box');
+    setSvg(face, portraitSvg(who.look));
+    const talks = crewTalks(id, gameData.dialogues, state);
+    const first = talks[0];
+    const talk = button(first ? 'Talk' : 'Nothing new', () => {
+      if (!first) return;
+      openSheet(card.closest('.layer') ?? card, (sheet, closeSheet) => {
+        renderDialogue(sheet, session, first.id, () => {
+          closeSheet();
+          redraw();
+        });
+      });
+    }, first ? 'primary small dot' : 'small');
+    talk.disabled = !first;
+    let armed = false;
+    const leave = button('Ask to leave', () => {
+      if (!armed) {
+        armed = true;
+        leave.textContent = 'Tap again to confirm';
+        return;
+      }
+      const home = who.home === undefined ? undefined : gameData.sites.get(who.home)?.site.name;
+      if (session.dismiss(id, Date.now())) showToast(`${who.name.split(' ')[0]} will wait at ${home ?? 'their home port'}`);
+      redraw();
+    }, 'small');
+    const info = el(
+      'div',
+      '',
+      el('b', '', who.name),
+      el('span', 'sub', `  ·  ${PRONOUN_LABEL[who.pronouns]}`),
+      el('div', 'sub', `${who.role} · ${feelingWord(state.affinity[id] ?? 0)}`),
+      el('div', 'svc-note', who.bio),
+      el('div', 'row', talk, leave),
+    );
+    body.append(el('div', 'svc crew-row', face, info));
+  }
+  const away = [...gameData.characters.values()].filter((c) => !state.crew.includes(c.id) && state.flags.includes(`joined-${c.id}`));
+  if (away.length > 0) {
+    body.append(el('div', 'sub section', 'Waiting ashore'));
+    for (const c of away) {
+      const where = c.home === undefined ? undefined : gameData.sites.get(c.home);
+      body.append(el('div', 'svc svc-dim', el('b', '', c.name), el('div', 'svc-note', `At ${where?.site.name ?? '?'}, ${gameData.systems.get(where?.systemId ?? '')?.name ?? ''}. Land there to invite them back.`)));
+    }
+  }
+}
+
+function shipTab(body: HTMLElement, session: Session, card: HTMLDivElement): void {
   const state = session.state;
   const def = gameData.ships.get(state.ship.defId);
   const stats = statsFor(state, gameData);
-  card.append(el('h1', '', state.shipName), el('div', 'sub', def?.name ?? ''));
-
   const art = el('div', 'ship-box');
   setSvg(art, shipSvg(state.paint));
-  card.append(art, el('div', 'note', 'Repaint her at any drydock: Highport, Olympus Yards, Centauri Yards or Sirius Gate.'));
+  body.append(el('div', 'sub', def?.name ?? ''), art, el('div', 'note', 'Repaint her at any drydock: Highport, Olympus Yards, Centauri Yards or Sirius Gate.'));
   const cap = state.captain;
   if (cap) {
     const portrait = el('div', 'portrait-box small');
@@ -205,12 +337,12 @@ export function renderShip(card: HTMLDivElement, session: Session, close: () => 
         sheet.append(el('div', 'row nav-row', button('Cancel', close), save));
       });
     }, 'small');
-    card.append(el('div', 'row look-row', portrait, changeLook));
+    body.append(el('div', 'row look-row', portrait, changeLook));
     const c = gameData.creation;
     const origin = c.origins.find((o) => o.id === cap.origin)?.name ?? '';
     const moment = c.moments.find((m) => m.id === cap.moment)?.name ?? '';
     const motive = c.motives.find((m) => m.id === cap.motive)?.name ?? '';
-    card.append(el('div', 'svc', el('b', '', `Captain ${cap.name}`), el('span', 'sub', `  ·  ${PRONOUN_LABEL[cap.pronouns]}`), el('div', 'svc-note', [origin, moment, motive].filter(Boolean).join(' · '))));
+    body.append(el('div', 'svc', el('b', '', `Captain ${cap.name}`), el('span', 'sub', `  ·  ${PRONOUN_LABEL[cap.pronouns]}`), el('div', 'svc-note', [origin, moment, motive].filter(Boolean).join(' · '))));
   }
 
   const rows: [string, string][] = [
@@ -225,55 +357,109 @@ export function renderShip(card: HTMLDivElement, session: Session, close: () => 
   ];
   const grid = el('div', 'stat-grid');
   for (const [k, v] of rows) grid.append(el('div', 'stat', el('span', 'sub', k), el('b', '', v)));
-  card.append(el('div', 'sub section', 'Ship'), grid);
+  body.append(el('div', 'sub section', 'Ship'), grid);
 
   const ups = gameData.upgrades
     .filter((t) => (state.upgrades[t.id] ?? 0) > 0)
     .map((t) => `${t.name}: ${t.tiers[(state.upgrades[t.id] ?? 1) - 1]?.name ?? ''}`);
-  card.append(el('div', 'sub section', 'Upgrades'), el('p', '', ups.length > 0 ? ups.join(' · ') : 'Stock. Drydocks at Highport, Olympus Yards, Centauri Yards and Sirius Gate can upgrade her.'));
+  body.append(el('div', 'sub section', 'Upgrades'), el('p', '', ups.length > 0 ? ups.join(' · ') : 'Stock. Drydocks at Highport, Olympus Yards, Centauri Yards and Sirius Gate can upgrade her.'));
 
   const hold = Object.entries(state.cargo).map(([id, n]) => `${gameData.commodities.get(id)?.name ?? id} ×${n}`);
-  card.append(el('div', 'sub section', 'Cargo hold'), el('p', '', hold.length > 0 ? hold.join(' · ') : 'Empty.'));
+  body.append(el('div', 'sub section', 'Cargo hold'), el('p', '', hold.length > 0 ? hold.join(' · ') : 'Empty.'));
 
-  card.append(el('div', 'sub section', 'Locker'));
+  body.append(el('div', 'sub section', 'Locker'));
   const locker = Object.entries(state.locker);
-  if (locker.length === 0) card.append(el('p', '', 'Empty for now. Mission items, artifacts and things you discover go here, and it never fills up.'));
+  if (locker.length === 0) body.append(el('p', '', 'Empty for now. Mission items, artifacts and things you discover go here, and it never fills up.'));
   for (const [id, n] of locker) {
     const item = gameData.items.get(id);
-    card.append(el('div', 'svc', el('b', '', `${item?.name ?? id}${n > 1 ? ` ×${n}` : ''}`), el('div', 'svc-note', item?.description ?? '')));
+    body.append(el('div', 'svc', el('b', '', `${item?.name ?? id}${n > 1 ? ` ×${n}` : ''}`), el('div', 'svc-note', item?.description ?? '')));
   }
+}
 
+function logTab(body: HTMLElement, state: GameState): void {
   // Story log: what you've learned, newest first.
   const entries = gameData.log.filter((e) => state.flags.includes(e.flag)).sort((a, b) => state.flags.indexOf(b.flag) - state.flags.indexOf(a.flag));
-  card.append(el('div', 'sub section', 'Log'));
-  if (entries.length === 0) card.append(el('p', '', 'Nothing yet. Talk to people, follow signals, and what you learn will be written here.'));
-  for (const e of entries) card.append(el('div', 'svc log-entry', el('b', '', e.title), el('div', 'svc-note', e.text)));
-  const done = button('Close', close, 'primary');
-  done.style.width = '100%';
-  done.style.marginTop = '8px';
-  card.append(done);
+  if (entries.length === 0) body.append(el('p', '', 'Nothing yet. Talk to people, follow signals, and what you learn will be written here.'));
+  for (const e of entries) body.append(el('div', 'svc log-entry', el('b', '', e.title), el('div', 'svc-note', e.text)));
 }
 
 // ------------------------------------------------------------------ Conversation
 
-/** A branching conversation as a sheet: speaker, text, choices (background-unlocked ones highlighted). */
+/**
+ * Small notices for what a choice changed: someone's approval, who came
+ * aboard or left, new journal entries. Approval is shown as a feeling, never
+ * a number, and only for people you know (characters with a name card).
+ */
+export function storyNotices(before: GameState, after: GameState): string[] {
+  const out: string[] = [];
+  const name = (id: string): string => gameData.characters.get(id)?.name.split(' ')[0] ?? id;
+  for (const id of Object.keys(after.affinity)) {
+    const d = (after.affinity[id] ?? 0) - (before.affinity[id] ?? 0);
+    if (d > 0) out.push(`${name(id)} liked that`);
+    if (d < 0) out.push(`${name(id)} didn't like that`);
+  }
+  for (const id of after.crew) if (!before.crew.includes(id)) out.push(`${name(id)} joined the crew`);
+  for (const id of before.crew) if (!after.crew.includes(id)) out.push(`${name(id)} left the ship`);
+  const had = new Set(journal(before, gameData).map((p) => `${p.mission.id}:${p.done}`));
+  for (const p of journal(after, gameData)) {
+    if (had.has(`${p.mission.id}:${p.done}`)) continue;
+    out.push(p.done ? `Mission complete: ${p.mission.title}` : `New mission: ${p.mission.title}`);
+  }
+  for (const e of gameData.log) if (after.flags.includes(e.flag) && !before.flags.includes(e.flag)) out.push(`Log: ${e.title}`);
+  return out;
+}
+
+/** Show notices one after another (toasts replace each other, so space them out). */
+export function showNotices(notices: readonly string[]): void {
+  notices.forEach((n, i) => {
+    setTimeout(() => {
+      showToast(n, 1800);
+    }, i * 1900);
+  });
+}
+
+/** A branching conversation as a sheet: speaker, portrait, text, choices (background-unlocked highlighted, flirts with a heart). */
 export function renderDialogue(card: HTMLDivElement, session: Session, dialogueId: string, close: () => void): void {
   const d = gameData.dialogues.get(dialogueId);
   if (!d) {
     close();
     return;
   }
+  const who = d.character === undefined ? undefined : gameData.characters.get(d.character);
+  const pending: string[] = [];
+  const finish = (): void => {
+    close();
+    showNotices(pending);
+  };
   const draw = (nodeId: string): void => {
-    card.replaceChildren(el('h1', '', d.speaker), el('div', 'sub', d.role), el('p', 'dialogue-text', nodeText(d, nodeId, session.state)));
+    const node = d.nodes[nodeId];
+    card.classList.toggle('mood-fade', node?.mood === 'fade');
+    card.classList.toggle('mood-title', node?.mood === 'title');
+    const head = el('div', 'dialogue-head');
+    if (who) {
+      const face = el('div', 'portrait-box tiny');
+      setSvg(face, portraitSvg(who.look));
+      head.append(face);
+    }
+    head.append(el('div', '', el('h1', '', d.speaker), el('div', 'sub', d.role)));
+    const story = el('div', 'dialogue-story', head, el('p', 'dialogue-text', nodeText(d, nodeId, session.state)));
+    const options = el('div', 'dialogue-choices');
+    card.classList.add('dialogue');
+    card.replaceChildren(story, options);
     for (const choice of shownChoices(d, nodeId, session.state)) {
-      const b = button(choice.text, () => {
+      const b = button(choice.flirt ? `♥ ${choice.text}` : choice.text, () => {
+        const before = session.state;
         const r = session.talk(d.id, nodeId, choice.index, Date.now());
         if (!r.ok) return;
-        if (r.next === null) close();
+        pending.push(...storyNotices(before, session.state));
+        if (r.next === null) finish();
         else draw(r.next);
-      }, choice.special ? 'pick special' : 'pick');
-      card.append(b);
+      }, choice.flirt ? 'pick special flirt' : choice.special ? 'pick special' : 'pick');
+      options.append(b);
     }
+    card.scrollTop = 0;
+    story.scrollTop = 0;
+    options.scrollTop = 0;
   };
   draw(d.start);
 }

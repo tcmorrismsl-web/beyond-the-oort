@@ -33,5 +33,25 @@
     "flag": "archive-lead",
     "title": "The Bessel Archive",
     "text": "Mara says the Bessel Archive at 61 Cygni pays captains to recover lost records from wrecks and ruins. Tell the archivists Mara sent you."
+  },
+  {
+    "flag": "okafor-archive-lead",
+    "title": "Ask for Ilse Varga",
+    "text": "Dr. Okafor says the only signal library older than the DSN's is the Bessel Archive at 61 Cygni. Ask for Ilse Varga."
+  },
+  {
+    "flag": "ilse-hired",
+    "title": "The Ninefold",
+    "text": "A consortium survey tender lost at Wolf 359 twelve years ago. Its last transmission carried the same tone as the core signal. Ilse Varga hired you to recover its flight recorder."
+  },
+  {
+    "flag": "drive-core-origin",
+    "title": "Where your drive core came from",
+    "text": "The Ninefold pulled something big, warm and old out of the Oort Cloud. The consortium built only one ship after that: yours. Your drive core hums when the recorder plays."
+  },
+  {
+    "flag": "camp-searched",
+    "title": "Tallis Camp",
+    "text": "Forty-one miners at Wolf 359 built a receiver from the Ninefold's scrap, heard the core, and answered. Their last transmission was the camp's own name, over and over."
   }
 ]

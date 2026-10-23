@@ -1,0 +1,155 @@
+[
+ {
+  "id": "mara",
+  "name": "Mara",
+  "pronouns": "she",
+  "role": "Bartender, The Departure Lounge",
+  "bio": "Silver rings on every finger, a memory for every face, and a habit of knowing things before the news does.",
+  "look": {
+   "face": "oval",
+   "skin": "#9c6640",
+   "hair": "long",
+   "hairColor": "#1b1410",
+   "eyes": "#6b4a2b",
+   "outfit": "longcoat",
+   "outfitColor": "#5a2a2a",
+   "beard": "none"
+  },
+  "romance": {
+   "leans": "any",
+   "at": 2,
+   "pastLean": 0
+  }
+ },
+ {
+  "id": "okafor",
+  "name": "Dr. Ines Okafor",
+  "pronouns": "she",
+  "role": "Deep Space Network",
+  "bio": "The tired, steady voice of the Deep Space Network. She listens for a living.",
+  "look": {
+   "face": "round",
+   "skin": "#5a3420",
+   "hair": "bun",
+   "hairColor": "#b8b8b8",
+   "eyes": "#3b2a1d",
+   "outfit": "uniform",
+   "outfitColor": "#2b3a55",
+   "beard": "none"
+  }
+ },
+ {
+  "id": "ilse",
+  "name": "Ilse Varga",
+  "pronouns": "she",
+  "role": "Archivist, Bessel Archive",
+  "bio": "Brilliant, dry and guarded. Reads three languages nobody speaks anymore and trusts almost nobody who still does.",
+  "look": {
+   "face": "narrow",
+   "skin": "#f6d7c3",
+   "hair": "ponytail",
+   "hairColor": "#d9b46b",
+   "eyes": "#7a8a96",
+   "outfit": "longcoat",
+   "outfitColor": "#3a3a40",
+   "beard": "none"
+  },
+  "home": "archive-halls",
+  "romance": {
+   "leans": [
+    "he"
+   ],
+   "at": 4,
+   "pastLean": 3
+  }
+ },
+ {
+  "id": "quin",
+  "name": "Quin Reyes",
+  "pronouns": "he",
+  "role": "Ice miner, Wolf 359",
+  "bio": "Big, blunt and good with engines. The only one left from Tallis Camp. Funny when you least expect it.",
+  "look": {
+   "face": "square",
+   "skin": "#c08559",
+   "hair": "buzz",
+   "hairColor": "#1b1410",
+   "eyes": "#3b2a1d",
+   "outfit": "mechanic",
+   "outfitColor": "#4a3b2a",
+   "beard": "short-beard"
+  },
+  "home": "wolf-point-dock",
+  "romance": {
+   "leans": [
+    "she"
+   ],
+   "at": 4,
+   "pastLean": 3
+  }
+ },
+ {
+  "id": "celeste",
+  "name": "Dr. Celeste Amari",
+  "pronouns": "she",
+  "role": "Signals researcher, Halcyon group",
+  "bio": "Smart, sweet and very glad of company. The last of the Halcyon group. She won't say how long she was alone.",
+  "look": {
+   "face": "oval",
+   "skin": "#7a4a2c",
+   "hair": "curls",
+   "hairColor": "#3b2416",
+   "eyes": "#a07b2a",
+   "outfit": "mechanic",
+   "outfitColor": "#c2b59b",
+   "beard": "none"
+  },
+  "home": "halcyon-post-deck",
+  "romance": {
+   "leans": "any",
+   "at": 3,
+   "pastLean": 0
+  }
+ },
+ {
+  "id": "noori",
+  "name": "Noori Castellan",
+  "pronouns": "she",
+  "role": "Security officer, Aurum Meridian",
+  "bio": "Cool, precise and always three moves ahead. She was sent to watch you.",
+  "look": {
+   "face": "narrow",
+   "skin": "#d9a37e",
+   "hair": "slick",
+   "hairColor": "#1b1410",
+   "eyes": "#3f7a4a",
+   "outfit": "uniform",
+   "outfitColor": "#1f2a24",
+   "beard": "none"
+  },
+  "home": "gate-underdeck",
+  "romance": {
+   "leans": "any",
+   "at": 6,
+   "pastLean": 0
+  }
+ },
+ {
+  "id": "moth",
+  "name": "Teo \"Moth\" Basri",
+  "pronouns": "he",
+  "role": "Hacker, New Geneva undercity",
+  "bio": "Talks fast, types faster, and sells secrets for a living. Likes you more than he'll admit.",
+  "look": {
+   "face": "round",
+   "skin": "#eac0a0",
+   "hair": "messy",
+   "hairColor": "#3f6fd1",
+   "eyes": "#3f6fa8",
+   "outfit": "flight-jacket",
+   "outfitColor": "#3a3a40",
+   "beard": "stubble"
+  },
+  "home": "the-sump"
+ }
+]

@@ -18,7 +18,12 @@ export default defineConfig(({ mode }) => ({
         // Keep the engine in its own long-cached chunk; game code changes
         // often, Phaser rarely does.
         codeSplitting: {
-          groups: [{ name: 'phaser', test: /node_modules[\\/]phaser/ }],
+          // Story and world content (JSON) get their own chunk too, so writing
+          // more acts never pushes game code over its size budget.
+          groups: [
+            { name: 'phaser', test: /node_modules[\\/]phaser/ },
+            { name: 'content', test: /src[\\/]data[\\/].*\.json$/ },
+          ],
         },
       },
     },

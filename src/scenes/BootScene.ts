@@ -50,6 +50,41 @@ export class BootScene extends Phaser.Scene {
     g.generateTexture('port-arrow', 12, 12);
     g.clear();
 
+    // Objective arrow: points at where the current mission step wants you.
+    g.fillStyle(0x7ee08a, 1);
+    g.fillTriangle(22, 11, 0, 0, 6, 11);
+    g.fillTriangle(22, 11, 6, 11, 0, 22);
+    g.generateTexture('objective-arrow', 22, 22);
+    g.clear();
+
+    // Points of interest in space (drawn white; tinted per kind in flight).
+    g.fillStyle(0xffffff, 0.9); // derelict: a broken hull
+    g.fillTriangle(4, 30, 24, 8, 30, 20);
+    g.fillTriangle(30, 24, 44, 14, 40, 34);
+    g.fillRect(18, 26, 8, 4);
+    g.generateTexture('poi-derelict', 48, 40);
+    g.clear();
+    g.lineStyle(2, 0xffffff, 0.9); // beacon: a tall diamond with a halo
+    g.strokeCircle(24, 24, 22);
+    g.fillStyle(0xffffff, 1);
+    g.fillTriangle(24, 4, 14, 24, 34, 24);
+    g.fillTriangle(24, 44, 14, 24, 34, 24);
+    g.generateTexture('poi-beacon', 48, 48);
+    g.clear();
+    g.lineStyle(2, 0xffffff, 0.9); // signal: rings
+    g.strokeCircle(24, 24, 22);
+    g.strokeCircle(24, 24, 14);
+    g.fillStyle(0xffffff, 1);
+    g.fillCircle(24, 24, 5);
+    g.generateTexture('poi-signal', 48, 48);
+    g.clear();
+    g.fillStyle(0xffffff, 0.8); // anomaly: a scatter of shards
+    g.fillTriangle(24, 2, 18, 22, 30, 22);
+    g.fillTriangle(4, 30, 20, 26, 14, 44);
+    g.fillTriangle(44, 30, 28, 26, 34, 44);
+    g.generateTexture('poi-anomaly', 48, 48);
+    g.clear();
+
     g.lineStyle(3, 0xffffff, 0.35);
     g.strokeCircle(60, 60, 57);
     g.generateTexture('stick-ring', 120, 120);

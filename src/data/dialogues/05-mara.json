@@ -1,0 +1,253 @@
+[
+ {
+  "id": "mara-regular",
+  "title": "Mara",
+  "speaker": "Mara",
+  "role": "Bartender, The Departure Lounge",
+  "site": "new-geneva",
+  "character": "mara",
+  "if": {
+   "flag": "met-mara"
+  },
+  "start": "hello",
+  "nodes": {
+   "hello": {
+    "text": "Mara is already pouring by the time you sit down. \"Captain {name}. You came back.\" Her rings click against the glass. \"Nobody comes back. It's very flattering.\"",
+    "choices": [
+     {
+      "text": "\"You said you get off at midnight.\"",
+      "to": "night",
+      "if": {
+       "romance": "mara",
+       "flag": "mara-interested",
+       "allFlags": [
+        "camp-searched"
+       ],
+       "notFlag": "mara-night"
+      }
+     },
+     {
+      "text": "\"I came back for you, mostly.\"",
+      "to": "flirt",
+      "if": {
+       "notFlag": "mara-interested"
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "mara",
+         "by": 1
+        }
+       },
+       {
+        "setFlag": "mara-interested"
+       }
+      ],
+      "flirt": true
+     },
+     {
+      "text": "\"I keep thinking about that napkin.\"",
+      "to": "napkin",
+      "if": {
+       "flag": "mara-interested",
+       "notFlag": "mara-night",
+       "noFlags": [
+        "mara-napkin"
+       ]
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "mara",
+         "by": 1
+        }
+       },
+       {
+        "setFlag": "mara-napkin"
+       }
+      ],
+      "flirt": true
+     },
+     {
+      "text": "\"Last night was...\"",
+      "to": "after",
+      "if": {
+       "flag": "mara-night",
+       "notFlag": "mara-after"
+      }
+     },
+     {
+      "text": "\"I found the camp at Wolf 359.\"",
+      "to": "camp",
+      "if": {
+       "flag": "camp-searched",
+       "notFlag": "mara-told-camp"
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "mara",
+         "by": 1
+        }
+       },
+       {
+        "setFlag": "mara-told-camp"
+       }
+      ]
+     },
+     {
+      "text": "\"What's the news?\"",
+      "to": "news"
+     },
+     {
+      "text": "\"Just the drink, thanks.\"",
+      "to": null
+     }
+    ]
+   },
+   "flirt": {
+    "text": "\"Mostly.\" She leans on the bar, chin on her hand. \"I'll take mostly.\" Her eyes linger on your mouth for exactly one second longer than is polite. \"You're bad for business, you know. I keep watching the door.\"",
+    "choices": [
+     {
+      "text": "Raise your glass to her.",
+      "to": null
+     }
+    ]
+   },
+   "napkin": {
+    "text": "\"Do you.\" She looks pleased in a way she clearly doesn't intend to hide. \"Most people lose it in the wash.\" She tops up your glass. \"Find something worth telling me, captain. I collect good stories.\"",
+    "choices": [
+     {
+      "text": "\"I'll bring you one.\"",
+      "to": null
+     }
+    ]
+   },
+   "camp": {
+    "text": "You tell her. All of it: the forks, the drawing, the name on the wall. She doesn't interrupt once. When you're done she pours two glasses of something that isn't on the menu and drinks hers in one go.\n\n\"Forty-one people.\" She sets the glass down. \"Thank you for telling me the truth. Nobody tells the bartender the truth.\"",
+    "choices": [
+     {
+      "text": "\"You're easy to tell things to.\"",
+      "to": null,
+      "effects": [
+       {
+        "affinity": {
+         "who": "mara",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "Drink with her in silence.",
+      "to": null
+     }
+    ]
+   },
+   "news": {
+    "text": "\"Sirius money is buying every listening post it can find. The Academy has told its cadets that talking about New Horizons is a disciplinary offense, which of course means it's all they talk about.\" She wipes the bar. \"And down in the Sump, somebody calling himself Moth is selling a decode of the core signal that he swears is real. My regulars say he's the best there is.\"",
+    "choices": [
+     {
+      "text": "\"Good to know. Thanks, Mara.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "heard-of-moth"
+       }
+      ]
+     }
+    ]
+   },
+   "night": {
+    "text": "Mara glances at the clock, at the last two regulars, then back at you. \"Give me ten minutes.\"\n\nThe ten minutes are long. She locks the door behind the last customer and kills the lights one by one until only the bottles glow, amber and green, along the back wall. Then she comes around to your side of the bar.\n\n\"I told you,\" she murmurs, close enough now that her rings are cool against your jaw, \"nobody tells better stories than a bartender after closing.\"\n\nHer mouth finds yours, slow at first, and then not slow at all.",
+    "choices": [
+     {
+      "text": "Pull her closer.",
+      "to": "closer"
+     },
+     {
+      "text": "\"Maybe another night.\"",
+      "to": "later"
+     }
+    ]
+   },
+   "later": {
+    "text": "She smiles against your lips and steps back, unbothered. \"Another night, then. The offer doesn't expire, captain.\" She unlocks the door for you. \"Neither do I.\"",
+    "choices": [
+     {
+      "text": "Say goodnight.",
+      "to": null
+     }
+    ]
+   },
+   "closer": {
+    "text": "Somewhere between the bar and the narrow stairs to her apartment your jacket ends up over a stool. Her rings come off one by one and end up in a little silver pile on the counter, ringing like bells. She laughs at the sound, and at you, and pulls you up the stairs by your belt.",
+    "choices": [
+     {
+      "text": "Follow her up.",
+      "to": "fade"
+     }
+    ]
+   },
+   "fade": {
+    "text": "The bottles glow below. The city hums outside the window. For a few hours, nothing out there is listening.",
+    "choices": [
+     {
+      "text": "...",
+      "to": "morning"
+     }
+    ],
+    "mood": "fade"
+   },
+   "morning": {
+    "text": "You wake in the small apartment above the bar to the smell of coffee and the sound of Mara humming something old. She's wearing your shirt, and nothing about her expression suggests she plans to give it back.\n\n\"Don't look so worried, captain.\" She hands you a cup. \"I'm not going to make you choose between me and the stars. Or anyone else out there.\" A wicked little smile. \"Just come back and tell me stories.\"",
+    "choices": [
+     {
+      "text": "\"I will. Every one.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "mara-night"
+       },
+       {
+        "affinity": {
+         "who": "mara",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "Kiss her goodbye.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "mara-night"
+       },
+       {
+        "affinity": {
+         "who": "mara",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "after": {
+    "text": "\"Was lovely,\" Mara finishes for you, and slides a coffee across the bar instead of a drink. \"It was. And it's a standing appointment, captain. Midnight, whenever you're in port.\"",
+    "choices": [
+     {
+      "text": "\"I'll hold you to that.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "mara-after"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+]

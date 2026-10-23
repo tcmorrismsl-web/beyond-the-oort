@@ -18,6 +18,8 @@ const sample: SaveData = {
   locker: {},
   flags: ['met-mara'],
   paint: { hull: '#2f5a8a', accent: '#ffd27a', pattern: 'stripe', glow: '#4fc3ff' },
+  crew: ['quin'],
+  affinity: { quin: 3, ilse: -1 },
 };
 
 describe('save system', () => {

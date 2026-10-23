@@ -12,7 +12,8 @@
         "choices": [
           {
             "text": "\"Word travels that fast?\"",
-            "to": "gossip"
+            "to": "gossip",
+            "effects": []
           },
           {
             "text": "\"Do you greet every captain this warmly?\"",
@@ -20,16 +21,29 @@
             "effects": [
               {
                 "setFlag": "mara-flirted"
+              },
+              {
+                "affinity": {
+                  "who": "mara",
+                  "by": 1
+                }
               }
-            ]
+            ],
+            "flirt": true
           },
           {
             "text": "\"I'm looking for work. Real work, not hauling.\"",
-            "to": "work"
+            "to": "work",
+            "effects": []
           },
           {
             "text": "Raise the glass and leave.",
-            "to": null
+            "to": null,
+            "effects": [
+              {
+                "setFlag": "met-mara"
+              }
+            ]
           }
         ]
       },
@@ -43,7 +57,8 @@
                 "freighter-born"
               ]
             },
-            "to": "freighter"
+            "to": "freighter",
+            "effects": []
           },
           {
             "text": "\"You've seen people like me before. From downstairs.\"",
@@ -52,7 +67,8 @@
                 "sol-undercity"
               ]
             },
-            "to": "undercity"
+            "to": "undercity",
+            "effects": []
           },
           {
             "text": "\"Let me guess. You know my family name.\"",
@@ -61,7 +77,8 @@
                 "academy-legacy"
               ]
             },
-            "to": "academy"
+            "to": "academy",
+            "effects": []
           },
           {
             "text": "\"Frontier folk stand out here, don't they?\"",
@@ -70,11 +87,13 @@
                 "frontier-colonist"
               ]
             },
-            "to": "frontier"
+            "to": "frontier",
+            "effects": []
           },
           {
             "text": "\"What else have you heard?\"",
-            "to": "rumors"
+            "to": "rumors",
+            "effects": []
           }
         ]
       },
@@ -83,7 +102,8 @@
         "choices": [
           {
             "text": "\"What else have you heard?\"",
-            "to": "rumors"
+            "to": "rumors",
+            "effects": []
           }
         ]
       },
@@ -92,7 +112,8 @@
         "choices": [
           {
             "text": "Tap the bar twice back. \"What else have you heard?\"",
-            "to": "rumors"
+            "to": "rumors",
+            "effects": []
           }
         ]
       },
@@ -101,7 +122,8 @@
         "choices": [
           {
             "text": "\"I'd rather earn my own name. What else have you heard?\"",
-            "to": "rumors"
+            "to": "rumors",
+            "effects": []
           }
         ]
       },
@@ -110,7 +132,8 @@
         "choices": [
           {
             "text": "\"Generous. What else have you heard?\"",
-            "to": "rumors"
+            "to": "rumors",
+            "effects": []
           }
         ]
       },
@@ -122,7 +145,8 @@
             "if": {
               "flag": "core-signal-heard"
             },
-            "to": "nh"
+            "to": "nh",
+            "effects": []
           },
           {
             "text": "\"Static? Every night, at the same hour?\"",
@@ -145,7 +169,8 @@
                 "silent-colony"
               ]
             },
-            "to": "silent"
+            "to": "silent",
+            "effects": []
           },
           {
             "text": "\"Someone went past the charts and never came back. Have you heard anything?\"",
@@ -154,11 +179,13 @@
                 "searching"
               ]
             },
-            "to": "searching"
+            "to": "searching",
+            "effects": []
           },
           {
             "text": "\"Sounds like work. Who's hiring?\"",
-            "to": "work"
+            "to": "work",
+            "effects": []
           }
         ]
       },
@@ -167,7 +194,8 @@
         "choices": [
           {
             "text": "\"I will.\"",
-            "to": "work"
+            "to": "work",
+            "effects": []
           }
         ]
       },
@@ -208,12 +236,20 @@
             "effects": [
               {
                 "setFlag": "mara-interested"
+              },
+              {
+                "affinity": {
+                  "who": "mara",
+                  "by": 1
+                }
               }
-            ]
+            ],
+            "flirt": true
           },
           {
             "text": "Smile. \"Business first. What have you heard lately?\"",
-            "to": "rumors"
+            "to": "rumors",
+            "effects": []
           }
         ]
       },
@@ -222,7 +258,8 @@
         "choices": [
           {
             "text": "\"Real work. Not hauling.\"",
-            "to": "work"
+            "to": "work",
+            "effects": []
           }
         ]
       },
@@ -235,6 +272,9 @@
             "effects": [
               {
                 "setFlag": "archive-lead"
+              },
+              {
+                "setFlag": "met-mara"
               }
             ]
           }
@@ -254,6 +294,10 @@
           }
         ]
       }
+    },
+    "character": "mara",
+    "if": {
+      "notFlag": "met-mara"
     }
   },
   {
@@ -369,7 +413,17 @@
         "text": "\"Every receiver in Sol, by now. Sirius corporate is already buying up listening posts. The Academy is calling it a hoax on every channel. And the undercity's selling bootleg copies by the hour.\" Then, quieter, on a private channel: \"Captain {name}. Your ship's array caught that transmission cleaner than the whole Deep Space Network did. Somebody's going to want to know why. Be careful who you tell.\"",
         "choices": [
           {
-            "text": "\"Understood. Saving the recording.\"",
+            "text": "\"Understood. Anything else?\"",
+            "to": "archive",
+            "effects": []
+          }
+        ]
+      },
+      "archive": {
+        "text": "\"One more thing.\" Her voice drops. \"There's a carrier tone under the message. The DSN can't pull it apart, and I've tried everything I have. The only signal library older than ours is the Bessel Archive at 61 Cygni. Take the recording there and ask for Ilse Varga. Tell her Ines sent you.\" A tired almost-laugh. \"She'll pretend she isn't interested. She will be.\"",
+        "choices": [
+          {
+            "text": "\"Saving the recording. I'll find her.\"",
             "to": null,
             "effects": [
               {
@@ -380,6 +434,43 @@
                   "item": "nh-recording",
                   "qty": 1
                 }
+              },
+              {
+                "setFlag": "okafor-archive-lead"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "character": "okafor"
+  },
+  {
+    "id": "okafor-archive-call",
+    "title": "Incoming call: Deep Space Network",
+    "speaker": "Dr. Ines Okafor",
+    "role": "Deep Space Network",
+    "character": "okafor",
+    "trigger": {
+      "if": {
+        "flag": "core-signal-heard",
+        "notFlag": "okafor-archive-lead",
+        "noFlags": [
+          "archive-lead"
+        ]
+      }
+    },
+    "start": "call",
+    "nodes": {
+      "call": {
+        "text": "\"Captain {name}? Ines Okafor, DSN. Private channel.\" Papers rustle. \"There's a carrier tone under the New Horizons message. We can't pull it apart. The only signal library older than ours is the Bessel Archive at 61 Cygni. Take your recording there and ask for Ilse Varga. Tell her Ines sent you.\"",
+        "choices": [
+          {
+            "text": "\"On my way.\"",
+            "to": null,
+            "effects": [
+              {
+                "setFlag": "okafor-archive-lead"
               }
             ]
           }

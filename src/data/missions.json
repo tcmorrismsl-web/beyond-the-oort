@@ -1,0 +1,60 @@
+[
+ {
+  "id": "static",
+  "title": "Static",
+  "kind": "main",
+  "summary": "Something is hiding under the New Horizons signal. Find someone who can hear it.",
+  "startIf": {
+   "anyFlag": [
+    "archive-lead",
+    "okafor-archive-lead"
+   ]
+  },
+  "steps": [
+   {
+    "text": "Take the New Horizons recording to the Bessel Archive",
+    "doneIf": {
+     "flag": "ilse-hired"
+    },
+    "target": {
+     "system": "61-cygni",
+     "site": "archive-halls"
+    }
+   },
+   {
+    "text": "Recover the Ninefold's flight recorder",
+    "doneIf": {
+     "flag": "ninefold-recorder"
+    },
+    "target": {
+     "system": "wolf-359",
+     "poi": "ninefold-wreck"
+    }
+   }
+  ]
+ },
+ {
+  "id": "the-quiet-camp",
+  "title": "The Quiet Camp",
+  "kind": "main",
+  "summary": "The Ninefold sold its scrap to a mining camp on Cinder. The camp went quiet last spring.",
+  "startIf": {
+   "anyFlag": [
+    "ninefold-recorder",
+    "camp-searched"
+   ]
+  },
+  "steps": [
+   {
+    "text": "Search Tallis Camp on Cinder",
+    "doneIf": {
+     "flag": "camp-searched"
+    },
+    "target": {
+     "system": "wolf-359",
+     "site": "tallis-camp"
+    }
+   }
+  ]
+ }
+]

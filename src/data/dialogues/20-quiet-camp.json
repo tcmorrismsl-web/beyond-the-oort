@@ -1,0 +1,406 @@
+[
+ {
+  "id": "tallis-camp-search",
+  "title": "Search the camp",
+  "speaker": "Tallis Camp",
+  "role": "Wolf 359 · silent since spring",
+  "site": "tallis-camp",
+  "if": {
+   "notFlag": "camp-searched"
+  },
+  "start": "land",
+  "nodes": {
+   "land": {
+    "text": "Tallis Camp sits in a crater on Cinder's night side, under flare shielding that nobody ever closed. Every light is on. The airlock cycles for you as if it has been expecting company.",
+    "choices": [
+     {
+      "text": "Try the mess hall.",
+      "to": "mess"
+     },
+     {
+      "text": "Try the bunkhouse.",
+      "to": "bunks"
+     },
+     {
+      "text": "Go straight to the comms shack.",
+      "to": "comms"
+     },
+     {
+      "text": "Leave. Come back later.",
+      "to": null
+     }
+    ]
+   },
+   "hub": {
+    "text": "The camp hums around you. Somewhere a ventilation fan ticks over, patient as a clock.",
+    "choices": [
+     {
+      "text": "The mess hall.",
+      "to": "mess",
+      "if": {
+       "notFlag": "camp-mess"
+      }
+     },
+     {
+      "text": "The bunkhouse.",
+      "to": "bunks",
+      "if": {
+       "notFlag": "camp-bunks"
+      }
+     },
+     {
+      "text": "The comms shack.",
+      "to": "comms"
+     },
+     {
+      "text": "Leave. Come back later.",
+      "to": null
+     }
+    ]
+   },
+   "mess": {
+    "text": "Forty trays on long tables. Forty meals, half eaten, gone gray and hard under the frost. The forks are set down neatly beside the plates, every one of them, as if somebody asked everyone to stop eating at once and they all politely did.",
+    "choices": [
+     {
+      "text": "\"Ilse. Look at the forks.\"",
+      "to": "mess-ilse",
+      "if": {
+       "crew": "ilse"
+      },
+      "effects": [
+       {
+        "setFlag": "camp-mess"
+       }
+      ]
+     },
+     {
+      "text": "Move on.",
+      "to": "hub",
+      "effects": [
+       {
+        "setFlag": "camp-mess"
+       }
+      ]
+     }
+    ]
+   },
+   "mess-ilse": {
+    "text": "\"I see them.\" She doesn't come any closer. \"People don't do that, Captain. People drop things. People run.\" She is recording everything on her slate, and her hand is perfectly steady, and she hasn't blinked in a while.",
+    "choices": [
+     {
+      "text": "Move on.",
+      "to": "hub"
+     }
+    ]
+   },
+   "bunks": {
+    "text": "Boots lined up by every bunk. Blankets turned down. On one pillow, a crayon drawing of the camp: little domes, a little dish, and a long line climbing out of the comms shack and up, up, off the top of the page. At the end of the line someone has drawn a face.\n\nIt's smiling.",
+    "choices": [
+     {
+      "text": "Take the drawing.",
+      "to": "hub",
+      "effects": [
+       {
+        "setFlag": "camp-bunks"
+       },
+       {
+        "setFlag": "camp-drawing"
+       }
+      ]
+     },
+     {
+      "text": "Leave it where it is.",
+      "to": "hub",
+      "effects": [
+       {
+        "setFlag": "camp-bunks"
+       }
+      ]
+     }
+    ]
+   },
+   "comms": {
+    "text": "The comms shack is warm. Too warm. In the middle of the floor sits a receiver nobody would ever sell you: hull plating, consortium cabling and a mining laser's focusing lens, bolted into a dish that points straight up through a hole cut in the roof.\n\nIts screen shows one line, still glowing: TRANSMISSION COMPLETE.",
+    "choices": [
+     {
+      "text": "\"That's the Ninefold's hull plating.\"",
+      "to": "plating",
+      "if": {
+       "flag": "ninefold-recorder"
+      }
+     },
+     {
+      "text": "Read the camp's log.",
+      "to": "camplog"
+     }
+    ]
+   },
+   "plating": {
+    "text": "The scrap the Ninefold's crew sold to make payroll. The miners didn't ask what it was. They built an ear out of it.\n\nThen, it seems, they built a mouth.",
+    "choices": [
+     {
+      "text": "Read the camp's log.",
+      "to": "camplog"
+     }
+    ]
+   },
+   "camplog": {
+    "text": "The log is short.\n\nDay 1: New dish picked up something. Pretty. Like whale song.\nDay 9: Hadley says it's coming from the galactic core. Can't be.\nDay 14: It knows the name of the camp. It asked us to sing back.\nDay 15, the last entry, in capitals: WE SAID YES.",
+    "choices": [
+     {
+      "text": "Check what they sent.",
+      "to": "sent"
+     }
+    ]
+   },
+   "sent": {
+    "text": "The outgoing buffer holds a single message, sent the night the camp went quiet. Not a reply. Not a song. Just the camp's own name, over and over, louder each time.\n\nTALLIS CAMP. TALLIS CAMP. TALLIS CAMP.\n\nLike someone giving directions.",
+    "choices": [
+     {
+      "text": "Keep going.",
+      "to": "behind"
+     }
+    ]
+   },
+   "behind": {
+    "text": "Behind you, the shack door scrapes open. A big man in a patched work suit fills the doorway, a flare pistol aimed at your chest. His hand is shaking.\n\n\"You're not them,\" he says. \"Are you?\"",
+    "choices": [
+     {
+      "text": "\"I grew up on the frontier. I know what it's like to be alone out here.\"",
+      "to": "frontier",
+      "if": {
+       "origin": [
+        "frontier-colonist"
+       ]
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 2
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"I've seen a place like this before. Lights on, nobody home.\"",
+      "to": "seen",
+      "if": {
+       "moment": [
+        "silent-colony"
+       ]
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 2
+        }
+       }
+      ]
+     },
+     {
+      "text": "Step in front of Ilse. \"Easy. She's with me.\"",
+      "to": "shield",
+      "if": {
+       "crew": "ilse"
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       },
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Lower the gun, or I lower it for you.\"",
+      "to": "hard",
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Easy. I'm a captain. I came to find out what happened here.\"",
+      "to": "calm"
+     }
+    ]
+   },
+   "frontier": {
+    "text": "\"Yeah?\" He looks at you properly for the first time. \"Then you know.\" The pistol drops to his side.",
+    "choices": [
+     {
+      "text": "\"Who are you?\"",
+      "to": "quin"
+     }
+    ]
+   },
+   "seen": {
+    "text": "The pistol wavers. \"Somewhere else? It's happened somewhere else?\" Something in his face cracks, relief and horror in equal parts. He lowers the gun.",
+    "choices": [
+     {
+      "text": "\"Who are you?\"",
+      "to": "quin"
+     }
+    ]
+   },
+   "shield": {
+    "text": "He looks at the archivist behind you, then at you, and the pistol drops. \"You stand in front of your people. Good.\" He swallows. \"Mine didn't have anybody.\"",
+    "choices": [
+     {
+      "text": "\"Who are you?\"",
+      "to": "quin"
+     }
+    ]
+   },
+   "hard": {
+    "text": "Something in your voice gets through. He lowers the pistol, almost relieved that somebody told him to. \"Fair. Sorry. Haven't had company in a while that wasn't in my head.\"",
+    "choices": [
+     {
+      "text": "\"Who are you?\"",
+      "to": "quin"
+     }
+    ]
+   },
+   "calm": {
+    "text": "\"Find out.\" He laughs, an awful little sound. \"I've been finding out for seven months.\" The pistol sinks.",
+    "choices": [
+     {
+      "text": "\"Who are you?\"",
+      "to": "quin"
+     }
+    ]
+   },
+   "quin": {
+    "text": "\"Quin Reyes. I cut ice here.\" He nods at the wall by the door, where forty-one names are chalked in a neat column. His is one of them. \"That night I got into a fight at Wolf Point and spent it in a cell. Flew home in the morning and they were just... gone. Forty-one people. My brother. Everybody.\"\n\nHe looks at the receiver like it might bite him.\n\n\"I come back every week. I keep thinking if I listen hard enough, I'll hear them.\"",
+    "choices": [
+     {
+      "text": "\"Do you ever hear anything?\"",
+      "to": "hear"
+     },
+     {
+      "text": "\"I'm sorry, Quin.\"",
+      "to": "sorry",
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "hear": {
+    "text": "\"Sometimes.\" Very quietly. \"Sometimes the dish turns by itself. Always the same way.\" He points straight up, then tilts his finger toward the galactic core, and holds it there a long moment.",
+    "choices": [
+     {
+      "text": "\"Then we need to understand what they answered.\"",
+      "to": "offer"
+     }
+    ]
+   },
+   "sorry": {
+    "text": "\"Yeah.\" He wipes his face with the back of a glove. \"Everybody's sorry. Nobody comes.\" A beat. \"You came.\"",
+    "choices": [
+     {
+      "text": "\"Then let's find out what happened to them.\"",
+      "to": "offer"
+     }
+    ]
+   },
+   "offer": {
+    "text": "\"You're chasing this. I can see it on you.\" He holsters the flare pistol. \"Take me with you. I can fix anything with an engine, I can shoot straight, and I've got nothing left here but a dish that won't stop listening.\"",
+    "choices": [
+     {
+      "text": "\"Help me shut the dish down first.\"",
+      "to": "dish",
+      "if": {
+       "notFlag": "tallis-dish-off"
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Not if you're looking for a way to die.\"",
+      "to": "die",
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Welcome aboard, Quin.\"",
+      "to": "welcome"
+     }
+    ]
+   },
+   "dish": {
+    "text": "Together you pull the focusing lens out of its housing. The hum stops.\n\nThe silence afterward is worse. Quin stands there holding the lens like it's something that might still be warm.",
+    "choices": [
+     {
+      "text": "\"Ready?\"",
+      "to": "offer",
+      "effects": [
+       {
+        "setFlag": "tallis-dish-off"
+       }
+      ]
+     }
+    ]
+   },
+   "die": {
+    "text": "\"I'm looking for a way to live with it.\" He meets your eyes. \"Haven't found one yet. Maybe it's out there.\"",
+    "choices": [
+     {
+      "text": "\"Then come find it with us.\"",
+      "to": "welcome"
+     }
+    ]
+   },
+   "welcome": {
+    "text": "Quin takes one last look around the shack. Then he picks up the chalk, crosses out his own name on the wall, and writes one line under the column:\n\nGONE LOOKING.",
+    "choices": [
+     {
+      "text": "\"Let's go.\"",
+      "to": null,
+      "effects": [
+       {
+        "join": "quin"
+       },
+       {
+        "setFlag": "quin-met"
+       },
+       {
+        "setFlag": "camp-searched"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+]

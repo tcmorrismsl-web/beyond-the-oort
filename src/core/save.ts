@@ -8,7 +8,7 @@ import { readKey, writeKey, type StorageResult } from './storage';
  *    is the most valuable thing in the game.
  *  - Every load is validated. A corrupt save is reported, never half-loaded.
  */
-export const SAVE_VERSION = 6;
+export const SAVE_VERSION = 7;
 const SAVE_KEY = 'game.save';
 
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/);
@@ -61,6 +61,10 @@ export const SaveSchema = z.object({
   locker: z.record(z.string(), z.number().int().positive()),
   /** Story flags set by conversations and missions (what you know, who you've met). */
   flags: z.array(z.string().min(1)),
+  /** Character ids aboard (Act 1: crew & romance). */
+  crew: z.array(z.string().min(1)),
+  /** Approval per character. */
+  affinity: z.record(z.string(), z.number().int()),
 });
 export type SaveData = z.infer<typeof SaveSchema>;
 
@@ -112,6 +116,8 @@ const migrations: Record<number, Migration> = {
     const look = captain && typeof captain['look'] === 'object' && captain['look'] !== null ? (captain['look'] as Record<string, unknown>) : null;
     return { ...old, captain: captain && look ? { ...captain, look: { ...look, beard: 'none' } } : captain };
   },
+  // v6 → v7 (Act 1): crew aboard and per-character approval, both empty.
+  6: (old) => ({ ...old, crew: [], affinity: {} }),
 };
 
 export type LoadResult =

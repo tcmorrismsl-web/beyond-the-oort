@@ -77,6 +77,10 @@ export interface GameState {
   /** Story flags set by conversations and missions. */
   flags: string[];
   paint: Paint;
+  /** Character ids aboard your ship, in the order they joined. */
+  crew: string[];
+  /** Each character's approval of you (missing = 0). Per person, never a global meter. */
+  affinity: Record<string, number>;
 }
 
 export const STARTING_CREDITS = 1000;
@@ -127,6 +131,8 @@ export function newGame(seed: number, now: number, career?: NewCareer): GameStat
     locker: {},
     flags: [],
     paint: { ...(career?.paint ?? DEFAULT_PAINT) },
+    crew: [],
+    affinity: {},
   };
 }
 
@@ -147,6 +153,8 @@ export function fromSave(save: SaveData): GameState {
     locker: { ...save.locker },
     flags: [...save.flags],
     paint: { ...save.paint },
+    crew: [...save.crew],
+    affinity: { ...save.affinity },
   };
 }
 
@@ -168,6 +176,8 @@ export function toSave(state: GameState, now: number): SaveData {
     locker: { ...state.locker },
     flags: [...state.flags],
     paint: { ...state.paint },
+    crew: [...state.crew],
+    affinity: { ...state.affinity },
   };
 }
 
@@ -215,6 +225,12 @@ export function repairAgainstContent(state: GameState, data: GameData = gameData
     if (!a.captain.beards.some((o) => o.id === look.beard)) look.beard = DEFAULT_LOOK.beard;
   }
   if (!a.ship.patterns.some((o) => o.id === state.paint.pattern)) state.paint.pattern = DEFAULT_PAINT.pattern;
+  // Crew members removed from the content (or who can no longer join) step off; approval is kept.
+  const crew = state.crew.filter((id, i) => data.characters.get(id)?.home !== undefined && state.crew.indexOf(id) === i);
+  if (crew.length !== state.crew.length) {
+    fixed.push('crew list adjusted');
+    state.crew = crew;
+  }
   state.visited = state.visited.filter((id) => data.systems.has(id));
   if (!state.visited.includes(state.systemId)) state.visited.push(state.systemId);
   state.mode = state.landedAt === null ? 'flight' : 'landed';

@@ -10,7 +10,7 @@ if (!mara) throw new Error('mara missing');
 
 describe('dialogue content', () => {
   it('is placed somewhere you can actually land', () => {
-    expect(dialoguesAt('new-geneva', gameData.dialogues).map((d) => d.id)).toContain('mara-departure-lounge');
+    expect(dialoguesAt('new-geneva', gameData.dialogues, stateFor()).map((d) => d.id)).toContain('mara-departure-lounge');
   });
 
   it('rejects broken conversations: missing links, unreachable nodes, dead ends, unknown backgrounds', () => {
@@ -100,8 +100,12 @@ describe('the New Horizons signal', () => {
     expect(pendingTransmission(fresh, gameData.dialogues)).toBeNull();
     const landed = { ...fresh, flags: ['landed-once'] };
     expect(pendingTransmission(landed, gameData.dialogues)?.id).toBe('new-horizons-signal');
-    const heard = { ...fresh, flags: ['landed-once', 'core-signal-heard'] };
+    const heard = { ...fresh, flags: ['landed-once', 'core-signal-heard', 'okafor-archive-lead'] };
     expect(pendingTransmission(heard, gameData.dialogues)).toBeNull();
+    // Saves that heard it before Okafor pointed people to the Archive get a short follow-up call instead.
+    const old = { ...fresh, flags: ['landed-once', 'core-signal-heard'] };
+    expect(pendingTransmission(old, gameData.dialogues)?.id).toBe('okafor-archive-call');
+    expect(pendingTransmission({ ...old, flags: [...old.flags, 'archive-lead'] }, gameData.dialogues)).toBeNull();
   });
 
   it('ends with the recording in your locker and the log entry unlocked, for every background', () => {

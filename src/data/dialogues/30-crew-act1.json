@@ -1,0 +1,417 @@
+[
+ {
+  "id": "ilse-settling",
+  "title": "Ilse settles in",
+  "speaker": "Ilse Varga",
+  "role": "Archivist",
+  "crew": "ilse",
+  "character": "ilse",
+  "if": {
+   "notFlag": "ilse-t1"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Ilse has claimed the observation lounge. Her three paper books are stacked on the console, a blanket is folded over the back of the couch, and she is sitting cross-legged on the floor with a slate, watching the stars slide past as if they owe her an explanation.\n\n\"Your ship,\" she says without looking up, \"makes a noise at 0300 every night. Did you know that?\"",
+    "choices": [
+     {
+      "text": "\"The same hour as the Oort signal.\"",
+      "to": "hour",
+      "if": {
+       "motive": [
+        "the-signal"
+       ]
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"What kind of noise?\"",
+      "to": "noise"
+     },
+     {
+      "text": "\"Making yourself at home, I see.\"",
+      "to": "home"
+     }
+    ]
+   },
+   "hour": {
+    "text": "\"The same hour exactly.\" She finally looks up. \"You noticed that years ago, didn't you? And told no one, because no one would have believed you.\" It isn't pity in her voice. It's recognition.",
+    "choices": [
+     {
+      "text": "\"Why does an archivist care about a noise?\"",
+      "to": "why"
+     }
+    ]
+   },
+   "noise": {
+    "text": "\"A sort of sigh. Down in the drive section. Like something turning over in its sleep.\" She makes a note. \"I've logged it four nights running.\"",
+    "choices": [
+     {
+      "text": "\"Why does an archivist care about a noise?\"",
+      "to": "why"
+     }
+    ]
+   },
+   "home": {
+    "text": "\"I'm an archivist. Wherever the interesting records are is home.\" She glances at the blanket, faintly embarrassed. \"Also the couch is better than my bunk at the Archive. Don't tell anyone.\"",
+    "choices": [
+     {
+      "text": "\"Your secret's safe. Why archiving?\"",
+      "to": "why",
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "why": {
+    "text": "\"Because people lie and records don't. Or they lie less, and more interestingly.\" She turns the slate over in her hands. \"My grandmother was an archivist. She used to say the Archive remembers so that nobody else has to.\"\n\nShe says it lightly, but her thumb has stopped moving on the slate.",
+    "choices": [
+     {
+      "text": "\"That sounds like a heavy thing to carry.\"",
+      "to": "heavy",
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"What does the Archive remember that nobody else does?\"",
+      "to": "what"
+     },
+     {
+      "text": "\"I'll let you get back to it.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "ilse-t1"
+       }
+      ]
+     }
+    ]
+   },
+   "heavy": {
+    "text": "For a second she looks at you as if you've read a page she didn't know was open. \"It is,\" she says simply. Then, briskly: \"Go and fly your ship, Captain. I have four nights of sighing to transcribe.\"",
+    "choices": [
+     {
+      "text": "Leave her to it.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "ilse-t1"
+       }
+      ]
+     }
+    ]
+   },
+   "what": {
+    "text": "\"Everything.\" A pause just slightly too long. \"Most of it is tax records.\" She smiles, and the smile is a closed door with a very polite sign on it.",
+    "choices": [
+     {
+      "text": "\"Most of it.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "ilse-t1"
+       },
+       {
+        "setFlag": "ilse-secret-noticed"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "ilse-drive-core",
+  "title": "Ilse and the drive core",
+  "speaker": "Ilse Varga",
+  "role": "Archivist",
+  "crew": "ilse",
+  "character": "ilse",
+  "if": {
+   "flag": "ninefold-recorder",
+   "notFlag": "ilse-t2"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "You find Ilse in the drive section, kneeling beside the core housing with an old-fashioned stethoscope pressed against the casing. She holds up one finger: wait.\n\nAfter a long moment she takes the earpieces out. \"It's not mechanical,\" she says. \"It has a rhythm. Seven beats, a rest, then eleven. Primes, Captain. Something in your ship is counting.\"",
+    "choices": [
+     {
+      "text": "\"Is it dangerous?\"",
+      "to": "danger"
+     },
+     {
+      "text": "\"You talk to her like she's alive.\"",
+      "to": "alive"
+     },
+     {
+      "text": "\"Do you talk to everyone that gently, or just my ship?\"",
+      "to": "flirt",
+      "if": {
+       "romance": "ilse"
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "danger": {
+    "text": "\"Everything is dangerous to someone.\" She coils the stethoscope. \"But it hummed at the recorder. It didn't scream. I think it recognized something.\" She hesitates. \"I think it's been waiting for someone to bring it home.\"",
+    "choices": [
+     {
+      "text": "\"Home where?\"",
+      "to": "home"
+     }
+    ]
+   },
+   "alive": {
+    "text": "\"I talk to everything like it's alive. Books. Ships. The Archive's air recyclers, which are all called Gerald.\" Her mouth twitches. \"It's good manners, and occasionally it's right.\"",
+    "choices": [
+     {
+      "text": "\"Is she dangerous?\"",
+      "to": "danger"
+     }
+    ]
+   },
+   "flirt": {
+    "text": "Ilse goes very still, then very pink, which on her is a remarkable amount of color.\n\n\"I talk to most people,\" she says carefully, \"as briefly as possible.\" She looks at the stethoscope in her hands instead of at you. \"You are... an exception I haven't finished cataloguing.\"",
+    "choices": [
+     {
+      "text": "\"Take your time. I'm not going anywhere.\"",
+      "to": "danger",
+      "effects": [
+       {
+        "setFlag": "ilse-flirted"
+       }
+      ]
+     },
+     {
+      "text": "\"Let me know when you've filed me.\"",
+      "to": "danger",
+      "effects": [
+       {
+        "setFlag": "ilse-flirted"
+       }
+      ]
+     }
+    ]
+   },
+   "home": {
+    "text": "\"The Oort.\" She says it the way she said it at the Archive, as if the word were fragile. \"Wherever the Ninefold found her. Someone made this, Captain. Someone very old, who counted in primes and built things to last.\" She gets to her feet. \"And then they left it in our front yard.\"",
+    "choices": [
+     {
+      "text": "\"Then let's find out who.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "ilse-t2"
+       },
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Get some sleep, Ilse.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "ilse-t2"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "quin-engines",
+  "title": "Quin in the engine room",
+  "speaker": "Quin Reyes",
+  "role": "Ice miner",
+  "crew": "quin",
+  "character": "quin",
+  "if": {
+   "notFlag": "quin-t1"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Quin is lying under the port thruster housing with only his boots sticking out. A wrench clanks. A word that isn't in any dictionary echoes up from underneath.\n\n\"Your intercoolers,\" he announces, \"were put in by someone who hated you personally.\"",
+    "choices": [
+     {
+      "text": "\"Can you fix them?\"",
+      "to": "fix"
+     },
+     {
+      "text": "\"How are you holding up?\"",
+      "to": "holding",
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"You're very good with your hands.\"",
+      "to": "flirt",
+      "if": {
+       "romance": "quin"
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "fix": {
+    "text": "He slides out on a creeper, grease to the elbows, grinning for the first time since you met him. \"Already did. She'll turn sharper now. Don't thank me, I needed something to hit.\"",
+    "choices": [
+     {
+      "text": "\"How are you holding up?\"",
+      "to": "holding",
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Thanks, Quin.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "quin-t1"
+       }
+      ]
+     }
+    ]
+   },
+   "holding": {
+    "text": "The grin fades but doesn't go out. \"Better with a wrench in my hand.\" He turns it over. \"My brother Mateo used to say I'd fix the apocalypse if somebody handed me the right size socket.\" A breath. \"He was the smart one. I was the one who got thrown in a cell for a bar fight and lived.\"",
+    "choices": [
+     {
+      "text": "\"That isn't your fault.\"",
+      "to": "fault",
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"We'll find out what happened to him.\"",
+      "to": "find",
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "fault": {
+    "text": "\"Yeah. Everybody says that.\" He looks at you for a long second. \"You say it like you mean it, though. That's new.\"",
+    "choices": [
+     {
+      "text": "\"I do mean it.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "quin-t1"
+       }
+      ]
+     }
+    ]
+   },
+   "find": {
+    "text": "\"Damn right we will.\" He pushes himself back under the thruster. \"Now go away, Captain, I'm about to say worse words than before.\"",
+    "choices": [
+     {
+      "text": "Leave him to it.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "quin-t1"
+       }
+      ]
+     }
+    ]
+   },
+   "flirt": {
+    "text": "Quin slides out on the creeper and looks up at you, upside down, for a long moment. Then he laughs, a real laugh, surprised out of him.\n\n\"Captain, I'm lying in a puddle of coolant with a wrench in my teeth.\" He wipes his hands, which doesn't help at all. \"Ask me again when I've had a shower.\"",
+    "choices": [
+     {
+      "text": "\"I will.\"",
+      "to": "holding",
+      "effects": [
+       {
+        "setFlag": "quin-flirted"
+       }
+      ]
+     },
+     {
+      "text": "\"Who says I need you clean?\"",
+      "to": "holding",
+      "effects": [
+       {
+        "setFlag": "quin-flirted"
+       },
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+]

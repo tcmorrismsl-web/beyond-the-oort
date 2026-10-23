@@ -4,10 +4,18 @@ import systemsJson from './systems.json';
 import upgradesJson from './upgrades.json';
 import commoditiesJson from './commodities.json';
 import originsJson from './origins.json';
-import dialoguesJson from './dialogues.json';
 import appearanceJson from './appearance.json';
 import itemsJson from './items.json';
 import logJson from './log.json';
+import charactersJson from './characters.json';
+import poisJson from './pois.json';
+import missionsJson from './missions.json';
+
+/** Conversations live one file per story beat or character in data/dialogues/. */
+const dialogueFiles = import.meta.glob<{ default: unknown[] }>('./dialogues/*.json', { eager: true });
+const dialoguesJson: unknown[] = Object.keys(dialogueFiles)
+  .sort()
+  .flatMap((k) => dialogueFiles[k]?.default ?? []);
 
 /**
  * All game content lives in JSON and is validated here, including
@@ -54,6 +62,8 @@ export const SiteSchema = z.object({
   services: z.array(z.enum(SERVICES)),
   notes: z.partialRecord(z.enum(SERVICES), z.string().min(1)).default({}),
   market: z.object({ cheap: z.array(id).default([]), dear: z.array(id).default([]) }).optional(),
+  /** Shown instead of a service list at a place with no services (a quiet dock, an empty camp). */
+  emptyNote: z.string().min(1).optional(),
 });
 export type Site = z.infer<typeof SiteSchema>;
 
@@ -143,7 +153,22 @@ export const ConditionSchema = z.object({
   pronouns: z.array(z.enum(['she', 'he', 'they'])).optional(),
   flag: id.optional(),
   notFlag: id.optional(),
+  /** All of these flags. */
+  allFlags: z.array(id).optional(),
+  /** At least one of these flags. */
+  anyFlag: z.array(id).optional(),
+  /** None of these flags. */
+  noFlags: z.array(id).optional(),
   minCredits: z.number().int().nonnegative().optional(),
+  /** This character is aboard your ship. */
+  crew: id.optional(),
+  notCrew: id.optional(),
+  /** This character's approval of you is at least `value`. */
+  minAffinity: z.object({ who: id, value: z.number().int() }).optional(),
+  /** This character is open to romance with you right now (see systems/crew.ts). */
+  romance: id.optional(),
+  /** You carry this item in the locker. */
+  hasItem: id.optional(),
 });
 export type Condition = z.infer<typeof ConditionSchema>;
 
@@ -153,6 +178,13 @@ export const EffectSchema = z.object({
   clearFlag: id.optional(),
   credits: z.number().int().optional(),
   locker: z.object({ item: id, qty: z.number().int().positive() }).optional(),
+  /** Take an item out of the locker (handing it over). */
+  removeItem: id.optional(),
+  /** Change one character's approval of you. */
+  affinity: z.object({ who: id, by: z.number().int().min(-5).max(5) }).optional(),
+  /** A character comes aboard / leaves the ship. */
+  join: id.optional(),
+  leave: id.optional(),
 });
 export type Effect = z.infer<typeof EffectSchema>;
 
@@ -161,6 +193,8 @@ export const ChoiceSchemaD = z.object({
   to: id.nullable(), // null ends the conversation
   if: ConditionSchema.optional(),
   effects: z.array(EffectSchema).default([]),
+  /** Mark as flirting (shown with a heart). Choices gated on `romance` are marked automatically. */
+  flirt: z.boolean().optional(),
 });
 
 /**
@@ -173,11 +207,26 @@ export const DialogueSchema = z.object({
   title: z.string().min(1),
   speaker: z.string().min(1),
   role: z.string().default(''),
-  site: id.optional(), // where you can find this conversation
-  /** Or: a story event that plays in flight once its condition is met (e.g. an incoming transmission). */
+  /** Who's talking, for their portrait (a character id). */
+  character: id.optional(),
+  // Where it happens — exactly one of these:
+  site: id.optional(), // at a landing site
+  /** A story event that plays in flight once its condition is met (e.g. an incoming transmission). */
   trigger: z.object({ if: ConditionSchema }).optional(),
+  poi: id.optional(), // at a point of interest in space ("Investigate")
+  crew: id.optional(), // aboard your ship, with this crew member (Ship screen)
+  /** When it's available (site, poi and crew conversations). */
+  if: ConditionSchema.optional(),
   start: id,
-  nodes: z.record(id, z.object({ text: z.string().min(1), choices: z.array(ChoiceSchemaD).min(1) })),
+  nodes: z.record(
+    id,
+    z.object({
+      text: z.string().min(1),
+      /** Presentation: fade to black (romance), or a title card (end of an act). */
+      mood: z.enum(['fade', 'title']).optional(),
+      choices: z.array(ChoiceSchemaD).min(1),
+    }),
+  ),
 });
 export type Dialogue = z.infer<typeof DialogueSchema>;
 
@@ -190,6 +239,83 @@ export const LogEntrySchema = z.object({ flag: id, title: z.string().min(1), tex
 export type LogEntry = z.infer<typeof LogEntrySchema>;
 
 const NamedOption = z.object({ id, name: z.string().min(1) });
+
+const PRONOUNS = ['she', 'he', 'they'] as const;
+
+/**
+ * Anyone with a face: crew, love interests, voices on the radio. One
+ * character system for everyone; flags in the data decide who can join the
+ * crew (`home`) or be romanced (`romance`).
+ */
+export const CharacterSchema = z.object({
+  id,
+  name: z.string().min(1),
+  pronouns: z.enum(PRONOUNS),
+  role: z.string().min(1),
+  bio: z.string().min(1),
+  look: z.object({
+    face: id,
+    skin: hexColor,
+    hair: id,
+    hairColor: hexColor,
+    eyes: hexColor,
+    outfit: id,
+    outfitColor: hexColor,
+    beard: id,
+  }),
+  /** Where they wait when they're not aboard. Only crew-capable characters have one. */
+  home: id.optional(),
+  /**
+   * Romance. `leans`: which captains they're usually drawn to (by pronouns;
+   * they/them captains always count). `at`: approval needed to flirt.
+   * `pastLean`: extra approval needed to win them over otherwise.
+   */
+  romance: z
+    .object({
+      leans: z.union([z.literal('any'), z.array(z.enum(PRONOUNS)).min(1)]),
+      at: z.number().int().min(0),
+      pastLean: z.number().int().min(0),
+    })
+    .nullable()
+    .default(null),
+});
+export type Character = z.infer<typeof CharacterSchema>;
+
+/** Something to find in space: a wreck, a beacon, a reading point. Fly close and tap Investigate. */
+export const PoiSchema = z.object({
+  id,
+  name: z.string().min(1),
+  kind: z.enum(['derelict', 'beacon', 'signal', 'anomaly']),
+  system: id,
+  x: z.number(),
+  y: z.number(),
+  description: z.string().min(1),
+  /** When it shows up in space (hidden until then). */
+  if: ConditionSchema.optional(),
+});
+export type Poi = z.infer<typeof PoiSchema>;
+
+/** Where a mission step takes you. */
+export const TargetSchema = z.object({ system: id, site: id.optional(), poi: id.optional() });
+export type Target = z.infer<typeof TargetSchema>;
+
+/**
+ * A mission is a story thread in your journal. Its progress is read from
+ * story flags (nothing extra is saved), so a mission can never disagree with
+ * what actually happened in conversations.
+ */
+export const MissionSchema = z.object({
+  id,
+  title: z.string().min(1),
+  kind: z.enum(['main', 'side', 'companion']),
+  summary: z.string().min(1),
+  /** When it appears in the journal. */
+  startIf: ConditionSchema,
+  steps: z
+    .array(z.object({ text: z.string().min(1), doneIf: ConditionSchema, target: TargetSchema.optional() }))
+    .min(1),
+});
+export type Mission = z.infer<typeof MissionSchema>;
 
 /** Appearance options for the captain's portrait and the ship's paint. */
 export const AppearanceSchema = z.object({
@@ -231,7 +357,13 @@ export interface GameData {
   appearance: AppearanceOptions;
   items: ReadonlyMap<string, Item>;
   log: readonly LogEntry[];
+  characters: ReadonlyMap<string, Character>;
+  pois: ReadonlyMap<string, Poi>;
+  missions: readonly Mission[];
 }
+
+/** Flags the engine sets by itself (not from conversations). */
+export const ENGINE_FLAGS = ['landed-once'] as const;
 
 /** Bodies must sit clear of their star by at least this much (so nobody spawns inside the sun). */
 const STAR_CLEARANCE = 150;
@@ -272,6 +404,9 @@ export interface RawContent {
   appearance?: unknown;
   items?: unknown;
   log?: unknown;
+  characters?: unknown;
+  pois?: unknown;
+  missions?: unknown;
 }
 
 export function buildGameData(raw: RawContent): GameData {
@@ -284,6 +419,9 @@ export function buildGameData(raw: RawContent): GameData {
   const appearance = AppearanceSchema.parse(raw.appearance ?? DEFAULT_APPEARANCE);
   const items = z.array(ItemSchema).parse(raw.items ?? []);
   const log = z.array(LogEntrySchema).parse(raw.log ?? []);
+  const characters = z.array(CharacterSchema).parse(raw.characters ?? []);
+  const pois = z.array(PoiSchema).parse(raw.pois ?? []);
+  const missions = z.array(MissionSchema).parse(raw.missions ?? []);
   const errors: string[] = [];
   const shipMap = indexById(ships, 'ship', errors);
   const systemMap = indexById(systems, 'system', errors);
@@ -339,24 +477,113 @@ export function buildGameData(raw: RawContent): GameData {
     motive: new Set(creation.motives.map((o) => o.id)),
   };
   const itemMap = indexById(items, 'item', errors);
+  const characterMap = indexById(characters, 'character', errors);
+  const poiMap = indexById(pois, 'point of interest', errors);
+  indexById(missions, 'mission', errors);
+
+  // Every flag that can ever be set; any condition naming another flag is a typo.
+  const settable = new Set<string>(ENGINE_FLAGS);
+  for (const d of dialogues) {
+    for (const node of Object.values(d.nodes)) for (const c of node.choices) for (const e of c.effects) {
+      if (e.setFlag !== undefined) settable.add(e.setFlag);
+      if (e.join !== undefined) settable.add(`joined-${e.join}`);
+    }
+  }
+  const refs = { characters: characterMap, items: itemMap, flags: settable };
+  const checkCond = (cond: Condition | undefined, where: string): void => {
+    checkCondition(cond, where, refs, errors);
+  };
+
+  for (const c of characters) {
+    const a = appearance.captain;
+    const l = c.look;
+    const ok =
+      a.faces.some((o) => o.id === l.face) && a.skinTones.includes(l.skin) && a.hairStyles.some((o) => o.id === l.hair) &&
+      a.hairColors.includes(l.hairColor) && a.eyeColors.includes(l.eyes) && a.outfits.some((o) => o.id === l.outfit) &&
+      a.outfitColors.includes(l.outfitColor) && a.beards.some((o) => o.id === l.beard);
+    if (!ok) errors.push(`character "${c.id}" has a look that isn't one of the appearance options`);
+    if (c.home !== undefined && !siteMap.has(c.home)) errors.push(`character "${c.id}" waits at missing site "${c.home}"`);
+  }
+  for (const p of pois) {
+    const sys = systemMap.get(p.system);
+    if (!sys) errors.push(`point of interest "${p.id}" is in missing system "${p.system}"`);
+    else if (Math.hypot(p.x, p.y) < sys.star.radius + STAR_CLEARANCE) errors.push(`point of interest "${p.id}" is inside the star`);
+    if (siteMap.has(p.id) || bodyMap.has(p.id)) errors.push(`point of interest "${p.id}" shares an id with a body or site`);
+    checkCond(p.if, `point of interest "${p.id}"`);
+  }
   for (const d of dialogues) {
     validateDialogue(d, known, siteMap, errors);
-    if (d.site === undefined && d.trigger === undefined) errors.push(`dialogue "${d.id}" has no site and no trigger, so it can never be heard`);
-    for (const node of Object.values(d.nodes)) {
+    const where = `dialogue "${d.id}"`;
+    const placements = [d.site, d.trigger, d.poi, d.crew].filter((x) => x !== undefined).length;
+    if (placements === 0) errors.push(`${where} has no site, trigger, poi or crew, so it can never be heard`);
+    if (placements > 1) errors.push(`${where} is placed in more than one way (site/trigger/poi/crew)`);
+    if (d.poi !== undefined && !poiMap.has(d.poi)) errors.push(`${where} is placed at missing point of interest "${d.poi}"`);
+    if (d.crew !== undefined) {
+      const who = characterMap.get(d.crew);
+      if (!who) errors.push(`${where} is with missing crew member "${d.crew}"`);
+      else if (who.home === undefined) errors.push(`${where} is aboard with "${d.crew}", who can't join the crew (no home)`);
+    }
+    if (d.character !== undefined && !characterMap.has(d.character)) errors.push(`${where} shows missing character "${d.character}"`);
+    if (d.trigger !== undefined) {
+      // A transmission must switch itself off, or it would replay forever.
+      const off = d.trigger.if.notFlag;
+      const sets = Object.values(d.nodes).some((n) => n.choices.some((c) => c.effects.some((e) => e.setFlag === off)));
+      if (off === undefined || !sets) errors.push(`${where} is a transmission that never switches itself off (its trigger needs a notFlag that the conversation sets)`);
+    }
+    if (d.trigger !== undefined && d.if !== undefined) errors.push(`${where}: a transmission's condition belongs in trigger.if`);
+    checkCond(d.trigger?.if, where);
+    checkCond(d.if, where);
+    for (const [nodeId, node] of Object.entries(d.nodes)) {
       for (const c of node.choices) {
+        checkCond(c.if, `${where} node "${nodeId}"`);
         for (const e of c.effects) {
-          if (e.locker && !itemMap.has(e.locker.item)) errors.push(`dialogue "${d.id}" gives missing item "${e.locker.item}"`);
+          if (e.locker && !itemMap.has(e.locker.item)) errors.push(`${where} gives missing item "${e.locker.item}"`);
+          if (e.removeItem !== undefined && !itemMap.has(e.removeItem)) errors.push(`${where} takes missing item "${e.removeItem}"`);
+          for (const who of [e.affinity?.who, e.join, e.leave]) {
+            if (who !== undefined && !characterMap.has(who)) errors.push(`${where} node "${nodeId}" names missing character "${who}"`);
+          }
+          if (e.join !== undefined && characterMap.get(e.join)?.home === undefined) errors.push(`${where} node "${nodeId}" recruits "${e.join}", who has no home port`);
         }
       }
     }
+  }
+  for (const m of missions) {
+    const where = `mission "${m.id}"`;
+    checkCond(m.startIf, where);
+    m.steps.forEach((step, i) => {
+      checkCond(step.doneIf, `${where} step ${i + 1}`);
+      const t = step.target;
+      if (!t) return;
+      if (!systemMap.has(t.system)) errors.push(`${where} step ${i + 1} targets missing system "${t.system}"`);
+      if (t.site !== undefined && siteMap.get(t.site)?.systemId !== t.system) errors.push(`${where} step ${i + 1} targets site "${t.site}", which isn't in "${t.system}"`);
+      if (t.poi !== undefined && poiMap.get(t.poi)?.system !== t.system) errors.push(`${where} step ${i + 1} targets point "${t.poi}", which isn't in "${t.system}"`);
+    });
   }
   const logFlags = new Set<string>();
   for (const entry of log) {
     if (logFlags.has(entry.flag)) errors.push(`two log entries for flag "${entry.flag}"`);
     logFlags.add(entry.flag);
+    if (!settable.has(entry.flag)) errors.push(`log entry "${entry.title}" waits for flag "${entry.flag}", which nothing sets`);
   }
   if (errors.length > 0) throw new Error(`Game data invalid:\n- ${errors.join('\n- ')}`);
-  return { ships: shipMap, systems: systemMap, bodies: bodyMap, sites: siteMap, upgrades, commodities: commodityMap, creation, dialogues: dialogueMap, appearance, items: itemMap, log };
+  return { ships: shipMap, systems: systemMap, bodies: bodyMap, sites: siteMap, upgrades, commodities: commodityMap, creation, dialogues: dialogueMap, appearance, items: itemMap, log, characters: characterMap, pois: poiMap, missions };
+}
+
+/** A condition may only name things that exist: characters, items, and flags something can set. */
+function checkCondition(
+  cond: Condition | undefined,
+  where: string,
+  refs: { characters: ReadonlyMap<string, Character>; items: ReadonlyMap<string, unknown>; flags: ReadonlySet<string> },
+  errors: string[],
+): void {
+  if (!cond) return;
+  const flags = [cond.flag, cond.notFlag, ...(cond.allFlags ?? []), ...(cond.anyFlag ?? []), ...(cond.noFlags ?? [])];
+  for (const f of flags) if (f !== undefined && !refs.flags.has(f)) errors.push(`${where} checks flag "${f}", which nothing ever sets`);
+  for (const who of [cond.crew, cond.notCrew, cond.minAffinity?.who, cond.romance]) {
+    if (who !== undefined && !refs.characters.has(who)) errors.push(`${where} checks missing character "${who}"`);
+  }
+  if (cond.romance !== undefined && refs.characters.get(cond.romance)?.romance === null) errors.push(`${where} checks romance with "${cond.romance}", who isn't romanceable`);
+  if (cond.hasItem !== undefined && !refs.items.has(cond.hasItem)) errors.push(`${where} checks missing item "${cond.hasItem}"`);
 }
 
 /**
@@ -406,4 +633,7 @@ export const gameData: GameData = buildGameData({
   appearance: appearanceJson,
   items: itemsJson,
   log: logJson,
+  characters: charactersJson,
+  pois: poisJson,
+  missions: missionsJson,
 });

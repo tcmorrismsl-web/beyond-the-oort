@@ -4,6 +4,9 @@ import type { Session } from '../core/session';
 import { button, createLayer, credits, el, type Layer } from '../ui/dom';
 import { openSheet, renderDialogue, renderDrydock, renderMarket } from '../ui/panels';
 import { dialoguesAt } from '../systems/dialogue';
+import { waitingAt } from '../systems/crew';
+import { portraitSvg, setSvg } from '../ui/art';
+import { showToast } from '../ui/toast';
 import { getSession } from './sessionAccess';
 import { addStarBackdrop, onScreenResize } from './resize';
 import { ensureBodyTexture } from './systemTextures';
@@ -13,8 +16,8 @@ const SERVICE_INFO: Record<Service, { label: string; arrives: string | null }> =
   trade: { label: 'Market', arrives: null },
   drydock: { label: 'Drydock', arrives: null },
   repair: { label: 'Repairs', arrives: 'Combat update' },
-  missions: { label: 'Jobs', arrives: 'Story update' },
-  bar: { label: 'Bar', arrives: 'Crew update' },
+  missions: { label: 'Jobs', arrives: 'side stories update' },
+  bar: { label: 'Bar', arrives: null },
 };
 
 const SITE_KIND: Record<Site['kind'], string> = {
@@ -85,46 +88,9 @@ export class LandedScene extends Phaser.Scene {
     head.append(this.creditsLine);
     const card = el('div', 'card port', head);
 
-    // Services: only what this site has, in its own words.
+    // Services: only what this site has, in its own words; people first.
     const list = el('div', 'svc-list port-svc');
-    for (const svc of site.services) {
-      const info = SERVICE_INFO[svc];
-      const note = site.notes[svc] ?? '';
-      const row = el('div', 'svc', el('b', '', info.label));
-      if (note) row.append(el('div', 'svc-note', note));
-      if (svc === 'trade' || svc === 'drydock') {
-        const open = button(svc === 'trade' ? 'Open market' : 'Open drydock', () => {
-          openSheet(this.ui.root, (sheetCard, close) => {
-            const refresh = (): void => {
-              this.creditsLine.textContent = credits(this.session.state.credits);
-            };
-            if (svc === 'trade') renderMarket(sheetCard, this.session, close, refresh);
-            else renderDrydock(sheetCard, this.session, close, refresh);
-          });
-        }, 'small');
-        open.style.marginTop = '8px';
-        row.append(open);
-      } else if (info.arrives) {
-        row.append(el('div', 'svc-soon', `Opens with the ${info.arrives}`));
-      }
-      list.append(row);
-    }
-    // People to talk to here (their conversation remembers your background and choices).
-    for (const d of dialoguesAt(site.id, gameData.dialogues)) {
-      const talk = button(`Talk to ${d.speaker}`, () => {
-        openSheet(this.ui.root, (sheetCard, close) => {
-          renderDialogue(sheetCard, this.session, d.id, () => {
-            close();
-            this.creditsLine.textContent = credits(this.session.state.credits);
-          });
-        });
-      }, 'small');
-      talk.style.marginTop = '8px';
-      list.prepend(el('div', 'svc person', el('b', '', d.speaker), el('span', 'sub', `  ·  ${d.role}`), el('div', 'svc-note', 'Someone here wants a word.'), talk));
-    }
-    if (site.services.length === 0) {
-      list.append(el('div', 'svc svc-dim', el('b', '', 'A quiet dock'), el('div', 'svc-note', 'Nothing for sale and nobody home. Just you, the hum of the station, and the names on the wall.')));
-    }
+    this.fillServices(list, site);
     card.append(list);
 
     // Actions stay pinned to the bottom of the card, so Lift off is always
@@ -151,6 +117,73 @@ export class LandedScene extends Phaser.Scene {
     actions.append(depart);
     card.append(actions);
     this.ui.root.append(el('div', 'screen', card));
+  }
+
+  /** People here, then services. Rebuilt after each conversation (talking can change who's around). */
+  private fillServices(list: HTMLDivElement, site: Site): void {
+    list.replaceChildren();
+    const refresh = (): void => {
+      this.creditsLine.textContent = credits(this.session.state.credits);
+      this.fillServices(list, site);
+    };
+    const state = this.session.state;
+    for (const d of dialoguesAt(site.id, gameData.dialogues, state)) {
+      const who = d.character === undefined ? undefined : gameData.characters.get(d.character);
+      const talk = button(who ? `Talk to ${d.speaker}` : d.title, () => {
+        openSheet(this.ui.root, (sheetCard, close) => {
+          renderDialogue(sheetCard, this.session, d.id, () => {
+            close();
+            refresh();
+          });
+        });
+      }, 'small primary');
+      talk.style.marginTop = '8px';
+      const row = el('div', 'svc person');
+      if (who) {
+        const face = el('div', 'portrait-box tiny');
+        setSvg(face, portraitSvg(who.look));
+        row.classList.add('crew-row');
+        row.append(face, el('div', '', el('b', '', d.speaker), el('div', 'sub', d.role), talk));
+      } else {
+        row.append(el('b', '', d.title), el('div', 'sub', d.role), talk);
+      }
+      list.append(row);
+    }
+    // Old shipmates waiting here can come back aboard.
+    for (const c of waitingAt(site.id, state, gameData)) {
+      const face = el('div', 'portrait-box tiny');
+      setSvg(face, portraitSvg(c.look));
+      const invite = button(`Invite ${c.name.split(' ')[0]} back aboard`, () => {
+        if (this.session.invite(c.id, Date.now())) showToast(`${c.name.split(' ')[0]} is back aboard`);
+        refresh();
+      }, 'small');
+      invite.style.marginTop = '8px';
+      list.append(el('div', 'svc person crew-row', face, el('div', '', el('b', '', c.name), el('div', 'sub', c.role), invite)));
+    }
+    for (const svc of site.services) {
+      const info = SERVICE_INFO[svc];
+      const note = site.notes[svc] ?? '';
+      const row = el('div', 'svc', el('b', '', info.label));
+      if (note) row.append(el('div', 'svc-note', note));
+      if (svc === 'trade' || svc === 'drydock') {
+        const open = button(svc === 'trade' ? 'Open market' : 'Open drydock', () => {
+          openSheet(this.ui.root, (sheetCard, close) => {
+            if (svc === 'trade') renderMarket(sheetCard, this.session, close, refresh);
+            else renderDrydock(sheetCard, this.session, close, refresh);
+          });
+        }, 'small');
+        open.style.marginTop = '8px';
+        row.append(open);
+      } else if (info.arrives) {
+        row.append(el('div', 'svc-soon', `Opens with the ${info.arrives}`));
+      }
+      list.append(row);
+    }
+    if (site.services.length === 0 && list.childElementCount === 0) {
+      list.append(el('div', 'svc svc-dim', el('b', '', 'Nobody here'), el('div', 'svc-note', site.emptyNote ?? 'Nothing for sale and nobody to talk to.')));
+    } else if (site.services.length === 0 && site.emptyNote) {
+      list.append(el('div', 'svc svc-dim', el('div', 'svc-note', site.emptyNote)));
+    }
   }
 
   override update(): void {

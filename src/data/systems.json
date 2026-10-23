@@ -67,6 +67,20 @@
               "trade": "Freight market — haggling encouraged.",
               "bar": "Mama Ade's — cheap stew, good tips on who's hiring."
             }
+          },
+          {
+            "id": "the-sump",
+            "name": "The Sump",
+            "kind": "city",
+            "description": "The crowded levels under New Geneva: noodle stalls, data dens, and favors traded faster than credits.",
+            "services": [
+              "trade",
+              "bar"
+            ],
+            "notes": {
+              "trade": "Everything is for sale down here, and half of it fell off a freighter.",
+              "bar": "A data den with cheap drinks, fast connections and people who never give their real names."
+            }
           }
         ]
       },
@@ -347,6 +361,26 @@
             }
           }
         ]
+      },
+      {
+        "id": "halcyon-post",
+        "name": "Halcyon Array",
+        "kind": "station",
+        "x": -1150,
+        "y": -650,
+        "radius": 26,
+        "color": "#9fb4d8",
+        "description": "A listening post: a ring of dishes around a small habitat, all turned outward.",
+        "sites": [
+          {
+            "id": "halcyon-post-deck",
+            "name": "Halcyon listening post",
+            "kind": "research",
+            "description": "A research habitat ringed by dishes that never stop turning. One window is lit.",
+            "services": [],
+            "emptyNote": "The dishes turn. The habitat hums. Someone has left the lights on in the galley."
+          }
+        ]
       }
     ]
   },
@@ -401,6 +435,14 @@
                 "machinery"
               ]
             }
+          },
+          {
+            "id": "tallis-camp",
+            "name": "Tallis Camp",
+            "kind": "ruins",
+            "description": "A mining camp in a crater on the night side. Silent since spring. Every light is still on.",
+            "services": [],
+            "emptyNote": "No one answers your hails. The airlock cycles open anyway."
           }
         ]
       },

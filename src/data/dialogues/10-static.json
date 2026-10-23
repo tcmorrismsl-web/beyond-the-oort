@@ -1,0 +1,505 @@
+[
+ {
+  "id": "ilse-archive",
+  "title": "Ilse Varga",
+  "speaker": "Ilse Varga",
+  "role": "Archivist, Bessel Archive",
+  "site": "archive-halls",
+  "character": "ilse",
+  "start": "hello",
+  "nodes": {
+   "hello": {
+    "text": "The Archive Halls are hushed: shelves of data crystal under amber light, and the soft tick of a reading desk older than most colonies. A woman at the nearest desk doesn't look up. \"If you're lost, the commons is one deck down. If you're selling something, it's two.\"",
+    "choices": [
+     {
+      "text": "\"Mara sent me. She said you pay captains to recover lost records.\"",
+      "to": "mara",
+      "if": {
+       "flag": "archive-lead"
+      }
+     },
+     {
+      "text": "\"Ines Okafor at the Deep Space Network sent me.\"",
+      "to": "okafor",
+      "if": {
+       "flag": "okafor-archive-lead"
+      }
+     },
+     {
+      "text": "\"I have a recording nobody can decode.\"",
+      "to": "recording",
+      "if": {
+       "hasItem": "nh-recording"
+      }
+     },
+     {
+      "text": "\"Just looking around.\"",
+      "to": "browse"
+     }
+    ]
+   },
+   "browse": {
+    "text": "\"Then look quietly.\" She turns a page. Then her eyes slide to the slate at her elbow, which shows the docking log, and stop. She looks at you properly for the first time. \"That's not a ship I know. And I know all of them.\"",
+    "choices": [
+     {
+      "text": "\"She's one of a kind.\"",
+      "to": "onekind"
+     },
+     {
+      "text": "Leave her to her reading.",
+      "to": null
+     }
+    ]
+   },
+   "onekind": {
+    "text": "\"Nothing is one of a kind, Captain. Things are just the first of their kind that someone wrote down.\" She goes back to her page, but she doesn't turn it. \"Come back if you have something worth reading.\"",
+    "choices": [
+     {
+      "text": "\"Actually, I do. The New Horizons transmission.\"",
+      "to": "recording",
+      "if": {
+       "hasItem": "nh-recording"
+      }
+     },
+     {
+      "text": "\"Another time.\"",
+      "to": null
+     }
+    ]
+   },
+   "mara": {
+    "text": "A flicker of a smile, there and gone. \"Mara sends me the interesting ones and keeps the charming ones for herself.\" She closes her book. \"Which are you?\"",
+    "choices": [
+     {
+      "text": "\"Interesting. I have a clean copy of the New Horizons transmission.\"",
+      "to": "recording",
+      "if": {
+       "hasItem": "nh-recording"
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Can't I be both?\"",
+      "to": "both"
+     },
+     {
+      "text": "\"Neither yet. I'll come back.\"",
+      "to": null
+     }
+    ]
+   },
+   "both": {
+    "text": "\"Statistically, no.\" But she almost laughs, which you suspect is rare. \"What have you brought me?\"",
+    "choices": [
+     {
+      "text": "\"A clean copy of the New Horizons transmission.\"",
+      "to": "recording",
+      "if": {
+       "hasItem": "nh-recording"
+      }
+     },
+     {
+      "text": "\"Nothing yet. I'll be back.\"",
+      "to": null
+     }
+    ]
+   },
+   "okafor": {
+    "text": "\"Ines.\" Something in her face softens and then locks again. \"She wouldn't send anyone to me unless the Deep Space Network was out of its depth.\" She clears a space on the desk. \"Show me.\"",
+    "choices": [
+     {
+      "text": "Hand her the recording.",
+      "to": "recording",
+      "if": {
+       "hasItem": "nh-recording"
+      }
+     },
+     {
+      "text": "\"I'll come back with it.\"",
+      "to": null
+     }
+    ]
+   },
+   "recording": {
+    "text": "She plugs your recording into a desk older than both of you. The message crawls past, WOLF 359, BARNARD'S STAR, ALPHA CENTAURI, SOL, and she doesn't flinch. Then she strips the words away and leaves only what's underneath: a low carrier tone, rising and falling like a held breath.\n\nIlse stops breathing too.\n\n\"I've heard this before,\" she says quietly. \"Once. Twelve years ago.\"",
+    "choices": [
+     {
+      "text": "\"There's another signal. From the Oort. Every night at the same hour.\"",
+      "to": "oort",
+      "if": {
+       "motive": [
+        "the-signal"
+       ]
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       },
+       {
+        "setFlag": "two-signals"
+       }
+      ]
+     },
+     {
+      "text": "\"I heard something like it once. At a colony where everyone vanished.\"",
+      "to": "silent",
+      "if": {
+       "moment": [
+        "silent-colony"
+       ]
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"You've gone pale. Are you all right?\"",
+      "to": "pale"
+     },
+     {
+      "text": "\"Where?\"",
+      "to": "ninefold"
+     }
+    ]
+   },
+   "oort": {
+    "text": "Her hand stops over the console. \"The Oort,\" she repeats, carefully, as if the word might break. \"Tell me the hour.\" You tell her. She writes it down on paper, not on the slate, and slips the paper into her coat.\n\n\"Interesting,\" is all she says. It is very clearly not all she thinks.",
+    "choices": [
+     {
+      "text": "\"You know something about it.\"",
+      "to": "ninefold",
+      "effects": [
+       {
+        "setFlag": "ilse-knows-oort"
+       }
+      ]
+     },
+     {
+      "text": "\"Where did you hear the tone before?\"",
+      "to": "ninefold",
+      "effects": [
+       {
+        "setFlag": "ilse-knows-oort"
+       }
+      ]
+     }
+    ]
+   },
+   "silent": {
+    "text": "\"Then you know what a quiet world looks like.\" She studies you for longer than is polite. \"Most people who tell me that are lying or drunk. You're neither.\"",
+    "choices": [
+     {
+      "text": "\"Where did you hear the tone before?\"",
+      "to": "ninefold"
+     }
+    ]
+   },
+   "pale": {
+    "text": "\"I'm an archivist. We're all pale.\" A beat. \"But thank you for asking. Nobody does.\"",
+    "choices": [
+     {
+      "text": "\"Where did you hear it?\"",
+      "to": "ninefold",
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "ninefold": {
+    "text": "\"The Ninefold. A survey tender owned by a research consortium at Lalande 21185.\" She pulls up a record: a squat, ugly little ship. \"Its last transmission had this same tone under it, and then nothing. The consortium went bankrupt a year later, and the Archive bought their records at auction.\"\n\nHer eyes flick to the window, to your ship in the dock.\n\n\"The same auction your ship came from, I'd guess.\"",
+    "choices": [
+     {
+      "text": "\"You knew what my ship was the moment I docked.\"",
+      "to": "knew",
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Where's the Ninefold now?\"",
+      "to": "where"
+     }
+    ]
+   },
+   "knew": {
+    "text": "\"I knew she was consortium-built. The hull lines give it away.\" A pause; a decision. \"And I knew her drive core wasn't on any parts list we bought. I've been waiting twelve years for someone to fly her in here.\"\n\nIt's more honest than she meant to be. You watch her regret it.",
+    "choices": [
+     {
+      "text": "\"Then tell me where the Ninefold is.\"",
+      "to": "where"
+     }
+    ]
+   },
+   "where": {
+    "text": "\"Drifting at Wolf 359. A miner reported the wreck years ago and nobody cared.\" She slides a data chit across the desk. \"Her flight recorder should still be aboard. Bring it back and the Archive pays well.\" She stands and takes her coat off the chair. \"One condition. A record never leaves an archivist's sight. I'm coming with you.\"",
+    "choices": [
+     {
+      "text": "\"Welcome aboard.\"",
+      "to": "pack",
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"My ship, my rules.\"",
+      "to": "rules"
+     },
+     {
+      "text": "\"Why do you really want to come?\"",
+      "to": "why"
+     }
+    ]
+   },
+   "rules": {
+    "text": "\"Naturally, Captain. I'll follow every rule you can explain to me.\" She says it so politely that it takes you a moment to notice it was a threat.",
+    "choices": [
+     {
+      "text": "\"Then we'll get along fine.\"",
+      "to": "pack"
+     }
+    ]
+   },
+   "why": {
+    "text": "\"Because it's the most interesting thing that's happened to me in twelve years, and I refuse to read about it secondhand.\" True, but not the whole truth. You can tell, and she can tell that you can tell.",
+    "choices": [
+     {
+      "text": "\"Fair enough. Welcome aboard.\"",
+      "to": "pack",
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"I'll get the rest of it out of you eventually.\"",
+      "to": "pack",
+      "effects": [
+       {
+        "setFlag": "ilse-secret-noticed"
+       }
+      ]
+     }
+    ]
+   },
+   "pack": {
+    "text": "She packs in under a minute: a slate, a coat, and three paper books held together with a strap. \"Wolf 359, then.\" She pauses at the hatch of your ship and lays her palm flat on the hull, like someone greeting a horse. \"Hello,\" she tells it, very quietly.",
+    "choices": [
+     {
+      "text": "\"Let's go.\"",
+      "to": null,
+      "effects": [
+       {
+        "join": "ilse"
+       },
+       {
+        "setFlag": "ilse-hired"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "if": {
+   "notFlag": "ilse-hired"
+  }
+ },
+ {
+  "id": "ninefold-sealed",
+  "title": "Ninefold wreck",
+  "speaker": "Ninefold wreck",
+  "role": "Wolf 359 · derelict",
+  "poi": "ninefold-wreck",
+  "start": "look",
+  "nodes": {
+   "look": {
+    "text": "A consortium survey tender, NINEFOLD stenciled on her flank, tumbling slowly in Wolf 359's red light. Every hatch is welded shut, and from the scorch pattern, the welding was done from the inside.\n\nWithout the consortium's access codes you'd be cutting for hours, and something about her makes you not want to stay that long.",
+    "choices": [
+     {
+      "text": "Mark her on the chart and move on.",
+      "to": null
+     }
+    ]
+   }
+  },
+  "if": {
+   "notFlag": "ilse-hired"
+  }
+ },
+ {
+  "id": "ninefold-wreck-search",
+  "title": "Board the Ninefold",
+  "speaker": "Ninefold wreck",
+  "role": "Wolf 359 · derelict",
+  "poi": "ninefold-wreck",
+  "start": "approach",
+  "nodes": {
+   "approach": {
+    "text": "The Ninefold tumbles slowly in Wolf 359's red light, frost glittering along her seams. You match her spin and dock. Every hatch is welded shut. From the inside.",
+    "choices": [
+     {
+      "text": "\"Ilse, do the Archive's codes still open consortium locks?\"",
+      "to": "codes",
+      "if": {
+       "crew": "ilse"
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "Cut through the hatch.",
+      "to": "inside"
+     }
+    ]
+   },
+   "codes": {
+    "text": "\"They should.\" On the suit channel you hear her typing, then a click deep in the hull. \"There. She remembers who owns her.\"",
+    "choices": [
+     {
+      "text": "Go in.",
+      "to": "inside"
+     }
+    ]
+   },
+   "inside": {
+    "text": "Frost on everything. The crew lockers stand open and empty. In the galley the table is set for six, and someone has left a card game in the middle of a hand. Six coffee cups, still full, frozen solid.",
+    "choices": [
+     {
+      "text": "Check the cargo bay.",
+      "to": "cargo"
+     },
+     {
+      "text": "Head for the bridge.",
+      "to": "bridge"
+     }
+    ]
+   },
+   "cargo": {
+    "text": "The bay is empty except for a cradle bolted to the deck, shaped to hold something roughly the size of your own ship's drive core. Its bolts have been sheared, not unscrewed.\n\nSomeone has scrawled on the cradle in marker: SOLD - TALLIS CAMP - CINDER. And under it, smaller, in a different hand: it hums.",
+    "choices": [
+     {
+      "text": "Head for the bridge.",
+      "to": "bridge",
+      "effects": [
+       {
+        "setFlag": "ninefold-cradle"
+       }
+      ]
+     }
+    ]
+   },
+   "bridge": {
+    "text": "The flight recorder sits in its armored housing behind the pilot's seat. You pull it free. When its power cell touches your suit, it plays its last log on its own.",
+    "choices": [
+     {
+      "text": "Listen.",
+      "to": "log"
+     }
+    ]
+   },
+   "log": {
+    "text": "\"Log, day 311. We pulled something out of the Oort. Big, warm, old. It hums when the signal plays. The consortium is paying a fortune for it.\"\n\n\"Day 340. Payroll's late again. Sold the scrap off the outer hull to the miners on Cinder. They didn't ask what it was.\"\n\n\"Day 352. It's singing back. Okonkwo says it's only resonance. Okonkwo has been lying in the cargo bay for two days with his ear pressed to the cradle, and he won't come out.\"\n\nThen static, and under the static, a sound like breathing.",
+    "choices": [
+     {
+      "text": "\"Ilse?\"",
+      "to": "ilse",
+      "if": {
+       "crew": "ilse"
+      }
+     },
+     {
+      "text": "Take the recorder and get out.",
+      "to": "out"
+     }
+    ]
+   },
+   "ilse": {
+    "text": "Ilse's voice on the suit channel is very calm, which is how you know she's frightened. \"Big, warm, old.\" She takes a breath. \"Captain, the consortium only built one ship after this. Yours.\"\n\nShe doesn't have to finish.",
+    "choices": [
+     {
+      "text": "\"I know. Let's go.\"",
+      "to": "out",
+      "effects": [
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "out": {
+    "text": "Back aboard, hatch sealed behind you, you notice it for the first time. Your drive core, the part of her that's older than the rest, is humming. Very softly. In time with the recorder.\n\nA message pings in from the Bessel Archive: fee received, with thanks.",
+    "choices": [
+     {
+      "text": "Shut the recorder off. Set a course for Cinder.",
+      "to": null,
+      "effects": [
+       {
+        "locker": {
+         "item": "ninefold-recorder",
+         "qty": 1
+        }
+       },
+       {
+        "setFlag": "ninefold-recorder"
+       },
+       {
+        "setFlag": "drive-core-origin"
+       },
+       {
+        "credits": 1500
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "if": {
+   "flag": "ilse-hired",
+   "notFlag": "ninefold-recorder"
+  }
+ }
+]
