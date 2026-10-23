@@ -44,6 +44,15 @@ export class BootScene extends Phaser.Scene {
     g.generateTexture('sun', r * 4, r * 4);
     g.clear();
 
+    // Engine flame, drawn pointing right with its base at the left edge;
+    // the scene stretches it with throttle and tints it during cruise.
+    g.fillStyle(0xffffff, 0.35);
+    g.fillTriangle(0, 0, 32, 8, 0, 16);
+    g.fillStyle(0xffffff, 0.9);
+    g.fillTriangle(0, 4, 18, 8, 0, 12);
+    g.generateTexture('flame', 32, 16);
+    g.clear();
+
     g.fillStyle(0xffd27a, 0.85);
     g.fillTriangle(18, 9, 0, 0, 0, 18);
     g.generateTexture('home-arrow', 18, 18);

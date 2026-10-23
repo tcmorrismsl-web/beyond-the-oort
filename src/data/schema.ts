@@ -18,6 +18,7 @@ export const ShipDefSchema = z.object({
   maxSpeed: z.number().positive(),
   turnRate: z.number().positive(),
   drag: z.number().nonnegative(),
+  cruiseMultiplier: z.number().min(1).max(5).default(1), // 1 = no cruise boost
   cargo: z.number().int().nonnegative(),
   price: z.number().int().nonnegative(),
 });

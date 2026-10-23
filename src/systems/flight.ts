@@ -8,6 +8,7 @@ export interface FlightStats {
   maxSpeed: number; // px/s
   turnRate: number; // rad/s
   drag: number;     // exponential decay per second; 0 = Newtonian
+  cruiseMultiplier: number; // top speed and thrust multiplier at full cruise (>= 1)
 }
 
 export interface ShipKinematics {
@@ -21,9 +22,12 @@ export interface ShipKinematics {
 export interface FlightInput {
   throttle: number;            // 0..1
   targetAngle: number | null;  // null = hold heading
+  cruise?: number;             // 0..1 cruise engagement (from updateCruise); default 0
 }
 
 const TAU = Math.PI * 2;
+/** How fast excess speed above the current limit bleeds off (per second). */
+const OVERSPEED_DECAY = 1.6;
 
 /** Shortest signed difference from a to b, in (-PI, PI]. */
 export function angleDelta(a: number, b: number): number {
@@ -49,17 +53,26 @@ export function stepShip(s: ShipKinematics, stats: FlightStats, input: FlightInp
   }
   angle = wrapAngle(angle);
 
-  let vx = s.vx + Math.cos(angle) * stats.thrust * throttle * dt;
-  let vy = s.vy + Math.sin(angle) * stats.thrust * throttle * dt;
+  const rawCruise = input.cruise ?? 0;
+  const cruise = Number.isFinite(rawCruise) ? Math.min(1, Math.max(0, rawCruise)) : 0;
+  const mult = 1 + (Math.max(1, stats.cruiseMultiplier) - 1) * cruise;
+  const thrust = stats.thrust * mult;
+  const limit = stats.maxSpeed * mult;
+
+  let vx = s.vx + Math.cos(angle) * thrust * throttle * dt;
+  let vy = s.vy + Math.sin(angle) * thrust * throttle * dt;
 
   // Frame-rate independent drag (same result at 60Hz and 120Hz).
   const decay = Math.exp(-stats.drag * dt);
   vx *= decay;
   vy *= decay;
 
+  // Over the limit (e.g. just dropped out of cruise): shed the extra speed
+  // smoothly instead of hitting an invisible wall. Slightly over the limit
+  // (normal thrusting at top speed) still clamps exactly.
   const speed = Math.hypot(vx, vy);
-  if (speed > stats.maxSpeed) {
-    const k = stats.maxSpeed / speed;
+  if (speed > limit) {
+    const k = Math.max(limit / speed, Math.exp(-OVERSPEED_DECAY * dt));
     vx *= k;
     vy *= k;
   }
@@ -86,4 +99,28 @@ export function consumeSteps(accumulator: number, frameSeconds: number): { steps
     steps += 1;
   }
   return { steps, remainder: Math.max(acc, 0) };
+}
+
+/**
+ * Cruise: push the stick to its edge and hold it there, and the engines
+ * spool up to a faster travel speed. A short hold is required so a quick
+ * full-stick flick in a fight doesn't launch the ship across the system.
+ */
+export interface CruiseState {
+  hold: number;  // seconds the stick has been at the edge
+  level: number; // 0..1 engagement, ramps smoothly
+}
+
+export const CRUISE_IDLE: CruiseState = { hold: 0, level: 0 };
+export const CRUISE_THROTTLE = 0.92;  // stick this far out counts as "at the edge"
+export const CRUISE_HOLD = 0.35;      // seconds at the edge before cruise engages
+const CRUISE_SPOOL_UP = 1 / 0.8;      // reaches full cruise 0.8 s after engaging
+const CRUISE_SPOOL_DOWN = 1 / 0.35;   // drops out quickly when you ease off
+
+export function updateCruise(c: CruiseState, throttle: number, dt: number): CruiseState {
+  const atEdge = Number.isFinite(throttle) && throttle >= CRUISE_THROTTLE;
+  const hold = atEdge ? c.hold + dt : 0;
+  const engaged = hold >= CRUISE_HOLD;
+  const level = Math.min(1, Math.max(0, c.level + (engaged ? CRUISE_SPOOL_UP : -CRUISE_SPOOL_DOWN) * dt));
+  return { hold, level };
 }

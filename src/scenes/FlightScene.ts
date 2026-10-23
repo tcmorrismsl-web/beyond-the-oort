@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { gameData } from '../data/schema';
-import { consumeSteps, stepShip, STEP, type ShipKinematics } from '../systems/flight';
+import { CRUISE_IDLE, consumeSteps, stepShip, STEP, updateCruise, type CruiseState, type ShipKinematics } from '../systems/flight';
 import { IDLE, readStick, type StickReading } from '../ui/joystick';
 import { getSession } from './sessionAccess';
 
@@ -12,11 +12,30 @@ const NEAR_PARALLAX = 0.4;
 const ARROW_RING = 0.42;
 /** Autosave interval in simulated seconds (plus a save whenever the app is hidden). */
 const AUTOSAVE_SECONDS = 30;
+/** Camera zoom at full cruise: pull back so you can see where you're going. */
+const CRUISE_ZOOM = 0.72;
+/** Fraction of the way the zoom moves toward its target each frame-step. */
+const ZOOM_EASE = 0.06;
+/** Camera looks this many seconds ahead of the ship's motion... */
+const LOOK_AHEAD_SECONDS = 0.3;
+/** ...but never more than this fraction of the screen's short side. */
+const LOOK_AHEAD_MAX = 0.25;
+const LOOK_AHEAD_EASE = 0.08;
+const FLAME_NORMAL = { r: 0xff, g: 0xa0, b: 0x40 };
+const FLAME_CRUISE = { r: 0x8f, g: 0xd8, b: 0xff };
 
+/**
+ * Two cameras: the main camera follows the ship and zooms with speed; a HUD
+ * camera on top never zooms, so the joystick and arrow stay exactly under
+ * the thumb. Every new object must be added to one of the two lists via
+ * `world()` or `hud()`, or it will render on both cameras.
+ */
 export class FlightScene extends Phaser.Scene {
   private ship!: Phaser.GameObjects.Image;
+  private flame!: Phaser.GameObjects.Image;
   private accumulator = 0;
   private sinceSave = 0;
+  private cruise: CruiseState = CRUISE_IDLE;
   private stick: StickReading = IDLE;
   private stickPointerId: number | null = null;
   private stickOrigin = { x: 0, y: 0 };
@@ -26,6 +45,7 @@ export class FlightScene extends Phaser.Scene {
   private nearStars!: Phaser.GameObjects.TileSprite;
   private sun!: Phaser.GameObjects.Image;
   private homeArrow!: Phaser.GameObjects.Image;
+  private hudCam!: Phaser.Cameras.Scene2D.Camera;
 
   constructor() {
     super('flight');
@@ -37,19 +57,32 @@ export class FlightScene extends Phaser.Scene {
     const def = gameData.ships.get(ship.defId);
     if (!def) throw new Error(`ship "${ship.defId}" missing from data`);
 
+    // Reset per-run fields: Phaser reuses the scene instance on restart.
+    this.accumulator = 0;
+    this.sinceSave = 0;
+    this.cruise = CRUISE_IDLE;
+    this.stick = IDLE;
+    this.stickPointerId = null;
+
     const { width, height } = this.scale;
-    this.farStars = this.add.tileSprite(0, 0, width, height, 'stars-far').setOrigin(0).setScrollFactor(0).setDepth(-20);
-    this.nearStars = this.add.tileSprite(0, 0, width, height, 'stars-near').setOrigin(0).setScrollFactor(0).setDepth(-19);
-    this.sun = this.add.image(0, 0, 'sun').setDepth(-10);
-    this.homeArrow = this.add.image(0, 0, 'home-arrow').setScrollFactor(0).setDepth(5).setVisible(false);
+    this.hudCam = this.cameras.add(0, 0, width, height).setName('hud');
 
-    this.ship = this.add.image(ship.x, ship.y, 'ship').setRotation(ship.angle);
-    this.cameras.main.startFollow(this.ship, true, 0.12, 0.12);
-    this.cameras.main.centerOn(ship.x, ship.y);
+    // Star layers live in the world camera (so they sit behind the ship) but
+    // ignore scrolling and counter the zoom, so they always fill the screen.
+    this.farStars = this.world(this.add.tileSprite(width / 2, height / 2, width, height, 'stars-far').setScrollFactor(0).setDepth(-20));
+    this.nearStars = this.world(this.add.tileSprite(width / 2, height / 2, width, height, 'stars-near').setScrollFactor(0).setDepth(-19));
+    this.sun = this.world(this.add.image(0, 0, 'sun').setDepth(-10));
+    this.flame = this.world(this.add.image(ship.x, ship.y, 'flame').setOrigin(0, 0.5).setVisible(false).setDepth(-1));
+    this.ship = this.world(this.add.image(ship.x, ship.y, 'ship').setRotation(ship.angle));
+
+    this.homeArrow = this.hud(this.add.image(0, 0, 'home-arrow').setDepth(5).setVisible(false));
+    this.ring = this.hud(this.add.image(0, 0, 'stick-ring').setVisible(false).setDepth(10));
+    this.knob = this.hud(this.add.image(0, 0, 'stick-knob').setVisible(false).setDepth(11));
+
+    const cam = this.cameras.main;
+    cam.startFollow(this.ship, true, 0.12, 0.12);
+    cam.centerOn(ship.x, ship.y);
     this.handleResize();
-
-    this.ring = this.add.image(0, 0, 'stick-ring').setScrollFactor(0).setVisible(false).setDepth(10);
-    this.knob = this.add.image(0, 0, 'stick-knob').setScrollFactor(0).setVisible(false).setDepth(11);
     this.setupInput();
 
     this.events.on(Phaser.Scenes.Events.UPDATE, (_t: number, deltaMs: number) => {
@@ -57,10 +90,14 @@ export class FlightScene extends Phaser.Scene {
       this.accumulator = remainder;
       let kin: ShipKinematics = ship;
       for (let i = 0; i < steps; i += 1) {
-        kin = stepShip(kin, def, { throttle: this.stick.throttle, targetAngle: this.stick.angle }, STEP);
+        this.cruise = updateCruise(this.cruise, this.stick.throttle, STEP);
+        kin = stepShip(kin, def, { throttle: this.stick.throttle, targetAngle: this.stick.angle, cruise: this.cruise.level }, STEP);
+        cam.setZoom(cam.zoom + (1 - (1 - CRUISE_ZOOM) * this.cruise.level - cam.zoom) * ZOOM_EASE);
+        this.easeLookAhead(cam, kin);
       }
       Object.assign(ship, kin);
       this.ship.setPosition(ship.x, ship.y).setRotation(ship.angle);
+      this.updateFlame();
       this.updateBackdrop();
 
       this.sinceSave += steps * STEP;
@@ -72,9 +109,37 @@ export class FlightScene extends Phaser.Scene {
   }
 
   /**
+   * Lead the camera in the direction of travel so that at speed you see what
+   * you're flying into, not what you left behind. (Phaser subtracts the
+   * follow offset, hence the negative sign.)
+   */
+  private easeLookAhead(cam: Phaser.Cameras.Scene2D.Camera, kin: ShipKinematics): void {
+    let ax = kin.vx * LOOK_AHEAD_SECONDS;
+    let ay = kin.vy * LOOK_AHEAD_SECONDS;
+    const max = (Math.min(cam.width, cam.height) * LOOK_AHEAD_MAX) / cam.zoom;
+    const len = Math.hypot(ax, ay);
+    if (len > max) {
+      ax *= max / len;
+      ay *= max / len;
+    }
+    const off = cam.followOffset;
+    cam.setFollowOffset(off.x + (-ax - off.x) * LOOK_AHEAD_EASE, off.y + (-ay - off.y) * LOOK_AHEAD_EASE);
+  }
+
+  private world<T extends Phaser.GameObjects.GameObject>(obj: T): T {
+    this.hudCam.ignore(obj);
+    return obj;
+  }
+
+  private hud<T extends Phaser.GameObjects.GameObject>(obj: T): T {
+    this.cameras.main.ignore(obj);
+    return obj;
+  }
+
+  /**
    * Rotating the phone resizes the game. Phaser only auto-resizes a camera
    * that exactly matched the old size, which iOS rotation can break, so we
-   * resize the camera and background ourselves and re-center on the ship.
+   * resize the cameras and background ourselves and re-center on the ship.
    */
   private handleResize(): void {
     const onResize = (gameSize: Phaser.Structs.Size): void => {
@@ -91,19 +156,40 @@ export class FlightScene extends Phaser.Scene {
     });
   }
 
+  private updateFlame(): void {
+    const throttle = this.stick.throttle;
+    const level = this.cruise.level;
+    const visible = throttle > 0.02 || level > 0.02;
+    this.flame.setVisible(visible);
+    if (!visible) return;
+    const back = this.ship.rotation + Math.PI;
+    const rear = this.ship.width / 2 - 2;
+    this.flame
+      .setPosition(this.ship.x + Math.cos(back) * rear, this.ship.y + Math.sin(back) * rear)
+      .setRotation(back)
+      .setScale(0.35 + throttle * 0.75 + level * 1.4, 0.8 + level * 0.35);
+    // Orange at normal thrust, blue-white at full cruise (no per-frame allocation).
+    const r = Math.round(FLAME_NORMAL.r + (FLAME_CRUISE.r - FLAME_NORMAL.r) * level);
+    const g = Math.round(FLAME_NORMAL.g + (FLAME_CRUISE.g - FLAME_NORMAL.g) * level);
+    const b = Math.round(FLAME_NORMAL.b + (FLAME_CRUISE.b - FLAME_NORMAL.b) * level);
+    this.flame.setTint((r << 16) | (g << 8) | b);
+  }
+
   private updateBackdrop(): void {
     const cam = this.cameras.main;
+    // Counter the camera zoom so the star layers always cover the screen,
+    // anchored at the screen center (the point the zoom scales around).
+    const inv = 1 / cam.zoom;
+    this.farStars.setPosition(cam.width / 2, cam.height / 2).setScale(inv);
+    this.nearStars.setPosition(cam.width / 2, cam.height / 2).setScale(inv);
     this.farStars.setTilePosition(cam.scrollX * FAR_PARALLAX, cam.scrollY * FAR_PARALLAX);
     this.nearStars.setTilePosition(cam.scrollX * NEAR_PARALLAX, cam.scrollY * NEAR_PARALLAX);
 
     // Point toward the system's star whenever it is off screen.
-    const view = cam.worldView;
-    const sunVisible = view.contains(this.sun.x, this.sun.y);
+    const sunVisible = cam.worldView.contains(this.sun.x, this.sun.y);
     this.homeArrow.setVisible(!sunVisible);
     if (!sunVisible) {
-      const dx = this.sun.x - this.ship.x;
-      const dy = this.sun.y - this.ship.y;
-      const angle = Math.atan2(dy, dx);
+      const angle = Math.atan2(this.sun.y - this.ship.y, this.sun.x - this.ship.x);
       const r = Math.min(cam.width, cam.height) * ARROW_RING;
       this.homeArrow.setPosition(cam.width / 2 + Math.cos(angle) * r, cam.height / 2 + Math.sin(angle) * r).setRotation(angle);
     }
