@@ -79,6 +79,9 @@ export class FlightScene extends Phaser.Scene {
   private objectivePoi: string | null = null;
   private shipBtn!: HTMLButtonElement;
   private investigateBtn!: HTMLButtonElement;
+  /** One-tap "next jump" toward the objective when it's in another system (no trip to the map needed). */
+  private routeBtn!: HTMLButtonElement;
+  private routeNext: string | null = null;
   private shownPoi: Poi | null = null;
 
   // DOM HUD
@@ -247,7 +250,11 @@ export class FlightScene extends Phaser.Scene {
       this.investigate();
     }, 'primary land-btn');
     this.investigateBtn.style.display = 'none';
-    const br = el('div', 'hud-br hud-stack', this.investigateBtn, this.landBtn);
+    this.routeBtn = button('Next jump', () => {
+      if (this.routeNext !== null && this.jumpTarget === null && !this.picking) this.beginJump(this.routeNext);
+    }, 'route-btn');
+    this.routeBtn.style.display = 'none';
+    const br = el('div', 'hud-br hud-stack', this.routeBtn, this.investigateBtn, this.landBtn);
 
     this.chargeFill = el('div');
     this.chargeBox = el('div', 'center-msg', el('div', '', ''), el('div', 'bar', this.chargeFill));
@@ -304,6 +311,7 @@ export class FlightScene extends Phaser.Scene {
     this.objectivePos = obj?.target ? targetPosition(obj.target, state, gameData) : null;
     const text = obj?.text ?? '';
     let where = '';
+    this.routeNext = null;
     if (obj?.target && obj.target.system !== state.systemId) {
       const route = routeTo(state.systemId, obj.target.system, gameData);
       const next = route?.[1];
@@ -311,10 +319,13 @@ export class FlightScene extends Phaser.Scene {
       if (route && next !== undefined) {
         const hop = gameData.systems.get(next)?.name ?? next;
         where = route.length > 2 ? `${dest} · next jump: ${hop} (${route.length - 1} jumps)` : `Jump to ${dest}`;
+        this.routeNext = next;
+        this.routeBtn.textContent = route.length > 2 ? `Jump · ${hop} (${route.length - 1} to go)` : `Jump · ${dest}`;
       }
     }
     this.objectiveLine.replaceChildren(el('div', '', text), ...(where ? [el('div', 'objective-where', where)] : []));
     this.objectiveLine.style.display = text ? '' : 'none';
+    this.routeBtn.style.display = this.routeNext === null ? 'none' : '';
     this.objectivePoi = obj?.target?.system === state.systemId ? (obj.target.poi ?? null) : null;
     this.buildPois();
   }
