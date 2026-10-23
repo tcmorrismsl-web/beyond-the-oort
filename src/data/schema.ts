@@ -4,6 +4,7 @@ import systemsJson from './systems.json';
 import upgradesJson from './upgrades.json';
 import commoditiesJson from './commodities.json';
 import originsJson from './origins.json';
+import dialoguesJson from './dialogues.json';
 
 /**
  * All game content lives in JSON and is validated here, including
@@ -131,6 +132,50 @@ export const OriginsSchema = z.object({
 });
 export type Origins = z.infer<typeof OriginsSchema>;
 
+/** When a dialogue choice is offered. All listed conditions must hold. */
+export const ConditionSchema = z.object({
+  origin: z.array(id).optional(),
+  moment: z.array(id).optional(),
+  motive: z.array(id).optional(),
+  pronouns: z.array(z.enum(['she', 'he', 'they'])).optional(),
+  flag: id.optional(),
+  notFlag: id.optional(),
+  minCredits: z.number().int().nonnegative().optional(),
+});
+export type Condition = z.infer<typeof ConditionSchema>;
+
+/** What a dialogue choice does. */
+export const EffectSchema = z.object({
+  setFlag: id.optional(),
+  clearFlag: id.optional(),
+  credits: z.number().int().optional(),
+  locker: z.object({ item: id, qty: z.number().int().positive() }).optional(),
+});
+export type Effect = z.infer<typeof EffectSchema>;
+
+export const ChoiceSchemaD = z.object({
+  text: z.string().min(1),
+  to: id.nullable(), // null ends the conversation
+  if: ConditionSchema.optional(),
+  effects: z.array(EffectSchema).default([]),
+});
+
+/**
+ * A branching conversation. Text can use {name}, {ship}, {they}, {them},
+ * {their} (from the captain). Choices can depend on your background and
+ * story flags, and can set flags for later conversations and missions.
+ */
+export const DialogueSchema = z.object({
+  id,
+  title: z.string().min(1),
+  speaker: z.string().min(1),
+  role: z.string().default(''),
+  site: id.optional(), // where you can find this conversation
+  start: id,
+  nodes: z.record(id, z.object({ text: z.string().min(1), choices: z.array(ChoiceSchemaD).min(1) })),
+});
+export type Dialogue = z.infer<typeof DialogueSchema>;
+
 export function isLandable(body: Body): boolean {
   return body.sites.length > 0;
 }
@@ -145,6 +190,7 @@ export interface GameData {
   upgrades: readonly UpgradeTrack[];
   commodities: ReadonlyMap<string, Commodity>;
   creation: Origins;
+  dialogues: ReadonlyMap<string, Dialogue>;
 }
 
 /** Bodies must sit clear of their star by at least this much (so nobody spawns inside the sun). */
@@ -167,6 +213,7 @@ export interface RawContent {
   upgrades?: unknown;
   commodities?: unknown;
   origins?: unknown;
+  dialogues?: unknown;
 }
 
 export function buildGameData(raw: RawContent): GameData {
@@ -175,6 +222,7 @@ export function buildGameData(raw: RawContent): GameData {
   const upgrades = z.array(UpgradeTrackSchema).parse(raw.upgrades ?? []);
   const commodities = z.array(CommoditySchema).parse(raw.commodities ?? []);
   const creation = OriginsSchema.parse(raw.origins ?? EMPTY_ORIGINS);
+  const dialogues = z.array(DialogueSchema).parse(raw.dialogues ?? []);
   const errors: string[] = [];
   const shipMap = indexById(ships, 'ship', errors);
   const systemMap = indexById(systems, 'system', errors);
@@ -223,8 +271,52 @@ export function buildGameData(raw: RawContent): GameData {
   for (const c of commodities) {
     if (c.cheapAt.some((k) => c.dearAt.includes(k))) errors.push(`commodity "${c.id}" is both cheap and dear at the same kind of site`);
   }
+  const dialogueMap = indexById(dialogues, 'dialogue', errors);
+  const known = {
+    origin: new Set(creation.origins.map((o) => o.id)),
+    moment: new Set(creation.moments.map((o) => o.id)),
+    motive: new Set(creation.motives.map((o) => o.id)),
+  };
+  for (const d of dialogues) validateDialogue(d, known, siteMap, errors);
   if (errors.length > 0) throw new Error(`Game data invalid:\n- ${errors.join('\n- ')}`);
-  return { ships: shipMap, systems: systemMap, bodies: bodyMap, sites: siteMap, upgrades, commodities: commodityMap, creation };
+  return { ships: shipMap, systems: systemMap, bodies: bodyMap, sites: siteMap, upgrades, commodities: commodityMap, creation, dialogues: dialogueMap };
+}
+
+/**
+ * Conversations must hang together: every link goes somewhere real, every
+ * node is reachable, nobody can get stuck (each node has at least one
+ * choice with no condition), and conditions only name real backgrounds.
+ */
+function validateDialogue(
+  d: Dialogue,
+  known: Record<'origin' | 'moment' | 'motive', ReadonlySet<string>>,
+  sites: ReadonlyMap<string, unknown>,
+  errors: string[],
+): void {
+  const where = `dialogue "${d.id}"`;
+  if (!(d.start in d.nodes)) errors.push(`${where} starts at missing node "${d.start}"`);
+  if (d.site !== undefined && !sites.has(d.site)) errors.push(`${where} is placed at missing site "${d.site}"`);
+  for (const [nodeId, node] of Object.entries(d.nodes)) {
+    if (!node.choices.some((c) => c.if === undefined)) errors.push(`${where} node "${nodeId}" can strand the player (every choice has a condition)`);
+    for (const c of node.choices) {
+      if (c.to !== null && !(c.to in d.nodes)) errors.push(`${where} node "${nodeId}" links to missing node "${c.to}"`);
+      for (const key of ['origin', 'moment', 'motive'] as const) {
+        for (const v of c.if?.[key] ?? []) if (!known[key].has(v)) errors.push(`${where} node "${nodeId}" checks unknown ${key} "${v}"`);
+      }
+    }
+  }
+  const seen = new Set<string>([d.start]);
+  const queue = [d.start];
+  while (queue.length > 0) {
+    const node = d.nodes[queue.shift() ?? ''];
+    for (const c of node?.choices ?? []) {
+      if (c.to !== null && !seen.has(c.to)) {
+        seen.add(c.to);
+        queue.push(c.to);
+      }
+    }
+  }
+  for (const nodeId of Object.keys(d.nodes)) if (!seen.has(nodeId)) errors.push(`${where} node "${nodeId}" can never be reached`);
 }
 
 export const gameData: GameData = buildGameData({
@@ -233,4 +325,5 @@ export const gameData: GameData = buildGameData({
   upgrades: upgradesJson,
   commodities: commoditiesJson,
   origins: originsJson,
+  dialogues: dialoguesJson,
 });

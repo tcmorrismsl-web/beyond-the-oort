@@ -2,7 +2,8 @@ import Phaser from 'phaser';
 import { gameData, type Service, type Site } from '../data/schema';
 import type { Session } from '../core/session';
 import { button, createLayer, credits, el, type Layer } from '../ui/dom';
-import { openSheet, renderDrydock, renderMarket } from '../ui/panels';
+import { openSheet, renderDialogue, renderDrydock, renderMarket } from '../ui/panels';
+import { dialoguesAt } from '../systems/dialogue';
 import { getSession } from './sessionAccess';
 import { addStarBackdrop, onScreenResize } from './resize';
 import { ensureBodyTexture } from './systemTextures';
@@ -107,6 +108,19 @@ export class LandedScene extends Phaser.Scene {
         row.append(el('div', 'svc-soon', `Opens with the ${info.arrives}`));
       }
       list.append(row);
+    }
+    // People to talk to here (their conversation remembers your background and choices).
+    for (const d of dialoguesAt(site.id, gameData.dialogues)) {
+      const talk = button(`Talk to ${d.speaker}`, () => {
+        openSheet(this.ui.root, (sheetCard, close) => {
+          renderDialogue(sheetCard, this.session, d.id, () => {
+            close();
+            this.creditsLine.textContent = credits(this.session.state.credits);
+          });
+        });
+      }, 'small');
+      talk.style.marginTop = '8px';
+      list.prepend(el('div', 'svc person', el('b', '', d.speaker), el('span', 'sub', `  ·  ${d.role}`), el('div', 'svc-note', 'Someone here wants a word.'), talk));
     }
     if (site.services.length === 0) {
       list.append(el('div', 'svc svc-dim', el('b', '', 'A quiet dock'), el('div', 'svc-note', 'Nothing for sale and nobody home. Just you, the hum of the station, and the names on the wall.')));

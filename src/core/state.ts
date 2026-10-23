@@ -50,6 +50,8 @@ export interface GameState {
   cargo: Record<string, number>;
   /** Mission items, artifacts and discoveries — never fills up. */
   locker: Record<string, number>;
+  /** Story flags set by conversations and missions. */
+  flags: string[];
 }
 
 export const STARTING_CREDITS = 1000;
@@ -97,6 +99,7 @@ export function newGame(seed: number, now: number, career?: NewCareer): GameStat
     upgrades: {},
     cargo: {},
     locker: {},
+    flags: [],
   };
 }
 
@@ -115,6 +118,7 @@ export function fromSave(save: SaveData): GameState {
     upgrades: { ...save.upgrades },
     cargo: { ...save.cargo },
     locker: { ...save.locker },
+    flags: [...save.flags],
   };
 }
 
@@ -134,6 +138,7 @@ export function toSave(state: GameState, now: number): SaveData {
     upgrades: { ...state.upgrades },
     cargo: { ...state.cargo },
     locker: { ...state.locker },
+    flags: [...state.flags],
   };
 }
 

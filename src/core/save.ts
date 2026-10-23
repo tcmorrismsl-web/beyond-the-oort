@@ -8,7 +8,7 @@ import { readKey, writeKey, type StorageResult } from './storage';
  *    is the most valuable thing in the game.
  *  - Every load is validated. A corrupt save is reported, never half-loaded.
  */
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 const SAVE_KEY = 'game.save';
 
 export const SaveSchema = z.object({
@@ -43,6 +43,8 @@ export const SaveSchema = z.object({
   cargo: z.record(z.string(), z.number().int().positive()),
   /** Mission items, artifacts and discoveries — unlimited. */
   locker: z.record(z.string(), z.number().int().positive()),
+  /** Story flags set by conversations and missions (what you know, who you've met). */
+  flags: z.array(z.string().min(1)),
 });
 export type SaveData = z.infer<typeof SaveSchema>;
 
@@ -74,6 +76,8 @@ const migrations: Record<number, Migration> = {
       locker: {},
     };
   },
+  // v3 → v4 (Milestone 4: dialogue & story): story flags.
+  3: (old) => ({ ...old, flags: [] }),
 };
 
 export type LoadResult =

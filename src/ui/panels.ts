@@ -7,6 +7,7 @@ import { gameData, type UpgradeEffect } from '../data/schema';
 import type { Session } from '../core/session';
 import { cargoUsed, holdSize, maxBuyable, quote, tradeBlockText } from '../systems/market';
 import { canUpgrade, statsFor, upgradeBlockText } from '../systems/ship';
+import { nodeText, shownChoices } from '../systems/dialogue';
 import { button, credits, el } from './dom';
 import { showToast } from './toast';
 
@@ -211,4 +212,28 @@ export function renderShip(card: HTMLDivElement, session: Session, close: () => 
   done.style.width = '100%';
   done.style.marginTop = '8px';
   card.append(done);
+}
+
+// ------------------------------------------------------------------ Conversation
+
+/** A branching conversation as a sheet: speaker, text, choices (background-unlocked ones highlighted). */
+export function renderDialogue(card: HTMLDivElement, session: Session, dialogueId: string, close: () => void): void {
+  const d = gameData.dialogues.get(dialogueId);
+  if (!d) {
+    close();
+    return;
+  }
+  const draw = (nodeId: string): void => {
+    card.replaceChildren(el('h1', '', d.speaker), el('div', 'sub', d.role), el('p', 'dialogue-text', nodeText(d, nodeId, session.state)));
+    for (const choice of shownChoices(d, nodeId, session.state)) {
+      const b = button(choice.text, () => {
+        const r = session.talk(d.id, nodeId, choice.index, Date.now());
+        if (!r.ok) return;
+        if (r.next === null) close();
+        else draw(r.next);
+      }, choice.special ? 'pick special' : 'pick');
+      card.append(b);
+    }
+  };
+  draw(d.start);
 }
