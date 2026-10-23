@@ -2,7 +2,7 @@
 // Navigations go network-first (players get updates when online, the cached
 // shell when offline); everything else is cache-first, which is safe because
 // Vite gives built files content-hashed names.
-const CACHE = 'game-v3';
+const CACHE = 'game-v4';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './index.html', './manifest.webmanifest'])));
@@ -21,8 +21,11 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
 
   if (req.mode === 'navigate') {
+    // 'no-cache' revalidates with the server instead of trusting the HTTP
+    // cache (GitHub Pages lets pages be cached for 10 min), so a new release
+    // shows up on the next launch rather than up to 10 minutes later.
     event.respondWith(
-      fetch(req)
+      fetch(new Request(req.url, { cache: 'no-cache', credentials: 'same-origin' }))
         .then((res) => {
           const copy = res.clone();
           caches.open(CACHE).then((c) => c.put('./index.html', copy));

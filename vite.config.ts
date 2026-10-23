@@ -1,9 +1,14 @@
+import { loadEnv } from 'vite';
 import { defineConfig } from 'vitest/config';
 
 // base './' keeps every asset path relative, so the build works from any
 // sub-path (GitHub Pages serves at /<repo>/) and from the Home Screen.
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   base: './',
+  // Short build id shown in-game after an update (CI sets GITHUB_SHA).
+  define: {
+    __BUILD_ID__: JSON.stringify((loadEnv(mode, '.', '')['GITHUB_SHA'] ?? 'dev').slice(0, 7)),
+  },
   build: {
     target: 'es2022',
     assetsInlineLimit: 0,
@@ -23,4 +28,4 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
     environment: 'node',
   },
-});
+}));

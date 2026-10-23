@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { FlightScene } from './scenes/FlightScene';
-import { requestPersistence } from './core/storage';
+import { readKey, requestPersistence, writeKey } from './core/storage';
 import { freshSeed } from './core/rng';
 import { Session } from './core/session';
 import { SESSION_KEY } from './scenes/sessionAccess';
@@ -43,7 +43,13 @@ session.bus.on('saved', () => {
 session.bus.on('saveFailed', () => {
   showToast('Save failed');
 });
-if (session.started === 'resumed') showToast('Welcome back');
+// Tell the player when they're on a new build (also makes playtests easy to
+// confirm); otherwise welcome them back.
+const BUILD_KEY = 'game.build';
+const lastBuild = readKey(BUILD_KEY);
+if (session.started !== 'new' && lastBuild !== __BUILD_ID__) showToast(`Updated · build ${__BUILD_ID__}`);
+else if (session.started === 'resumed') showToast('Welcome back');
+writeKey(BUILD_KEY, __BUILD_ID__);
 
 // Pause cleanly when the player leaves the app (and keep audio from bleeding).
 // Leaving is also the moment to save: iOS may kill a backgrounded web app
