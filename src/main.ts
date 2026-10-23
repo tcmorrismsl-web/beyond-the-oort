@@ -25,6 +25,26 @@ const game = new Phaser.Game({
   callbacks: { preBoot: (g) => g.registry.set(SESSION_KEY, session) },
 });
 
+// Brief on-screen confirmation for saves, so the player can trust them.
+const toast = document.getElementById('toast');
+let toastTimer: ReturnType<typeof setTimeout> | undefined;
+function showToast(text: string): void {
+  if (!toast) return;
+  toast.textContent = text;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 1500);
+}
+session.bus.on('saved', () => {
+  showToast('Saved');
+});
+session.bus.on('saveFailed', () => {
+  showToast('Save failed');
+});
+if (session.started === 'resumed') showToast('Welcome back');
+
 // Pause cleanly when the player leaves the app (and keep audio from bleeding).
 // Leaving is also the moment to save: iOS may kill a backgrounded web app
 // without any further warning.

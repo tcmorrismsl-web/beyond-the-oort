@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { gameData } from '../src/data/schema';
 import { angleDelta, consumeSteps, STEP, stepShip, type FlightStats, type ShipKinematics } from '../src/systems/flight';
 
 const stats: FlightStats = { thrust: 300, maxSpeed: 400, turnRate: 3, drag: 0.5 };
@@ -50,5 +51,38 @@ describe('flight', () => {
   it('ignores bad input without producing NaN', () => {
     const s = stepShip(still, stats, { throttle: Number.NaN, targetAngle: Number.POSITIVE_INFINITY }, STEP);
     expect(Object.values(s).every(Number.isFinite)).toBe(true);
+  });
+});
+
+// Feel targets from the first iPhone playtest (handling rated 3/5, "a bit
+// under-responsive"). These keep the starter ship snappy if numbers drift.
+describe('starter ship handling targets', () => {
+  const shuttle = gameData.ships.get('shuttle');
+  if (!shuttle) throw new Error('shuttle missing');
+
+  it('reaches 80% of top speed from rest within 1.2 s at full throttle', () => {
+    let s: ShipKinematics = { x: 0, y: 0, vx: 0, vy: 0, angle: 0 };
+    let t = 0;
+    while (Math.hypot(s.vx, s.vy) < shuttle.maxSpeed * 0.8 && t < 5) {
+      s = stepShip(s, shuttle, { throttle: 1, targetAngle: 0 }, STEP);
+      t += STEP;
+    }
+    expect(t).toBeLessThanOrEqual(1.2);
+  });
+
+  it('turns around (180°) within 0.7 s', () => {
+    let s: ShipKinematics = { x: 0, y: 0, vx: 0, vy: 0, angle: 0 };
+    let t = 0;
+    while (Math.abs(angleDelta(s.angle, Math.PI)) > 1e-6 && t < 5) {
+      s = stepShip(s, shuttle, { throttle: 0, targetAngle: Math.PI }, STEP);
+      t += STEP;
+    }
+    expect(t).toBeLessThanOrEqual(0.7);
+  });
+
+  it('coasts nearly to a stop within 4 s of letting go', () => {
+    let s: ShipKinematics = { x: 0, y: 0, vx: shuttle.maxSpeed, vy: 0, angle: 0 };
+    for (let t = 0; t < 4; t += STEP) s = stepShip(s, shuttle, { throttle: 0, targetAngle: null }, STEP);
+    expect(Math.hypot(s.vx, s.vy)).toBeLessThan(shuttle.maxSpeed * 0.05);
   });
 });
