@@ -80,7 +80,11 @@ export class TitleScene extends Phaser.Scene {
       );
     }
 
-    const wrap = el('div', 'title-wrap', el('h1', '', 'BEYOND THE OORT'), el('div', 'tag', 'A space RPG'), buttons);
+    // The app icon doubles as the title mark: a little solar system inside the Oort Cloud.
+    const logo = el('img', 'title-logo');
+    logo.src = './icons/icon-512.png';
+    logo.alt = '';
+    const wrap = el('div', 'title-wrap', logo, el('h1', '', 'BEYOND THE OORT'), el('div', 'tag', 'A space RPG'), buttons);
     if (this.session.started === 'recovered') {
       wrap.append(el('div', 'note', "Your previous save couldn't be read, so a new game was started. A backup copy was kept."));
     }

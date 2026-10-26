@@ -295,6 +295,13 @@
         #ui .sheet-card.dialogue .dialogue-text { font-size: 16px; }
       }
       #ui .title-wrap { text-align: center; }
+      #ui .title-logo {
+        display: block; width: 168px; height: 168px; margin: 0 auto 6px;
+        /* Fade the icon's square background into the starfield. */
+        -webkit-mask-image: radial-gradient(circle, #000 63%, transparent 72%);
+        mask-image: radial-gradient(circle, #000 63%, transparent 72%);
+      }
+      @media (orientation: landscape) and (max-height: 500px) { #ui .title-logo { width: 110px; height: 110px; margin-bottom: 0; } }
       #ui .title-wrap h1 { font-size: 34px; letter-spacing: 4px; margin: 0 0 6px; }
       #ui .title-wrap .tag { color: var(--ui-dim); margin-bottom: 22px; }
       #ui .title-wrap .row { flex-direction: column; max-width: 320px; margin: 0 auto; }
