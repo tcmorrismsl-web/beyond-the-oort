@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildGameData, gameData, walkableTile } from '../src/data/schema';
 import { DEFAULT_LOOK, newGame } from '../src/core/state';
-import { autoSpotAt, blocked, REACH, stepWalker, withinReach, type Walker } from '../src/systems/onfoot';
+import { autoSpotAt, blocked, REACH, STRIDE, stepWalker, WALK_SPEED, walkPose, withinReach, type Walker } from '../src/systems/onfoot';
 import { consumeSteps, STEP } from '../src/systems/flight';
 
 const room = ['#####', '#...#', '#...#', '#####'];
@@ -34,6 +34,70 @@ describe('walking', () => {
     const w = { x: 2, y: 2, facing: 1 };
     expect(stepWalker(w, 0, 0, STEP, room)).toBe(w);
     expect(stepWalker(w, 1, null, STEP, room)).toBe(w);
+  });
+});
+
+/**
+ * Walking should look like walking (Tyler, 2026-10-23: "they glide").
+ * Targets: reach walking speed in about a quarter second, stop within about
+ * a quarter second, turn around in well under half a second, and feet that
+ * advance with distance covered (so they never slide).
+ */
+describe('walking feel', () => {
+  const hall = ['############', '#..........#', '#..........#', '############'];
+  const speed = (w: Walker): number => Math.hypot(w.vx ?? 0, w.vy ?? 0);
+
+  it('takes a beat to get going, then holds walking speed', () => {
+    let w: Walker = { x: 1.5, y: 1.5, facing: 0 };
+    w = stepWalker(w, 1, 0, STEP, hall);
+    expect(speed(w)).toBeGreaterThan(0);
+    expect(speed(w)).toBeLessThan(WALK_SPEED * 0.3); // not instant
+    for (let i = 0; i < 15; i += 1) w = stepWalker(w, 1, 0, STEP, hall); // ~0.27 s
+    expect(speed(w)).toBeGreaterThan(WALK_SPEED * 0.85);
+  });
+
+  it('slows to a stop over a short moment, without drifting far', () => {
+    let w: Walker = { x: 1.5, y: 1.5, facing: 0 };
+    for (let i = 0; i < 30; i += 1) w = stepWalker(w, 1, 0, STEP, hall);
+    const x0 = w.x;
+    for (let i = 0; i < 30; i += 1) w = stepWalker(w, 0, null, STEP, hall); // half a second, no input
+    expect(speed(w)).toBe(0);
+    expect(w.x - x0).toBeGreaterThan(0.05); // eased, not a dead stop
+    expect(w.x - x0).toBeLessThan(0.5);
+  });
+
+  it('turns smoothly instead of snapping', () => {
+    let w: Walker = { x: 5.5, y: 1.5, facing: 0 };
+    w = stepWalker(w, 1, Math.PI, STEP, hall);
+    expect(Math.abs(w.facing)).toBeLessThan(0.5); // one frame later, still mostly facing the old way
+    for (let i = 0; i < 25; i += 1) w = stepWalker(w, 1, Math.PI, STEP, hall); // ~0.4 s
+    expect(Math.abs(Math.abs(w.facing) - Math.PI)).toBeLessThan(0.05);
+  });
+
+  it('feet advance with distance actually covered (a wall stops the stride too)', () => {
+    let w: Walker = { x: 1.5, y: 1.5, facing: 0 };
+    let total = 0;
+    for (let i = 0; i < 60; i += 1) {
+      const before = w;
+      w = stepWalker(w, 1, 0, STEP, hall);
+      total += Math.hypot(w.x - before.x, w.y - before.y);
+    }
+    expect(w.stride).toBeCloseTo((total / STRIDE) % 1, 5);
+    // Pressing into a wall: no distance, so no stepping in place.
+    let stuck: Walker = { x: 1.3, y: 1.5, facing: Math.PI };
+    for (let i = 0; i < 30; i += 1) stuck = stepWalker(stuck, 1, Math.PI, STEP, hall);
+    const s0 = stuck.stride;
+    stuck = stepWalker(stuck, 1, Math.PI, STEP, hall);
+    expect(stuck.stride).toBe(s0);
+  });
+
+  it('pose: feet and hands swing opposite, and stand still when stopped', () => {
+    const mid = walkPose(0.25, WALK_SPEED);
+    expect(mid.leftFoot).toBeCloseTo(1);
+    expect(mid.rightFoot).toBeCloseTo(-1);
+    expect(Math.sign(mid.leftHand)).toBe(-Math.sign(mid.leftFoot));
+    const still = walkPose(0.25, 0);
+    expect(Math.abs(still.leftFoot) + Math.abs(still.rightFoot) + still.bob).toBe(0);
   });
 });
 

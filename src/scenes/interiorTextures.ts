@@ -1,11 +1,9 @@
 import type Phaser from 'phaser';
 import type { Interior } from '../data/schema';
-import type { Look } from '../core/state';
 import { TILE_PX } from '../systems/onfoot';
-import { hexToNumber } from './systemTextures';
 
 /**
- * Placeholder art for walkable places and the people in them, generated from
+ * Placeholder art for walkable places, generated from
  * content data. Real tile art and character sprites can replace these
  * texture keys later without touching gameplay.
  */
@@ -95,33 +93,6 @@ export function ensureInteriorTexture(scene: Phaser.Scene, inside: Interior): st
     });
   });
   g.generateTexture(key, w, h);
-  g.destroy();
-  return key;
-}
-
-/** A person seen from above, facing right: shoulders in their outfit color, head, hair. */
-export function ensurePersonTexture(scene: Phaser.Scene, look: Look): string {
-  const key = `person-${look.skin}-${look.hair}-${look.hairColor}-${look.outfitColor}`;
-  if (scene.textures.exists(key)) return key;
-  const g = scene.make.graphics({ x: 0, y: 0 }, false);
-  const S = 36;
-  const c = S / 2;
-  g.fillStyle(0x000000, 0.35);
-  g.fillEllipse(c + 2, c + 3, 26, 30);
-  g.fillStyle(hexToNumber(look.outfitColor), 1);
-  g.fillEllipse(c - 2, c, 16, 28); // shoulders
-  g.fillStyle(hexToNumber(look.skin), 1);
-  g.fillCircle(c + 8, c - 9, 3.2); // hands, reaching forward a little
-  g.fillCircle(c + 8, c + 9, 3.2);
-  g.fillCircle(c + 1, c, 7.5); // head
-  if (look.hair !== 'bald') {
-    g.fillStyle(hexToNumber(look.hairColor), 1);
-    g.fillCircle(c - 1, c, look.hair === 'buzz' ? 6 : 7.2);
-    if (['long', 'ponytail', 'locs'].includes(look.hair)) g.fillEllipse(c - 9, c, 9, 7);
-    if (['bun', 'topknot'].includes(look.hair)) g.fillCircle(c - 8, c, 3.5);
-    if (look.hair === 'afro' || look.hair === 'curls') g.fillCircle(c - 1, c, 9);
-  }
-  g.generateTexture(key, S, S);
   g.destroy();
   return key;
 }

@@ -2,13 +2,14 @@ import Phaser from 'phaser';
 import { gameData, type Interior } from '../data/schema';
 import type { Session } from '../core/session';
 import { consumeSteps, STEP } from '../systems/flight';
-import { autoSpotAt, dialogueAtSpot, peopleHere, stepWalker, TILE_PX, withinReach, type Reachable, type Walker } from '../systems/onfoot';
+import { autoSpotAt, dialogueAtSpot, peopleHere, STRIDE, stepWalker, TURN_RATE, walkPose, TILE_PX, withinReach, type Reachable, type Walker } from '../systems/onfoot';
 import { IDLE, readStick, type StickReading } from '../ui/joystick';
 import { button, createLayer, el, type Layer } from '../ui/dom';
 import { openSheet, renderDialogue } from '../ui/panels';
 import { getSession } from './sessionAccess';
 import { onScreenResize } from './resize';
-import { ensureFlashlightTexture, ensureInteriorTexture, ensurePersonTexture } from './interiorTextures';
+import { ensureFlashlightTexture, ensureInteriorTexture } from './interiorTextures';
+import { PersonView } from './personView';
 
 const STICK_RADIUS = 60;
 /** Crew members who walk with you (Mass Effect squad style). */
@@ -17,6 +18,8 @@ const MAX_FOLLOWERS = 2;
 const FOLLOW_GAP = 14;
 /** Flashlight overlay size relative to the screen's long side. */
 const FLASHLIGHT_SCALE = 1.6;
+/** On foot the camera sits closer than in flight, so people read clearly on a phone. */
+const ON_FOOT_ZOOM = 1.35;
 
 export interface OnFootData {
   interior: string;
@@ -33,16 +36,19 @@ export class OnFootScene extends Phaser.Scene {
   private session!: Session;
   private inside!: Interior;
   private walker: Walker = { x: 0, y: 0, facing: 0 };
-  private player!: Phaser.GameObjects.Image;
-  private followers: Phaser.GameObjects.Image[] = [];
+  private player!: PersonView;
+  /** Crew walking behind you; each keeps its own walk cycle so their feet match their speed. */
+  private followers: { view: PersonView; stride: number; facing: number }[] = [];
   private trail: { x: number; y: number }[] = [];
-  private people: { spot: string; img: Phaser.GameObjects.Image }[] = [];
+  private people: { spot: string; view: PersonView }[] = [];
   private markers: Phaser.GameObjects.GameObject[] = [];
   private dark: Phaser.GameObjects.Image | null = null;
   private accumulator = 0;
   private stick: StickReading = IDLE;
   private stickPointerId: number | null = null;
   private stickOrigin = { x: 0, y: 0 };
+  /** The stick lives on its own unzoomed camera, so it stays exactly under your thumb. */
+  private hudCam!: Phaser.Cameras.Scene2D.Camera;
   private ring!: Phaser.GameObjects.Image;
   private knob!: Phaser.GameObjects.Image;
   private ui!: Layer;
@@ -87,18 +93,22 @@ export class OnFootScene extends Phaser.Scene {
 
     const cap = this.session.state.captain;
     const look = cap?.look ?? { face: 'oval', skin: '#c08559', hair: 'short', hairColor: '#3b2416', eyes: '#6b4a2b', outfit: 'flight-jacket', outfitColor: '#2b3a55', beard: 'none' };
-    this.player = this.add.image(this.px(this.walker.x), this.px(this.walker.y), ensurePersonTexture(this, look)).setDepth(20);
+    this.player = new PersonView(this, look, this.px(this.walker.x), this.px(this.walker.y), 20);
     for (const id of this.session.state.crew.slice(0, MAX_FOLLOWERS)) {
       const who = gameData.characters.get(id);
-      if (who) this.followers.push(this.add.image(this.player.x, this.player.y, ensurePersonTexture(this, who.look)).setDepth(19).setAlpha(0.95));
+      if (who) this.followers.push({ view: new PersonView(this, who.look, this.player.x, this.player.y, 19).setAlpha(0.95), stride: 0.5, facing: 0 });
     }
     if (inside.dark) this.dark = this.add.image(0, 0, ensureFlashlightTexture(this)).setDepth(50);
 
     this.ring = this.add.image(0, 0, 'stick-ring').setScrollFactor(0).setDepth(60).setVisible(false);
     this.knob = this.add.image(0, 0, 'stick-knob').setScrollFactor(0).setDepth(61).setVisible(false);
+    this.hudCam = this.cameras.add(0, 0, this.scale.width, this.scale.height).setName('hud');
+    this.cameras.main.ignore([this.ring, this.knob]);
+    this.syncCameras();
 
     const cam = this.cameras.main;
-    cam.startFollow(this.player, true, 0.15, 0.15);
+    cam.setZoom(ON_FOOT_ZOOM);
+    cam.startFollow(this.player.root, true, 0.15, 0.15);
     cam.centerOn(this.player.x, this.player.y);
     this.fit();
     onScreenResize(this, () => {
@@ -117,8 +127,9 @@ export class OnFootScene extends Phaser.Scene {
     for (let i = 0; i < steps && !this.busy; i += 1) {
       this.walker = stepWalker(this.walker, this.stick.throttle, this.stick.angle, STEP, this.inside.map);
     }
-    this.player.setPosition(this.px(this.walker.x), this.px(this.walker.y)).setRotation(this.walker.facing);
-    this.updateFollowers();
+    const w = this.walker;
+    this.player.setPosition(this.px(w.x), this.px(w.y), w.facing).setPose(walkPose(w.stride ?? 0, this.busy ? 0 : Math.hypot(w.vx ?? 0, w.vy ?? 0)));
+    this.updateFollowers(deltaMs / 1000);
     if (this.dark) this.dark.setPosition(this.player.x, this.player.y);
     if (this.busy || this.leaving) return;
     this.updateAction();
@@ -129,9 +140,24 @@ export class OnFootScene extends Phaser.Scene {
     }
   }
 
+  /** Test hook: where you are and how fast you're going. */
+  walkerState(): Walker {
+    return { ...this.walker };
+  }
+
+  /** Test hook: hold the stick at a throttle and angle (null = let go), without touch events. */
+  holdStick(throttle: number, angle: number | null): void {
+    this.stick = angle === null ? IDLE : { active: true, throttle, angle };
+  }
+
   /** Test hook (smoke tests): stand somewhere, in tiles. */
   teleport(x: number, y: number): void {
-    this.walker = { ...this.walker, x, y };
+    this.walker = { ...this.walker, x, y, vx: 0, vy: 0 };
+  }
+
+  /** Everything except the stick belongs to the world camera (call after adding world objects). */
+  private syncCameras(): void {
+    this.hudCam.ignore(this.children.list.filter((o) => o !== this.ring && o !== this.knob));
   }
 
   private px(tiles: number): number {
@@ -163,17 +189,17 @@ export class OnFootScene extends Phaser.Scene {
   }
 
   private buildPeople(): void {
-    for (const p of this.people) p.img.destroy();
+    for (const p of this.people) p.view.destroy();
     this.people = peopleHere(this.inside, this.session.state).flatMap((p) => {
       const who = gameData.characters.get(p.character);
       if (!who) return [];
-      const img = this.add.image(this.px(p.x), this.px(p.y), ensurePersonTexture(this, who.look)).setDepth(18).setRotation(Math.PI);
-      return [{ spot: p.spot, img }];
+      const view = new PersonView(this, who.look, this.px(p.x), this.px(p.y), 18).setPosition(this.px(p.x), this.px(p.y), Math.PI);
+      return [{ spot: p.spot, view }];
     });
   }
 
-  /** Crew walk in your footsteps, a few paces apart. */
-  private updateFollowers(): void {
+  /** Crew walk in your footsteps, a few paces apart, turning and stepping like you do. */
+  private updateFollowers(dt: number): void {
     const last = this.trail[this.trail.length - 1];
     if (!last || Math.hypot(last.x - this.player.x, last.y - this.player.y) > 4) this.trail.push({ x: this.player.x, y: this.player.y });
     const keep = FOLLOW_GAP * (MAX_FOLLOWERS + 1);
@@ -181,17 +207,27 @@ export class OnFootScene extends Phaser.Scene {
     this.followers.forEach((f, i) => {
       const target = this.trail[Math.max(0, this.trail.length - 1 - FOLLOW_GAP * (i + 1))];
       if (!target) return;
-      const dx = target.x - f.x;
-      const dy = target.y - f.y;
-      if (Math.hypot(dx, dy) > 1) f.setRotation(Math.atan2(dy, dx));
-      f.setPosition(f.x + dx * 0.2, f.y + dy * 0.2);
+      const v = f.view;
+      const dx = (target.x - v.x) * 0.2;
+      const dy = (target.y - v.y) * 0.2;
+      const moved = Math.hypot(dx, dy); // px this frame
+      if (moved > 0.3) {
+        let d = Math.atan2(dy, dx) - f.facing;
+        d = Math.atan2(Math.sin(d), Math.cos(d));
+        f.facing += Math.max(-TURN_RATE * dt, Math.min(TURN_RATE * dt, d));
+      }
+      f.stride = (f.stride + moved / TILE_PX / STRIDE) % 1;
+      const speed = dt > 0 ? moved / TILE_PX / dt : 0;
+      v.setPosition(v.x + dx, v.y + dy, f.facing).setPose(walkPose(f.stride, speed));
     });
   }
 
   private fit(): void {
     const { width, height } = this.scale;
     this.cameras.resize(width, height);
-    if (this.dark) this.dark.setDisplaySize(Math.max(width, height) * FLASHLIGHT_SCALE, Math.max(width, height) * FLASHLIGHT_SCALE);
+    // World units: divide by the zoom so the pool of light covers the same part of the screen.
+    const light = (Math.max(width, height) * FLASHLIGHT_SCALE) / ON_FOOT_ZOOM;
+    if (this.dark) this.dark.setDisplaySize(light, light);
     this.resetStick();
   }
 
@@ -252,6 +288,7 @@ export class OnFootScene extends Phaser.Scene {
         this.shownAction = null;
         this.buildMarkers();
         this.buildPeople();
+        this.syncCameras();
       });
     });
   }

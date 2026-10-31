@@ -106,6 +106,12 @@ declare global {
       setShip: (x: number, y: number) => void;
       /** Test-only: stand somewhere on foot (tiles). */
       setWalker: (x: number, y: number) => void;
+      /** Test-only: the on-foot walker (position, velocity, stride). */
+      walker: () => string;
+      /** Test-only: a PNG data URL of the next rendered frame (reliable even when page screenshots lag). */
+      snapshot: () => Promise<string>;
+      /** Test-only: hold the on-foot stick (null angle = let go). */
+      holdStick: (throttle: number, angle: number | null) => void;
       /** Test-only: jump straight into a walkable place (smoke test checks rotation there). */
       walkInto: (interior: string) => boolean;
       state: () => string;
@@ -124,6 +130,20 @@ if (new URLSearchParams(window.location.search).has('smoke')) {
       session.state.ship.y = y;
       session.state.ship.vx = 0;
       session.state.ship.vy = 0;
+    },
+    walker: () => {
+      const scene = game.scene.getScene('onfoot');
+      return scene instanceof OnFootScene ? JSON.stringify(scene.walkerState()) : '';
+    },
+    snapshot: () =>
+      new Promise<string>((resolve) => {
+        game.renderer.snapshot((img) => {
+          resolve(img instanceof HTMLImageElement ? img.src : '');
+        });
+      }),
+    holdStick: (throttle, angle) => {
+      const scene = game.scene.getScene('onfoot');
+      if (scene instanceof OnFootScene) scene.holdStick(throttle, angle);
     },
     walkInto: (interior) => {
       if (!gameData.interiors.has(interior)) return false;

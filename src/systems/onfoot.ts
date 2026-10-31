@@ -15,11 +15,34 @@ export const BODY_RADIUS = 0.28;
 /** How close (tiles) you must be to look at a spot, talk to someone, or leave. */
 export const REACH = 1.15;
 
+/** How quickly you reach walking speed, and come to a stop (per second; higher = snappier). */
+export const ACCEL = 9;
+export const DECEL = 12;
+/** How fast you turn to face where you're going (radians per second). */
+export const TURN_RATE = 11;
+/** Distance covered by one full walk cycle (left step + right step), in tiles. */
+export const STRIDE = 1.4;
+/** Below this speed (tiles/s) you're standing still. */
+export const REST_SPEED = 0.05;
+
 export interface Walker {
   x: number;
   y: number;
   /** Facing angle in radians (for the sprite). */
   facing: number;
+  /** Velocity in tiles per second (eases toward the stick, so starts and stops take a beat). */
+  vx?: number;
+  vy?: number;
+  /** Walk-cycle phase, 0..1, advanced by distance actually covered (feet never slide). */
+  stride?: number;
+}
+
+/** Shortest signed angle from a to b. */
+function turnToward(from: number, to: number, maxStep: number): number {
+  let d = (to - from) % (Math.PI * 2);
+  if (d > Math.PI) d -= Math.PI * 2;
+  if (d < -Math.PI) d += Math.PI * 2;
+  return from + Math.max(-maxStep, Math.min(maxStep, d));
 }
 
 export function solidAt(map: readonly string[], tx: number, ty: number): boolean {
@@ -43,22 +66,58 @@ export function blocked(map: readonly string[], x: number, y: number): boolean {
 }
 
 /**
- * One fixed step of walking. Moves each axis separately so you slide along
- * walls instead of sticking to them. `throttle` 0..1, `angle` null = stand still.
+ * One fixed step of walking. Speed eases toward the stick (a beat to get
+ * going, a beat to stop), you turn smoothly to face where you're moving, and
+ * the walk cycle advances by the distance you actually covered, so feet stay
+ * planted. Moves each axis separately so you slide along walls instead of
+ * sticking to them. `throttle` 0..1, `angle` null = no input.
  */
 export function stepWalker(w: Walker, throttle: number, angle: number | null, dt: number, map: readonly string[]): Walker {
-  if (angle === null || throttle <= 0) return w;
-  const dist = WALK_SPEED * Math.min(1, throttle) * dt;
+  const vx0 = w.vx ?? 0;
+  const vy0 = w.vy ?? 0;
+  const moving = angle !== null && throttle > 0;
+  if (!moving && Math.hypot(vx0, vy0) < REST_SPEED) return vx0 === 0 && vy0 === 0 ? w : { ...w, vx: 0, vy: 0 };
+  const speed = moving ? WALK_SPEED * Math.min(1, throttle) : 0;
+  const tx = moving ? Math.cos(angle) * speed : 0;
+  const ty = moving ? Math.sin(angle) * speed : 0;
+  const k = Math.min(1, (moving ? ACCEL : DECEL) * dt);
+  let vx = vx0 + (tx - vx0) * k;
+  let vy = vy0 + (ty - vy0) * k;
+  const dist = Math.hypot(vx, vy) * dt;
   // Sub-steps keep fast movement from tunnelling through thin walls.
   const steps = Math.max(1, Math.ceil(dist / (BODY_RADIUS * 0.5)));
-  const sx = (Math.cos(angle) * dist) / steps;
-  const sy = (Math.sin(angle) * dist) / steps;
+  const sx = (vx * dt) / steps;
+  const sy = (vy * dt) / steps;
   let { x, y } = w;
   for (let i = 0; i < steps; i += 1) {
     if (!blocked(map, x + sx, y)) x += sx;
+    else vx = 0;
     if (!blocked(map, x, y + sy)) y += sy;
+    else vy = 0;
   }
-  return { x, y, facing: angle };
+  const covered = Math.hypot(x - w.x, y - w.y);
+  const heading = moving ? angle : Math.atan2(vy, vx);
+  const facing = covered > 0 || moving ? turnToward(w.facing, heading, TURN_RATE * dt) : w.facing;
+  return { x, y, facing, vx, vy, stride: ((w.stride ?? 0) + covered / STRIDE) % 1 };
+}
+
+/**
+ * Pose for drawing a walker: how far each foot is ahead (+) or behind (-) of
+ * the body, how far each hand swings (opposite to its foot), and a small bob.
+ * `amount` 0..1 fades the stride in and out with speed so you don't freeze mid-step.
+ */
+export interface Pose {
+  leftFoot: number;
+  rightFoot: number;
+  leftHand: number;
+  rightHand: number;
+  bob: number;
+}
+
+export function walkPose(stride: number, speed: number): Pose {
+  const amount = Math.min(1, speed / (WALK_SPEED * 0.6));
+  const s = Math.sin(stride * Math.PI * 2) * amount;
+  return { leftFoot: s, rightFoot: -s, leftHand: -s * 0.8, rightHand: s * 0.8, bob: Math.abs(Math.cos(stride * Math.PI * 2)) * amount };
 }
 
 export interface Reachable {
