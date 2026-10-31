@@ -53,5 +53,33 @@
   "if": {
    "flag": "beacon-located"
   }
+ },
+ {
+  "id": "consortium-yard",
+  "name": "Consortium yard",
+  "kind": "derelict",
+  "system": "lalande-21185",
+  "x": -600,
+  "y": -1100,
+  "description": "A bankrupt shipyard in a slow orbit, lights off, berths empty. This is where your ship was built.",
+  "if": {
+   "flag": "echo-briefed"
+  },
+  "interior": {
+   "id": "consortium-yard",
+   "label": "Board"
+  }
+ },
+ {
+  "id": "barnard-deep",
+  "name": "Quiet orbit",
+  "kind": "anomaly",
+  "system": "barnards-star",
+  "x": 350,
+  "y": -420,
+  "description": "A low orbit close to Barnard's Star, where anything dropped falls into the dim red sun in a few days. Nobody comes here.",
+  "if": {
+   "hasItem": "whispering-crate"
+  }
  }
 ]

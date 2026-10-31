@@ -13,7 +13,7 @@ import { button, chips, credits, el, swatches } from './dom';
 import { portraitSvg, setSvg, shipSvg } from './art';
 import { freshSeed, Rng } from '../core/rng';
 import type { GameState, Look, Paint } from '../core/state';
-import { journal, routeTo } from '../systems/missions';
+import { journal, routeTo, trackedObjective } from '../systems/missions';
 import { showToast } from './toast';
 
 /** Open a sheet over the given layer; returns a function that closes it. */
@@ -214,7 +214,7 @@ export function renderShip(card: HTMLDivElement, session: Session, close: () => 
     }
     card.append(bar);
     const body = el('div', 'tab-body');
-    if (tab === 'journal') journalTab(body, state);
+    if (tab === 'journal') journalTab(body, session, draw);
     else if (tab === 'crew') crewTab(body, session, card, draw);
     else if (tab === 'ship') shipTab(body, session, card);
     else logTab(body, state);
@@ -237,13 +237,15 @@ export function targetText(target: Target, state: GameState): string {
   return `${place ? `${place} · ` : ''}${sys} (${far})`;
 }
 
-function journalTab(body: HTMLElement, state: GameState): void {
+function journalTab(body: HTMLElement, session: Session, redraw: () => void): void {
+  const state = session.state;
   const all = journal(state, gameData);
   if (all.length === 0) {
-    body.append(el('p', '', 'No missions yet. Talk to people in bars and ports. Someone always needs a captain with a ship like yours.'));
+    body.append(el('p', '', 'No missions yet. Talk to people in bars and ports, and check the Jobs boards. Someone always needs a captain with a ship like yours.'));
     return;
   }
   const kindLabel = { main: 'Main story', companion: 'Crew', side: 'Side story' } as const;
+  const followed = trackedObjective(state, gameData, session.tracked)?.mission.id;
   for (const p of all) {
     const m = p.mission;
     const row = el('div', p.done ? 'svc mission done' : 'svc mission', el('b', '', m.title), el('span', 'sub', `  ·  ${p.done ? 'Complete' : kindLabel[m.kind]}`));
@@ -254,6 +256,15 @@ function journalTab(body: HTMLElement, state: GameState): void {
       if (now) {
         row.append(el('div', 'svc-note step-now', `◆ ${now.text}`));
         if (now.target) row.append(el('div', 'sub', targetText(now.target, state)));
+      }
+      if (m.id === followed) row.append(el('div', 'svc-soon tracking', 'Following'));
+      else {
+        const track = button('Follow this one', () => {
+          session.tracked = m.id;
+          redraw();
+        }, 'small');
+        track.style.marginTop = '8px';
+        row.append(track);
       }
     }
     body.append(row);

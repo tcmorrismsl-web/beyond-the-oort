@@ -324,6 +324,11 @@ export const MissionSchema = z.object({
   summary: z.string().min(1),
   /** When it appears in the journal. */
   startIf: ConditionSchema,
+  /**
+   * Side stories: a lead posted on Jobs boards. Taking it sets `flag` (put that
+   * flag in startIf). Shown only while the mission hasn't started and `if` holds.
+   */
+  board: z.object({ text: z.string().min(1), flag: id, if: ConditionSchema.optional() }).optional(),
   steps: z
     .array(z.object({ text: z.string().min(1), doneIf: ConditionSchema, target: TargetSchema.optional() }))
     .min(1),
@@ -546,6 +551,7 @@ export function buildGameData(raw: RawContent): GameData {
       if (e.join !== undefined) settable.add(`joined-${e.join}`);
     }
   }
+  for (const m of missions) if (m.board) settable.add(m.board.flag);
   const refs = { characters: characterMap, items: itemMap, flags: settable };
   const checkCond = (cond: Condition | undefined, where: string): void => {
     checkCondition(cond, where, refs, errors);
@@ -629,6 +635,12 @@ export function buildGameData(raw: RawContent): GameData {
   for (const m of missions) {
     const where = `mission "${m.id}"`;
     checkCond(m.startIf, where);
+    if (m.board) {
+      checkCond(m.board.if, `${where} board`);
+      const starts = [m.startIf.flag, ...(m.startIf.anyFlag ?? [])].includes(m.board.flag);
+      if (!starts) errors.push(`${where}: taking its board lead sets "${m.board.flag}", but startIf doesn't start on that flag`);
+      if (!m.steps[0]?.target) errors.push(`${where}: a board lead needs a first step with a target (so the board can say where)`);
+    }
     m.steps.forEach((step, i) => {
       checkCond(step.doneIf, `${where} step ${i + 1}`);
       const t = step.target;

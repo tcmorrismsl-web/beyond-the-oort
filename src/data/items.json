@@ -33,5 +33,55 @@
     "id": "hadley-notebook",
     "name": "Hadley's notebook",
     "description": "A Tallis Camp miner's notes: frequencies, star names, a ring of dots with one filled in black, and a hand raised to a mouth, scribbled out."
+  },
+  {
+    "id": "consortium-buildsheet",
+    "name": "Consortium build sheet",
+    "description": "The Lalande consortium's assembly notes for your ship. Handwritten in the margin: \"Do not power the core before hull seal. Do not let it hear the Oort.\""
+  },
+  {
+    "id": "sleepwalker-recording",
+    "name": "Darkside night recording",
+    "description": "Forty miners asleep on their feet on the ice, all facing the same way, all whispering the same word."
+  },
+  {
+    "id": "europa-vial",
+    "name": "Europa sample vial",
+    "description": "Water from under Europa's ice. Most of the time it's dark. Near your drive core, it glows: seven pulses, a rest, eleven."
+  },
+  {
+    "id": "bulkhead-rubbing",
+    "name": "Rubbing from the Vega bulkhead",
+    "description": "Charcoal on paper: your ship's hull number, scratched into the waystation at Vega forty-one years before she was built."
+  },
+  {
+    "id": "juno-navcore",
+    "name": "Juno's nav core",
+    "description": "A racing nav core with a crude sticker of a comet on it. Kade Marlow was very reluctant to part with it."
+  },
+  {
+    "id": "juno-pennant",
+    "name": "Terminator Run pennant",
+    "description": "Juno's winner's pennant from the Terminator Run. She signed it with a lipstick kiss and the words \"for my pit crew.\""
+  },
+  {
+    "id": "whispering-crate",
+    "name": "Dez's sealed crate",
+    "description": "Heavy, cold, and sealed with three kinds of tape. If you put your ear to it, it whispers."
+  },
+  {
+    "id": "vesna-letter",
+    "name": "Vesna's letter",
+    "description": "A sealed letter for Mira Ilyin, Verdance. The handwriting on the envelope is very careful."
+  },
+  {
+    "id": "mira-reply",
+    "name": "Mira's reply",
+    "description": "A letter back to Vesna, and a small paper bag of honey bread that smells like home."
+  },
+  {
+    "id": "vesna-wings",
+    "name": "Vesna's Academy wings",
+    "description": "A pilot's wings from the Tranquility Academy, the pin worn smooth. She said she didn't need them anymore. She said it like it cost her."
   }
 ]

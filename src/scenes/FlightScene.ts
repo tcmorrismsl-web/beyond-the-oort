@@ -312,7 +312,7 @@ export class FlightScene extends Phaser.Scene {
   /** Objective line + arrow target, and which points of interest are showing. */
   private refreshStory(): void {
     const state = this.session.state;
-    const obj = trackedObjective(state, gameData);
+    const obj = trackedObjective(state, gameData, this.session.tracked);
     this.objectivePos = obj?.target ? targetPosition(obj.target, state, gameData) : null;
     const text = obj?.text ?? '';
     let where = '';

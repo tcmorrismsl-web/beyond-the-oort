@@ -41,13 +41,38 @@ export interface Objective {
   target: Target | null;
 }
 
-/** What the HUD points you at: the current step of the most important active mission. */
-export function trackedObjective(state: GameState, data: GameData): Objective | null {
-  const top = journal(state, data).find((p) => !p.done);
+/**
+ * What the HUD points you at: the current step of the mission you chose to
+ * track, or else the most important active one (main story first).
+ */
+export function trackedObjective(state: GameState, data: GameData, prefer: string | null = null): Objective | null {
+  const active = journal(state, data).filter((p) => !p.done);
+  const top = active.find((p) => p.mission.id === prefer) ?? active[0];
   if (!top) return null;
   const step = top.mission.steps[top.step];
   if (!step) return null;
   return { mission: top.mission, text: step.text, target: step.target ?? null };
+}
+
+export interface Lead {
+  mission: Mission;
+  text: string;
+  /** Where the story starts, and how many jumps away. */
+  systemId: string;
+  jumps: number;
+}
+
+/** Side-story leads for a Jobs board: not yet started, available now, nearest first. */
+export function boardLeads(state: GameState, data: GameData): Lead[] {
+  const out: Lead[] = [];
+  for (const m of data.missions) {
+    if (!m.board || progressOf(m, state) !== null || !conditionMet(m.board.if, state)) continue;
+    const sys = m.steps[0]?.target?.system;
+    if (sys === undefined) continue;
+    const route = routeTo(state.systemId, sys, data);
+    out.push({ mission: m, text: m.board.text, systemId: sys, jumps: route ? route.length - 1 : 99 });
+  }
+  return out.sort((a, b) => a.jumps - b.jumps);
 }
 
 /** Shortest jump route between systems (inclusive), or null if unreachable. */

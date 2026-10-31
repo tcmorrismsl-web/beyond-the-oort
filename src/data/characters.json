@@ -202,5 +202,160 @@
    "outfitColor": "#6b4a8a",
    "beard": "none"
   }
+ },
+ {
+  "id": "brooks",
+  "name": "Chief Anaya Brooks",
+  "pronouns": "she",
+  "role": "Survey chief, Lalande 21185",
+  "bio": "Runs Survey Camp Seven with a clipboard, a thermos and no patience for nonsense. Lately, she's scared.",
+  "look": {
+   "face": "round",
+   "skin": "#7a4a2c",
+   "hair": "locs",
+   "hairColor": "#1b1410",
+   "eyes": "#3b2a1d",
+   "outfit": "mechanic",
+   "outfitColor": "#c2b59b",
+   "beard": "none"
+  }
+ },
+ {
+  "id": "ferro",
+  "name": "Dr. Tomas Ferro",
+  "pronouns": "he",
+  "role": "Medic, Darkside Camp",
+  "bio": "The only doctor on Proxima b's night side. Hasn't slept properly in a month, because his patients won't.",
+  "look": {
+   "face": "square",
+   "skin": "#c08559",
+   "hair": "sidepart",
+   "hairColor": "#6b4226",
+   "eyes": "#6b4a2b",
+   "outfit": "uniform",
+   "outfitColor": "#3a3a40",
+   "beard": "mustache"
+  }
+ },
+ {
+  "id": "ness",
+  "name": "Dr. Halvard Ness",
+  "pronouns": "he",
+  "role": "Lead biologist, Europa Deep",
+  "bio": "Has spent twenty years listening to an alien ocean. Last month, it stopped talking.",
+  "look": {
+   "face": "narrow",
+   "skin": "#f6d7c3",
+   "hair": "bald",
+   "hairColor": "#b8b8b8",
+   "eyes": "#7a8a96",
+   "outfit": "mechanic",
+   "outfitColor": "#2b3a55",
+   "beard": "full-beard"
+  }
+ },
+ {
+  "id": "juno",
+  "name": "Juno Ashe",
+  "pronouns": "she",
+  "role": "Racer, Terminator City",
+  "bio": "Fastest pilot on Proxima b, and she'll tell you so. Laughs easily, flies recklessly, and keeps her promises.",
+  "look": {
+   "face": "oval",
+   "skin": "#eac0a0",
+   "hair": "ponytail",
+   "hairColor": "#8f2f2a",
+   "eyes": "#3f7a4a",
+   "outfit": "flight-jacket",
+   "outfitColor": "#5a2a2a",
+   "beard": "none"
+  },
+  "romance": {
+   "leans": "any",
+   "at": 2,
+   "pastLean": 0
+  }
+ },
+ {
+  "id": "kade",
+  "name": "Kade Marlow",
+  "pronouns": "he",
+  "role": "Racer, Darkside Camp",
+  "bio": "Juno's rival. Second fastest on Proxima b, and it eats him alive.",
+  "look": {
+   "face": "narrow",
+   "skin": "#d9a37e",
+   "hair": "slick",
+   "hairColor": "#d9b46b",
+   "eyes": "#7a8a96",
+   "outfit": "flight-jacket",
+   "outfitColor": "#1f2a24",
+   "beard": "stubble"
+  }
+ },
+ {
+  "id": "dez",
+  "name": "Dez Moreau",
+  "pronouns": "he",
+  "role": "Trader, Barnard's Star",
+  "bio": "Smiles like he's already won the hand. A smuggler with good manners and a crate he really wants gone.",
+  "look": {
+   "face": "square",
+   "skin": "#9c6640",
+   "hair": "quiff",
+   "hairColor": "#1b1410",
+   "eyes": "#a07b2a",
+   "outfit": "longcoat",
+   "outfitColor": "#4a3b2a",
+   "beard": "stubble"
+  },
+  "romance": {
+   "leans": [
+    "she"
+   ],
+   "at": 2,
+   "pastLean": 3
+  }
+ },
+ {
+  "id": "vesna",
+  "name": "Vesna Ilyin",
+  "pronouns": "she",
+  "role": "Groundskeeper, Pilgrim's Field",
+  "bio": "Former Academy pilot. Refused an order once, and has been hiding among the monks of Tau Ceti ever since. Quiet, dry, and watchful.",
+  "look": {
+   "face": "narrow",
+   "skin": "#f6d7c3",
+   "hair": "long",
+   "hairColor": "#f0ede6",
+   "eyes": "#3f6fa8",
+   "outfit": "longcoat",
+   "outfitColor": "#c2b59b",
+   "beard": "none"
+  },
+  "romance": {
+   "leans": [
+    "he"
+   ],
+   "at": 3,
+   "pastLean": 3
+  }
+ },
+ {
+  "id": "mira",
+  "name": "Mira Ilyin",
+  "pronouns": "she",
+  "role": "Baker, Verdance",
+  "bio": "Vesna's younger sister. Runs a bakery on the terraces and hasn't seen her sister in four years.",
+  "look": {
+   "face": "round",
+   "skin": "#f6d7c3",
+   "hair": "bun",
+   "hairColor": "#d9b46b",
+   "eyes": "#3f6fa8",
+   "outfit": "mechanic",
+   "outfitColor": "#6b4a8a",
+   "beard": "none"
+  }
  }
 ]

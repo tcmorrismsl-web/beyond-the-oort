@@ -6,6 +6,7 @@ import { openSheet, renderDialogue, renderDrydock, renderMarket, shortName } fro
 import { dialoguesAt } from '../systems/dialogue';
 import { waitingAt } from '../systems/crew';
 import { entryOpen } from '../systems/onfoot';
+import { boardLeads } from '../systems/missions';
 import type { OnFootData } from './OnFootScene';
 import { portraitSvg, setSvg } from '../ui/art';
 import { showToast } from '../ui/toast';
@@ -18,7 +19,7 @@ const SERVICE_INFO: Record<Service, { label: string; arrives: string | null }> =
   trade: { label: 'Market', arrives: null },
   drydock: { label: 'Drydock', arrives: null },
   repair: { label: 'Repairs', arrives: 'Combat update' },
-  missions: { label: 'Jobs', arrives: 'side stories update' },
+  missions: { label: 'Jobs board', arrives: null },
   bar: { label: 'Bar', arrives: null },
 };
 
@@ -176,7 +177,20 @@ export class LandedScene extends Phaser.Scene {
       const note = site.notes[svc] ?? '';
       const row = el('div', 'svc', el('b', '', info.label));
       if (note) row.append(el('div', 'svc-note', note));
-      if (svc === 'trade' || svc === 'drydock') {
+      if (svc === 'missions') {
+        // Leads to side stories elsewhere in the galaxy, nearest first.
+        const leads = boardLeads(state, gameData).slice(0, 3);
+        if (leads.length === 0) row.append(el('div', 'svc-soon', 'Nothing new posted. Check back after your next adventure.'));
+        for (const lead of leads) {
+          const where = gameData.systems.get(lead.systemId)?.name ?? lead.systemId;
+          const take = button('Take the lead', () => {
+            if (this.session.takeLead(lead.mission.id, Date.now())) showToast(`New mission: ${lead.mission.title}`);
+            refresh();
+          }, 'small');
+          take.style.marginTop = '6px';
+          row.append(el('div', 'lead', el('div', 'svc-note', lead.text), el('div', 'sub', `${where} · ${lead.jumps === 0 ? 'this system' : `${lead.jumps} jump${lead.jumps === 1 ? '' : 's'}`}`), take));
+        }
+      } else if (svc === 'trade' || svc === 'drydock') {
         const open = button(svc === 'trade' ? 'Open market' : 'Open drydock', () => {
           openSheet(this.ui.root, (sheetCard, close) => {
             if (svc === 'trade') renderMarket(sheetCard, this.session, close, refresh);

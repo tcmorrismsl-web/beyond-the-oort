@@ -191,7 +191,7 @@ export class MapScene extends Phaser.Scene {
   /** Jump route from here to the tracked objective's system (null if none or you're there). */
   private objectiveRoute(): string[] | null {
     const state = this.session.state;
-    const target = trackedObjective(state, gameData)?.target;
+    const target = trackedObjective(state, gameData, this.session.tracked)?.target;
     if (!target || target.system === state.systemId) return null;
     return routeTo(state.systemId, target.system, gameData);
   }
@@ -299,7 +299,7 @@ export class MapScene extends Phaser.Scene {
     const state = this.session.state;
     this.panel.replaceChildren();
     const sys: StarSystem | undefined = this.selected === null ? undefined : gameData.systems.get(this.selected);
-    const obj = trackedObjective(state, gameData);
+    const obj = trackedObjective(state, gameData, this.session.tracked);
     const route = this.objectiveRoute();
     if (!sys) {
       if (obj) this.panel.append(el('div', 'objective', obj.text));

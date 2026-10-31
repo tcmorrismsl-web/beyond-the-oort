@@ -165,5 +165,273 @@
     }
    }
   ]
+ },
+ {
+  "id": "the-echo",
+  "title": "The Echo",
+  "kind": "side",
+  "summary": "Survey Camp Seven's radio keeps hearing its own voice come back, days late, from somewhere empty.",
+  "startIf": {
+   "anyFlag": [
+    "lead-echo",
+    "echo-briefed"
+   ]
+  },
+  "board": {
+   "text": "Survey Camp Seven at Lalande 21185 is paying a captain to look at \"a radio problem.\" Their words. They sound scared.",
+   "flag": "lead-echo"
+  },
+  "steps": [
+   {
+    "text": "Talk to Chief Brooks at Survey Camp Seven",
+    "doneIf": {
+     "flag": "echo-briefed"
+    },
+    "target": {
+     "system": "lalande-21185",
+     "site": "survey-camp"
+    }
+   },
+   {
+    "text": "Board the old consortium yard in orbit",
+    "doneIf": {
+     "flag": "echo-source-found"
+    },
+    "target": {
+     "system": "lalande-21185",
+     "poi": "consortium-yard"
+    }
+   },
+   {
+    "text": "Tell Chief Brooks what you found",
+    "doneIf": {
+     "flag": "echo-done"
+    },
+    "target": {
+     "system": "lalande-21185",
+     "site": "survey-camp"
+    }
+   }
+  ]
+ },
+ {
+  "id": "sleepwalkers",
+  "title": "Sleepwalkers",
+  "kind": "side",
+  "summary": "Miners on Proxima b's night side are walking out onto the ice in their sleep.",
+  "startIf": {
+   "anyFlag": [
+    "lead-sleep",
+    "sleep-briefed"
+   ]
+  },
+  "board": {
+   "text": "The medic at Darkside Camp, Proxima b, needs a captain \"who isn't afraid of the dark.\" Paying in cash and favors.",
+   "flag": "lead-sleep"
+  },
+  "steps": [
+   {
+    "text": "Find Dr. Ferro at Darkside Camp",
+    "doneIf": {
+     "flag": "sleep-briefed"
+    },
+    "target": {
+     "system": "alpha-centauri",
+     "site": "darkside-camp"
+    }
+   },
+   {
+    "text": "Stay up for the night shift at Darkside Camp",
+    "doneIf": {
+     "flag": "sleep-done"
+    },
+    "target": {
+     "system": "alpha-centauri",
+     "site": "darkside-camp"
+    }
+   }
+  ]
+ },
+ {
+  "id": "lights-out",
+  "title": "Lights Out Under Europa",
+  "kind": "side",
+  "summary": "Europa Deep found something in the ocean. Now they need someone they can trust with it.",
+  "startIf": {
+   "anyFlag": [
+    "lead-europa",
+    "europa-briefed"
+   ]
+  },
+  "board": {
+   "text": "Europa Deep Station wants a pilot with a quiet ship for \"a sensitive survey.\" No reporters.",
+   "flag": "lead-europa"
+  },
+  "steps": [
+   {
+    "text": "Meet Dr. Ness at Europa Deep",
+    "doneIf": {
+     "flag": "europa-briefed"
+    },
+    "target": {
+     "system": "sol",
+     "site": "europa-deep"
+    }
+   },
+   {
+    "text": "Decide what to do with what they found",
+    "doneIf": {
+     "flag": "europa-done"
+    },
+    "target": {
+     "system": "sol",
+     "site": "europa-deep"
+    }
+   }
+  ]
+ },
+ {
+  "id": "the-terminator-run",
+  "title": "The Terminator Run",
+  "kind": "side",
+  "summary": "Juno Ashe can't race without her nav core, and she knows exactly who took it.",
+  "startIf": {
+   "anyFlag": [
+    "lead-juno",
+    "juno-briefed"
+   ]
+  },
+  "board": {
+   "text": "A racer at Terminator City is offering a cut of her winnings to anyone with a fast ship and no fear of sunlight.",
+   "flag": "lead-juno"
+  },
+  "steps": [
+   {
+    "text": "Find Juno Ashe in Terminator City",
+    "doneIf": {
+     "flag": "juno-briefed"
+    },
+    "target": {
+     "system": "alpha-centauri",
+     "site": "terminator-city"
+    }
+   },
+   {
+    "text": "Get Juno's nav core back from Kade Marlow at Darkside Camp",
+    "doneIf": {
+     "flag": "juno-core"
+    },
+    "target": {
+     "system": "alpha-centauri",
+     "site": "darkside-camp"
+    }
+   },
+   {
+    "text": "Bring the nav core back to Juno",
+    "doneIf": {
+     "flag": "juno-done"
+    },
+    "target": {
+     "system": "alpha-centauri",
+     "site": "terminator-city"
+    }
+   }
+  ]
+ },
+ {
+  "id": "whispering-cargo",
+  "title": "Whispering Cargo",
+  "kind": "side",
+  "summary": "Dez Moreau has a crate he wants gone, far from anyone, and he won't say why.",
+  "startIf": {
+   "anyFlag": [
+    "lead-dez",
+    "dez-briefed"
+   ]
+  },
+  "board": {
+   "text": "A trader on the Ring at Barnard's Star needs a crate disposed of, discreetly and far from anyone. Pays well. Asks no questions; would like the same.",
+   "flag": "lead-dez"
+  },
+  "steps": [
+   {
+    "text": "Meet Dez Moreau on the Ring at Barnard's Star",
+    "doneIf": {
+     "flag": "dez-briefed"
+    },
+    "target": {
+     "system": "barnards-star",
+     "site": "waystation-ring"
+    }
+   },
+   {
+    "text": "Take the crate somewhere nobody will ever find it",
+    "doneIf": {
+     "flag": "dez-crate-gone"
+    },
+    "target": {
+     "system": "barnards-star",
+     "poi": "barnard-deep"
+    }
+   },
+   {
+    "text": "Tell Dez it's done",
+    "doneIf": {
+     "flag": "dez-done"
+    },
+    "target": {
+     "system": "barnards-star",
+     "site": "waystation-ring"
+    }
+   }
+  ]
+ },
+ {
+  "id": "letters",
+  "title": "Letters from Pilgrim's Field",
+  "kind": "side",
+  "summary": "A woman hiding among the monks of Tau Ceti needs a letter carried to her sister.",
+  "startIf": {
+   "anyFlag": [
+    "lead-vesna",
+    "vesna-briefed"
+   ]
+  },
+  "board": {
+   "text": "Someone at Pilgrim's Field, Tau Ceti, needs a letter carried. The monks say she's been waiting for the right captain.",
+   "flag": "lead-vesna"
+  },
+  "steps": [
+   {
+    "text": "Meet Vesna at Pilgrim's Field",
+    "doneIf": {
+     "flag": "vesna-briefed"
+    },
+    "target": {
+     "system": "tau-ceti",
+     "site": "pilgrim-field"
+    }
+   },
+   {
+    "text": "Deliver Vesna's letter to Mira in Verdance",
+    "doneIf": {
+     "flag": "vesna-letter-delivered"
+    },
+    "target": {
+     "system": "tau-ceti",
+     "site": "verdance"
+    }
+   },
+   {
+    "text": "Bring Mira's reply back to Pilgrim's Field",
+    "doneIf": {
+     "flag": "vesna-done"
+    },
+    "target": {
+     "system": "tau-ceti",
+     "site": "pilgrim-field"
+    }
+   }
+  ]
  }
 ]

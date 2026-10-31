@@ -98,5 +98,30 @@
     "flag": "act1-complete",
     "title": "We hear you",
     "text": "Your drive core answered the Hush beacon on its own. The reply came from the core: \"WE HEAR YOU, LITTLE LANTERN.\""
+  },
+  {
+    "flag": "echo-source-found",
+    "title": "Where she was built",
+    "text": "The Lalande consortium built your ship in an orbital yard around her drive core. Their notes say: do not let it hear the Oort. The yard's transmitter still repeats everything it hears."
+  },
+  {
+    "flag": "sleep-done",
+    "title": "The sleepwalkers of Darkside",
+    "text": "Miners on Proxima b's night side walk out onto the ice at the Oort hour, face Sol, and whisper \"shh.\" They aren't being taken. They're being warned."
+  },
+  {
+    "flag": "europa-briefed",
+    "title": "The ocean went quiet",
+    "text": "The living lights under Europa's ice went dark the night New Horizons woke. All but one colony, which pulses in the same rhythm as your drive core."
+  },
+  {
+    "flag": "vega-read",
+    "title": "Names on the bulkhead",
+    "text": "At the Vega waystation, captains scratch their names on the way out past the charts. Your ship's hull number is there, dated forty-one years before she was built."
+  },
+  {
+    "flag": "dez-crate-opened",
+    "title": "The whispering crate",
+    "text": "Dez's crate held a dish of hull scrap shaped like a mouth. It was whispering a list of names. One of them was your ship's."
   }
 ]

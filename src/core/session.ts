@@ -13,6 +13,7 @@ import { buy, sell, type TradeResult } from '../systems/market';
 import { canRepaint, canUpgrade, repaint, upgrade, type RepaintCheck, type UpgradeCheck } from '../systems/ship';
 import { choose, type ChooseResult } from '../systems/dialogue';
 import { joinCrew, leaveCrew, waitingAt } from '../systems/crew';
+import { boardLeads } from '../systems/missions';
 import type { StorageResult } from './storage';
 
 export interface SaveBackend {
@@ -27,6 +28,8 @@ export type StartKind = 'new' | 'resumed' | 'recovered';
 
 export class Session {
   readonly bus = new EventBus();
+  /** The mission you chose to follow (journal "Track"). Not saved: on reload the main story leads again. */
+  tracked: string | null = null;
 
   private constructor(
     public state: GameState,
@@ -209,6 +212,17 @@ export class Session {
     this.setMode(to);
     this.save(now);
     return to;
+  }
+
+  /** Take a lead from a Jobs board: the side story starts (it's in your journal and tracked). Saves. */
+  takeLead(missionId: string, now: number): boolean {
+    const lead = boardLeads(this.state, gameData).find((l) => l.mission.id === missionId);
+    if (!lead?.mission.board) return false;
+    const flag = lead.mission.board.flag;
+    this.state = { ...this.state, flags: [...this.state.flags, flag] };
+    this.tracked = missionId;
+    this.save(now);
+    return true;
   }
 
   /** Ask a crew member to leave the ship; they wait at their home port. Saves. */

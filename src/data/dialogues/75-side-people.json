@@ -1,0 +1,1377 @@
+[
+ {
+  "id": "juno-intro",
+  "title": "Juno Ashe",
+  "speaker": "Juno Ashe",
+  "role": "Terminator City",
+  "site": "terminator-city",
+  "character": "juno",
+  "if": {
+   "notFlag": "juno-briefed"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "In a hangar bar along the twilight ring of Terminator City, a woman with a bright red ponytail is standing on a table, explaining to a crowd of pilots exactly how she plans to beat every one of them. She sees you, sees your flight jacket, and jumps down.\n\n\"You. You've got the ship nobody's ever seen.\" She sticks out a hand. \"Juno Ashe. Fastest pilot on Proxima b. Currently grounded, which is a crime against the sport.\"",
+    "choices": [
+     {
+      "text": "\"Grounded how?\"",
+      "to": "how"
+     },
+     {
+      "text": "\"Fastest pilot? Prove it.\"",
+      "to": "prove",
+      "effects": [
+       {
+        "affinity": {
+         "who": "juno",
+         "by": 1
+        }
+       }
+      ],
+      "flirt": true
+     },
+     {
+      "text": "\"You posted on the Jobs board.\"",
+      "to": "how",
+      "if": {
+       "flag": "lead-juno"
+      }
+     }
+    ]
+   },
+   "prove": {
+    "text": "A slow grin. \"Oh, I like you.\" She leans in, close enough that you catch engine grease and something like cinnamon. \"I'd love to prove it, captain. Unfortunately someone stole the one thing I need to do that.\"",
+    "choices": [
+     {
+      "text": "\"Who?\"",
+      "to": "how"
+     }
+    ]
+   },
+   "how": {
+    "text": "\"The Terminator Run. Once a year, all the way round Proxima b along the twilight line, where it's always sunset. You go too high, the sun cooks you. Too low, the night side freezes your engines.\" Her eyes shine. \"It's the best thing in the universe.\n\n\"Two days ago someone pulled the nav core out of my ship. Nobody else on this rock can afford a racing core, so it was Kade Marlow, who has finished second to me four years running and has a face like a sulking egg. He's holed up at Darkside Camp.\"",
+    "choices": [
+     {
+      "text": "\"Want me to get it back?\"",
+      "to": "deal"
+     },
+     {
+      "text": "\"What's in it for me?\"",
+      "to": "deal"
+     }
+    ]
+   },
+   "deal": {
+    "text": "\"A cut of my winnings, which will be considerable.\" She grins. \"And my undying gratitude, which is also considerable.\" She writes something on your wrist in grease pencil: a hangar number. \"Bring it back before the Run. Please. I'm begging. I don't beg.\"",
+    "choices": [
+     {
+      "text": "\"For you? Happily.\"",
+      "to": "go",
+      "effects": [
+       {
+        "affinity": {
+         "who": "juno",
+         "by": 1
+        }
+       }
+      ],
+      "flirt": true
+     },
+     {
+      "text": "\"I'll get your core back.\"",
+      "to": "go"
+     }
+    ]
+   },
+   "go": {
+    "text": "\"My hero.\" She salutes you with a beer. \"Don't let Kade talk too much. He talks when he's nervous, and he's always nervous.\"",
+    "choices": [
+     {
+      "text": "Head for Darkside Camp.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "juno-briefed"
+       },
+       {
+        "setFlag": "met-juno"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "kade-darkside",
+  "title": "Kade Marlow",
+  "speaker": "Kade Marlow",
+  "role": "Darkside Camp",
+  "site": "darkside-camp",
+  "character": "kade",
+  "if": {
+   "flag": "juno-briefed",
+   "notFlag": "juno-core"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Kade Marlow is in the back of the Darkside bar with a racing nav core wrapped in a towel on the seat beside him, like a hostage. He sees you coming and goes pale under his stubble.\n\n\"She sent you. Of course she sent you. Did she tell you I stole it? I didn't steal it. I'm *holding* it.\"",
+    "choices": [
+     {
+      "text": "\"Hand it over, Kade.\"",
+      "to": "talk"
+     },
+     {
+      "text": "\"Why take it?\"",
+      "to": "why"
+     }
+    ]
+   },
+   "why": {
+    "text": "\"Because she's going to win again!\" He drags his hands down his face. \"Every year. Every year she laughs and waves on the podium and I'm second, and my sponsor says one more second place and I'm done. I just... I just wanted one year.\"",
+    "choices": [
+     {
+      "text": "\"Then beat her fair. Hand it over.\"",
+      "to": "talk",
+      "effects": [
+       {
+        "affinity": {
+         "who": "kade",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "talk": {
+    "text": "He clutches the towel. \"And if I don't?\"",
+    "choices": [
+     {
+      "text": "\"Then my friend here will discuss it with you.\"",
+      "to": "quin",
+      "if": {
+       "crew": "quin"
+      }
+     },
+     {
+      "text": "\"I happen to know who your sponsor is. I'm sure they'd love to hear how you train.\"",
+      "to": "noori",
+      "if": {
+       "crew": "noori"
+      }
+     },
+     {
+      "text": "Put a thousand credits on the table. \"Buy yourself a better core.\"",
+      "to": "pay",
+      "if": {
+       "minCredits": 1000
+      }
+     },
+     {
+      "text": "\"Race me for it. Down the ice canyon. Now.\"",
+      "to": "race"
+     }
+    ]
+   },
+   "quin": {
+    "text": "Quin cracks his knuckles, one at a time, very slowly. He doesn't say anything at all. Kade looks at him for about three seconds, then holds out the towel with both hands.",
+    "choices": [
+     {
+      "text": "Take the core.",
+      "to": "got",
+      "effects": [
+       {
+        "affinity": {
+         "who": "quin",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "noori": {
+    "text": "Noori pulls up a file on her slate without looking at it. \"Vantage Thrusters. Marketing director, Elise Paquet. Very particular about her brand.\" She smiles pleasantly. \"I've met her.\"\n\nKade puts the towel down and pushes it across the table.",
+    "choices": [
+     {
+      "text": "Take the core.",
+      "to": "got",
+      "effects": [
+       {
+        "affinity": {
+         "who": "noori",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "pay": {
+    "text": "Kade stares at the credits for a long time. Then he takes them, and pushes the towel across. \"Tell her...\" He stops. \"Don't tell her anything.\"",
+    "choices": [
+     {
+      "text": "Take the core.",
+      "to": "got",
+      "effects": [
+       {
+        "credits": -1000
+       },
+       {
+        "affinity": {
+         "who": "kade",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "race": {
+    "text": "The ice canyon behind Darkside is a crack in the night side a kilometer deep and barely wider than your wings. Kade takes it at full burn. You take it faster.\n\nYou come out the far end with frost on your canopy and your heart in your teeth, and Kade comes out eleven seconds later, white-faced, and laughing despite himself.\n\n\"Okay,\" he says over the comm. \"Okay. Take it. Tell her I want a rematch.\"",
+    "choices": [
+     {
+      "text": "Take the core.",
+      "to": "got",
+      "effects": [
+       {
+        "affinity": {
+         "who": "kade",
+         "by": 1
+        }
+       },
+       {
+        "setFlag": "juno-raced"
+       }
+      ]
+     }
+    ]
+   },
+   "got": {
+    "text": "The nav core has a crude sticker of a comet on it. It's warm from being held.",
+    "choices": [
+     {
+      "text": "Take it back to Juno.",
+      "to": null,
+      "effects": [
+       {
+        "locker": {
+         "item": "juno-navcore",
+         "qty": 1
+        }
+       },
+       {
+        "setFlag": "juno-core"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "juno-return",
+  "title": "Juno Ashe",
+  "speaker": "Juno Ashe",
+  "role": "Terminator City",
+  "site": "terminator-city",
+  "character": "juno",
+  "if": {
+   "flag": "juno-core",
+   "notFlag": "juno-done"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Juno sees the towel and actually whoops. She snatches the core, kisses the comet sticker, and kisses you on the cheek before you can see it coming.\n\n\"You beautiful lunatic. Was he awful? Did he cry? Tell me he cried.\"",
+    "choices": [
+     {
+      "text": "\"I raced him for it. Down the ice canyon.\"",
+      "to": "raced",
+      "if": {
+       "flag": "juno-raced"
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "juno",
+         "by": 2
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"He just wanted one year where he wasn't second.\"",
+      "to": "kind"
+     },
+     {
+      "text": "\"It was easy.\"",
+      "to": "run"
+     }
+    ]
+   },
+   "raced": {
+    "text": "Her mouth falls open. \"You took the *canyon*? In *that*?\" She looks at you as if seeing you for the first time. \"Oh, I'm in so much trouble,\" she says, mostly to herself.",
+    "choices": [
+     {
+      "text": "\"Go win your race, Juno.\"",
+      "to": "run"
+     }
+    ]
+   },
+   "kind": {
+    "text": "Juno's grin softens. \"Yeah. I know.\" She turns the core over in her hands. \"He's a good pilot. He's just never once flown like he wasn't scared.\" A pause. \"Maybe I'll give him a rematch. After I win.\"",
+    "choices": [
+     {
+      "text": "\"Go win your race.\"",
+      "to": "run",
+      "effects": [
+       {
+        "affinity": {
+         "who": "juno",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "run": {
+    "text": "The Terminator Run is the next day. You watch from the pit wall as forty ships scream along the line between fire and ice, and one of them, red and reckless, takes the final turn so close to the sun that her hull glows.\n\nShe wins by four seconds. On the podium she points straight at you, and the whole crowd turns to look.",
+    "choices": [
+     {
+      "text": "Wave back.",
+      "to": "after"
+     }
+    ]
+   },
+   "after": {
+    "text": "That night she finds you at the pit wall with two bottles and her winner's pennant. \"Your cut.\" Credits flash on your slate. Then she presses the pennant into your hands, signed with a lipstick kiss: *for my pit crew.*\n\n\"Come back and see me,\" she says. \"I mean it. The sunset here never ends, captain. Somebody should watch it with me.\"",
+    "choices": [
+     {
+      "text": "\"Count on it.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "juno-done"
+       },
+       {
+        "removeItem": "juno-navcore"
+       },
+       {
+        "locker": {
+         "item": "juno-pennant",
+         "qty": 1
+        }
+       },
+       {
+        "credits": 1500
+       },
+       {
+        "affinity": {
+         "who": "juno",
+         "by": 1
+        }
+       },
+       {
+        "setFlag": "juno-flirted"
+       }
+      ],
+      "flirt": true
+     },
+     {
+      "text": "\"Good luck, Juno.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "juno-done"
+       },
+       {
+        "removeItem": "juno-navcore"
+       },
+       {
+        "locker": {
+         "item": "juno-pennant",
+         "qty": 1
+        }
+       },
+       {
+        "credits": 1500
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "juno-regular",
+  "title": "Juno Ashe",
+  "speaker": "Juno Ashe",
+  "role": "Terminator City",
+  "site": "terminator-city",
+  "character": "juno",
+  "if": {
+   "flag": "juno-done"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Juno spots you from across the hangar and vaults a fuel line to get to you. \"Captain! Still alive! Still the second most reckless pilot I know!\"",
+    "choices": [
+     {
+      "text": "\"You said somebody should watch the sunset with you.\"",
+      "to": "sunset",
+      "if": {
+       "romance": "juno",
+       "flag": "juno-flirted",
+       "notFlag": "juno-night"
+      },
+      "flirt": true
+     },
+     {
+      "text": "\"I thought about you while I was gone.\"",
+      "to": "flirt",
+      "if": {
+       "notFlag": "juno-flirted"
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "juno",
+         "by": 1
+        }
+       },
+       {
+        "setFlag": "juno-flirted"
+       }
+      ],
+      "flirt": true
+     },
+     {
+      "text": "\"How's the rematch with Kade going?\"",
+      "to": "kade"
+     },
+     {
+      "text": "\"Just passing through.\"",
+      "to": null
+     }
+    ]
+   },
+   "flirt": {
+    "text": "\"Good.\" No hesitation, no coyness. \"I thought about you too. Mostly about that canyon, but also about your face.\" She bumps your shoulder with hers. \"Come back when you've got a whole evening.\"",
+    "choices": [
+     {
+      "text": "\"I will.\"",
+      "to": null
+     }
+    ]
+   },
+   "kade": {
+    "text": "\"He came second.\" She grins. \"By half a second, though. Best he's ever flown. He bought me a drink afterward and didn't cry once.\" She looks oddly proud. \"Don't tell him I said that.\"",
+    "choices": [
+     {
+      "text": "\"Your secret's safe.\"",
+      "to": null
+     }
+    ]
+   },
+   "sunset": {
+    "text": "She goes still, then smiles slowly, all the bravado gone soft. \"Yeah. I did say that.\"\n\nShe takes you up a maintenance ladder to the roof of her hangar, where someone has dragged an old acceleration couch and a cooler. Below, the city glitters. Ahead, the sun sits forever on the horizon, red and gold, painting everything the color of embers.\n\n\"Every night of my life,\" she says, \"and it never gets old.\" She hands you a bottle, then thinks better of it and takes it back, and kisses you instead.",
+    "choices": [
+     {
+      "text": "Kiss her back.",
+      "to": "closer"
+     },
+     {
+      "text": "\"Maybe just the sunset tonight.\"",
+      "to": "slow"
+     }
+    ]
+   },
+   "slow": {
+    "text": "\"Then just the sunset.\" She leans against you, warm and easy, and you watch the light that never goes out until the cooler is empty. \"Offer stands, captain. Every night.\"",
+    "choices": [
+     {
+      "text": "Say goodnight.",
+      "to": null
+     }
+    ]
+   },
+   "closer": {
+    "text": "She laughs into the kiss, breathless, and her flight jacket hits the roof somewhere behind the couch. Then yours. The sunset turns her red hair to fire as she pulls you down with her.",
+    "choices": [
+     {
+      "text": "...",
+      "to": "fade"
+     }
+    ]
+   },
+   "fade": {
+    "text": "Above the twilight line of Proxima b, the sun never quite sets. Tonight, neither of you minds.",
+    "choices": [
+     {
+      "text": "...",
+      "to": "morning"
+     }
+    ],
+    "mood": "fade"
+   },
+   "morning": {
+    "text": "There is no morning on the terminator line, but eventually there's an alarm, and a groan, and Juno with her face in your shoulder.\n\n\"Practice run in an hour,\" she mumbles. \"Worth it.\" She props her chin on your chest. \"Go save the galaxy or whatever. I'll be right here. Going very, very fast.\"",
+    "choices": [
+     {
+      "text": "\"I'll come back.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "juno-night"
+       },
+       {
+        "affinity": {
+         "who": "juno",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "Kiss her goodbye.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "juno-night"
+       },
+       {
+        "affinity": {
+         "who": "juno",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "dez-intro",
+  "title": "Dez Moreau",
+  "speaker": "Dez Moreau",
+  "role": "The Ring, Barnard's Star",
+  "site": "waystation-ring",
+  "character": "dez",
+  "if": {
+   "notFlag": "dez-briefed"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "A man in a long coat is leaning against a cargo pallet on the Ring, shuffling a deck of cards one-handed. He has the easy, unhurried smile of someone who has never once paid full price.\n\n\"Captain. Dez Moreau. Trader, raconteur, occasional liar.\" He tips an imaginary hat. \"I have a small favor and a large payment, and I promise only one of those is a lie.\"",
+    "choices": [
+     {
+      "text": "\"Which one?\"",
+      "to": "which"
+     },
+     {
+      "text": "\"Raconteur. That's a big word for a smuggler.\"",
+      "to": "flirt",
+      "effects": [
+       {
+        "affinity": {
+         "who": "dez",
+         "by": 1
+        }
+       }
+      ],
+      "flirt": true
+     },
+     {
+      "text": "\"You posted about a crate.\"",
+      "to": "crate",
+      "if": {
+       "flag": "lead-dez"
+      }
+     }
+    ]
+   },
+   "flirt": {
+    "text": "\"I have many big words, captain.\" His smile widens a little. \"And a very good vocabulary for compliments, which I'll save for when you've earned them.\"",
+    "choices": [
+     {
+      "text": "\"And the favor?\"",
+      "to": "crate"
+     }
+    ]
+   },
+   "which": {
+    "text": "\"The payment is real.\" He fans the cards and snaps them shut. \"The favor is not small.\"",
+    "choices": [
+     {
+      "text": "\"Go on.\"",
+      "to": "crate"
+     }
+    ]
+   },
+   "crate": {
+    "text": "He leads you to a crate in the back of his hold, sealed with three kinds of tape. \"Won it in a card game at Wolf Point. The man I won it from was very, very happy to lose.\" He doesn't touch it. \"Put your ear to it.\"\n\nYou do. Faintly, through the metal, something is whispering. A list. Names.",
+    "choices": [
+     {
+      "text": "\"That's Tallis Camp scrap. Ninefold hull plating.\"",
+      "to": "tallis",
+      "if": {
+       "flag": "camp-searched"
+      }
+     },
+     {
+      "text": "\"What is it?\"",
+      "to": "what"
+     }
+    ]
+   },
+   "tallis": {
+    "text": "Dez's smile slips for the first time. \"Tallis. The camp that went quiet.\" He looks at the crate the way you'd look at a sleeping animal. \"Then I'm very glad I didn't open it.\"",
+    "choices": [
+     {
+      "text": "\"What do you want done with it?\"",
+      "to": "want"
+     }
+    ]
+   },
+   "what": {
+    "text": "\"I don't know, and I would like to keep not knowing.\" He shuffles the deck again, a little too fast. \"It started whispering the night I won it. Every night since, at three in the morning.\"",
+    "choices": [
+     {
+      "text": "\"What do you want done with it?\"",
+      "to": "want"
+     }
+    ]
+   },
+   "want": {
+    "text": "\"Gone. Somewhere nobody will ever find it, and nobody will ever be close enough to hear it.\" He names a fee that makes your eyebrows go up. \"I'd do it myself, but my ship is held together by charm. Yours, I hear, is held together by something stranger.\"",
+    "choices": [
+     {
+      "text": "\"I'll take it.\"",
+      "to": "take"
+     }
+    ]
+   },
+   "take": {
+    "text": "He helps you load it, very carefully, and pats the crate once like a man saying goodbye to a bad dog. \"There's a quiet orbit close in to the star. Anything that drifts in there falls into the sun eventually.\" His eyes meet yours. \"Come back after. I'd like to buy you a drink and not talk about it.\"",
+    "choices": [
+     {
+      "text": "Load the crate.",
+      "to": null,
+      "effects": [
+       {
+        "locker": {
+         "item": "whispering-crate",
+         "qty": 1
+        }
+       },
+       {
+        "setFlag": "dez-briefed"
+       },
+       {
+        "setFlag": "met-dez"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "dez-drop",
+  "title": "The quiet orbit",
+  "speaker": "Quiet orbit",
+  "role": "Barnard's Star",
+  "poi": "barnard-deep",
+  "if": {
+   "hasItem": "whispering-crate"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Barnard's Star fills the forward screen, dim and red and ancient. Down in the hold, the crate has started whispering louder. You can hear it through the deck plates now.",
+    "choices": [
+     {
+      "text": "Drop it into the star's pull without looking.",
+      "to": "drop"
+     },
+     {
+      "text": "Open it first.",
+      "to": "open"
+     },
+     {
+      "text": "\"Moth. Ilse. Do we want to study this?\"",
+      "to": "keep",
+      "if": {
+       "anyFlag": [
+        "joined-ilse",
+        "joined-moth"
+       ]
+      }
+     }
+    ]
+   },
+   "open": {
+    "text": "You cut the tape. Inside, packed in foam, is a dish made of hull plating, shaped by someone at Tallis Camp with a hammer and a lot of care. It's curved like a mouth.\n\nUp close, the whisper is clear. Names. WOLF 359. TALLIS CAMP. BARNARD'S STAR. ALPHA CENTAURI.\n\nAnd then, softly, almost fondly, the name of your ship.",
+    "choices": [
+     {
+      "text": "Close the crate and drop it into the star.",
+      "to": "drop",
+      "effects": [
+       {
+        "setFlag": "dez-crate-opened"
+       }
+      ]
+     },
+     {
+      "text": "Close the crate. Ilse and Moth should study this.",
+      "to": "keep",
+      "if": {
+       "anyFlag": [
+        "joined-ilse",
+        "joined-moth"
+       ]
+      },
+      "effects": [
+       {
+        "setFlag": "dez-crate-opened"
+       }
+      ]
+     }
+    ]
+   },
+   "keep": {
+    "text": "You seal the crate in a shielded locker, three layers deep, and log it as a hazard. Moth wants to name it. Ilse won't let him.\n\nThe whispering stops the moment the locker closes. It doesn't feel like it's gone. It feels like it's waiting.",
+    "choices": [
+     {
+      "text": "Head back to the Ring.",
+      "to": null,
+      "effects": [
+       {
+        "removeItem": "whispering-crate"
+       },
+       {
+        "setFlag": "dez-crate-gone"
+       },
+       {
+        "setFlag": "dez-crate-kept"
+       }
+      ]
+     }
+    ]
+   },
+   "drop": {
+    "text": "You open the cargo doors and let it go. The crate tumbles away, small and dark against the red disc of the star, and drops out of sight.\n\nOn the open channel, very faintly, for just a moment, something says *goodbye*.",
+    "choices": [
+     {
+      "text": "Head back to the Ring.",
+      "to": null,
+      "effects": [
+       {
+        "removeItem": "whispering-crate"
+       },
+       {
+        "setFlag": "dez-crate-gone"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "dez-return",
+  "title": "Dez Moreau",
+  "speaker": "Dez Moreau",
+  "role": "The Ring, Barnard's Star",
+  "site": "waystation-ring",
+  "character": "dez",
+  "if": {
+   "flag": "dez-crate-gone",
+   "notFlag": "dez-done"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Dez has two glasses poured before you're through the door. He slides one across the bar, studies your face, and doesn't ask. \"It's gone?\"",
+    "choices": [
+     {
+      "text": "\"It's gone. It said my ship's name before it went.\"",
+      "to": "name",
+      "if": {
+       "flag": "dez-crate-opened"
+      }
+     },
+     {
+      "text": "\"It's gone.\"",
+      "to": "paid"
+     }
+    ]
+   },
+   "name": {
+    "text": "He's quiet for a while. Then he reaches over and covers your hand with his, briefly, warm. \"Then I owe you more than money, captain.\" He lets go. \"I don't say that often. I usually owe people much less.\"",
+    "choices": [
+     {
+      "text": "Drink with him.",
+      "to": "paid",
+      "effects": [
+       {
+        "affinity": {
+         "who": "dez",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "paid": {
+    "text": "The credits land on your slate, and they are, for once, exactly what he promised. \"Honest money,\" he says. \"It feels very strange.\" He shuffles his deck one-handed, smiling at you over it. \"Stay for a hand of cards. I promise to cheat only a little.\"",
+    "choices": [
+     {
+      "text": "\"Only if you let me win.\"",
+      "to": "after",
+      "effects": [
+       {
+        "affinity": {
+         "who": "dez",
+         "by": 1
+        }
+       },
+       {
+        "setFlag": "dez-flirted"
+       }
+      ],
+      "flirt": true
+     },
+     {
+      "text": "\"Another time, Dez.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "dez-done"
+       },
+       {
+        "credits": 1200
+       }
+      ]
+     }
+    ]
+   },
+   "after": {
+    "text": "He doesn't let you win. You win anyway, twice, and the second time he laughs, really laughs, and looks at you like a man revising his odds.\n\n\"Come back, captain,\" he says, when you finally stand. \"I'd like a rematch. I'd like several.\"",
+    "choices": [
+     {
+      "text": "\"Deal.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "dez-done"
+       },
+       {
+        "credits": 1200
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "dez-regular",
+  "title": "Dez Moreau",
+  "speaker": "Dez Moreau",
+  "role": "The Ring, Barnard's Star",
+  "site": "waystation-ring",
+  "character": "dez",
+  "if": {
+   "flag": "dez-done"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Dez looks up from a game of solitaire he's clearly cheating at. \"Captain. My favorite customer, and my only honest one.\"",
+    "choices": [
+     {
+      "text": "\"You owe me a rematch. Somewhere more private.\"",
+      "to": "cabin",
+      "if": {
+       "romance": "dez",
+       "flag": "dez-flirted",
+       "notFlag": "dez-night"
+      },
+      "flirt": true
+     },
+     {
+      "text": "\"I keep thinking about that card game.\"",
+      "to": "flirt",
+      "if": {
+       "notFlag": "dez-flirted"
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "dez",
+         "by": 1
+        }
+       },
+       {
+        "setFlag": "dez-flirted"
+       }
+      ],
+      "flirt": true
+     },
+     {
+      "text": "\"Anything interesting come through the Ring?\"",
+      "to": "news"
+     },
+     {
+      "text": "\"Just saying hello.\"",
+      "to": null
+     }
+    ]
+   },
+   "flirt": {
+    "text": "\"The cards, or the company?\" He doesn't wait for an answer, which is wise of him. \"Either way. Come back with time to lose, captain.\"",
+    "choices": [
+     {
+      "text": "\"I will.\"",
+      "to": null
+     }
+    ]
+   },
+   "news": {
+    "text": "\"Sirius money, Academy patrols, and a lot of people who suddenly want to buy old radio dishes.\" He frowns at his cards. \"Everyone's listening for something lately. I prefer not to.\"",
+    "choices": [
+     {
+      "text": "\"Wise.\"",
+      "to": null
+     }
+    ]
+   },
+   "cabin": {
+    "text": "Dez stops shuffling. \"Somewhere more private,\" he repeats slowly, and a smile spreads across his face like dawn. \"I happen to have a ship, held together by charm, with a very small table.\"\n\nIt is a very small table. The cards end up mostly on the floor. At some point he says, \"I usually only bet what I can afford to lose,\" and you say, \"What about now?\" and he kisses you instead of answering.",
+    "choices": [
+     {
+      "text": "Pull him closer.",
+      "to": "fade"
+     },
+     {
+      "text": "\"Let's just finish the game tonight.\"",
+      "to": "slow"
+     }
+    ]
+   },
+   "slow": {
+    "text": "\"Then we finish the game.\" He gathers the cards with good grace, and deals, and cheats outrageously, and walks you back to your ship at the end of it with his coat around your shoulders. \"Next time, captain.\"",
+    "choices": [
+     {
+      "text": "\"Next time.\"",
+      "to": null
+     }
+    ]
+   },
+   "fade": {
+    "text": "Somewhere on the Ring, a card game goes unfinished. Nobody minds.",
+    "choices": [
+     {
+      "text": "...",
+      "to": "morning"
+     }
+    ],
+    "mood": "fade"
+   },
+   "morning": {
+    "text": "You wake to the smell of terrible coffee and Dez in his shirtsleeves, dealing solitaire on the very small table, humming.\n\n\"Good morning,\" he says. \"I've decided I'm in a lot of trouble.\" He doesn't look troubled at all. \"Go. Fly. Come back and let me lose to you again.\"",
+    "choices": [
+     {
+      "text": "\"Count on it.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "dez-night"
+       },
+       {
+        "affinity": {
+         "who": "dez",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "Steal his coffee and kiss him goodbye.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "dez-night"
+       },
+       {
+        "affinity": {
+         "who": "dez",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "vesna-intro",
+  "title": "Vesna",
+  "speaker": "Vesna Ilyin",
+  "role": "Pilgrim's Field, Tau Ceti",
+  "site": "pilgrim-field",
+  "character": "vesna",
+  "if": {
+   "notFlag": "vesna-briefed"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "The landing field beside the monastery is quiet except for the wind in the wheat. A woman with long pale hair is raking the gravel by the landing pad, slowly and very precisely, and she watches your ship touch down without stopping.\n\nWhen you walk over, she leans on the rake. \"You flew in from the Sol side and you came straight here. Either you're lost, or you're looking for me.\"",
+    "choices": [
+     {
+      "text": "\"The monks said someone here needed a letter carried.\"",
+      "to": "letter"
+     },
+     {
+      "text": "\"You flew for the Academy. You land-watch like a pilot.\"",
+      "to": "pilot",
+      "if": {
+       "origin": [
+        "academy-legacy"
+       ]
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "vesna",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"You refused an order once. So did I.\"",
+      "to": "pilot",
+      "if": {
+       "moment": [
+        "decorated-discharged"
+       ]
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "vesna",
+         "by": 2
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "pilot": {
+    "text": "Her rake stops. She looks at you properly for the first time, gray-blue eyes, very direct. \"Then you know why I'm here and not up there.\" A pause. \"Most people need it explained to them.\"",
+    "choices": [
+     {
+      "text": "\"You need a letter carried?\"",
+      "to": "letter"
+     }
+    ]
+   },
+   "letter": {
+    "text": "\"My sister, Mira. She has a bakery in Verdance, on the terraces.\" She takes an envelope from inside her coat. \"I can't go myself. The Academy is pulling in deserters to crew its quarantine ships, and they watch the city. Here, the monks don't ask questions, and neither does the wheat.\"",
+    "choices": [
+     {
+      "text": "\"What did you refuse to do?\"",
+      "to": "refused"
+     },
+     {
+      "text": "\"I'll take it to her.\"",
+      "to": "take"
+     }
+    ]
+   },
+   "refused": {
+    "text": "\"Fire on a refugee ship that hadn't answered a hail.\" Flat, practiced. \"Its transmitter was broken. Mine wasn't. I told them so, and then I flew away.\" She turns the envelope over. \"Four years. I haven't seen Mira in four years.\"",
+    "choices": [
+     {
+      "text": "\"You did the right thing.\"",
+      "to": "take",
+      "effects": [
+       {
+        "affinity": {
+         "who": "vesna",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"I'll get the letter to her.\"",
+      "to": "take"
+     }
+    ]
+   },
+   "take": {
+    "text": "She holds the envelope out, then doesn't quite let go of it. \"If she's angry with me, you don't have to tell me what she says.\" Then she lets go. \"Thank you, captain.\"",
+    "choices": [
+     {
+      "text": "\"I'll be back with her reply.\"",
+      "to": null,
+      "effects": [
+       {
+        "locker": {
+         "item": "vesna-letter",
+         "qty": 1
+        }
+       },
+       {
+        "setFlag": "vesna-briefed"
+       },
+       {
+        "setFlag": "met-vesna"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "mira-verdance",
+  "title": "Mira",
+  "speaker": "Mira Ilyin",
+  "role": "Verdance",
+  "site": "verdance",
+  "character": "mira",
+  "if": {
+   "hasItem": "vesna-letter"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "The bakery is three terraces up, and it smells like rain and honey. The young woman behind the counter takes one look at the handwriting on the envelope and sits down very suddenly on a flour sack.\n\n\"She's alive,\" Mira says. \"Oh, she's alive, that idiot. That *idiot*.\" She's laughing and crying at once. \"Four years without a word.\"",
+    "choices": [
+     {
+      "text": "\"She was afraid you'd be angry.\"",
+      "to": "angry"
+     },
+     {
+      "text": "Let her read.",
+      "to": "read"
+     }
+    ]
+   },
+   "angry": {
+    "text": "\"I am angry.\" Mira wipes her eyes with a floury wrist. \"I'm furious. I'm going to bake her something so good she cries.\" She opens the letter. \"Give me a minute.\"",
+    "choices": [
+     {
+      "text": "Wait while she reads.",
+      "to": "read"
+     }
+    ]
+   },
+   "read": {
+    "text": "Mira reads it twice. Then she writes a reply fast, on the back of an order slip, and wraps half a loaf of honey bread in paper to go with it.\n\nAs you're leaving, she catches your sleeve. \"Captain. An Academy officer has been in here three times this month asking if I've heard from her. A lieutenant with a scar here.\" She touches her chin. \"Tell Vesna. Please.\"",
+    "choices": [
+     {
+      "text": "\"I'll tell her.\"",
+      "to": null,
+      "effects": [
+       {
+        "removeItem": "vesna-letter"
+       },
+       {
+        "locker": {
+         "item": "mira-reply",
+         "qty": 1
+        }
+       },
+       {
+        "setFlag": "vesna-letter-delivered"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "vesna-return",
+  "title": "Vesna",
+  "speaker": "Vesna Ilyin",
+  "role": "Pilgrim's Field, Tau Ceti",
+  "site": "pilgrim-field",
+  "character": "vesna",
+  "if": {
+   "hasItem": "mira-reply"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Vesna is waiting at the edge of the landing pad when you set down, as if she's been there since you left. She sees the paper bag in your hand and her composure goes all at once.\n\n\"Honey bread,\" she says unsteadily. \"She remembered.\"",
+    "choices": [
+     {
+      "text": "Give her the reply.",
+      "to": "read"
+     }
+    ]
+   },
+   "read": {
+    "text": "She reads it standing in the wheat with the wind pulling at her hair. Halfway through she laughs out loud, a startled, real laugh. At the end she folds it very small and holds it against her chest.",
+    "choices": [
+     {
+      "text": "\"There's something else. An Academy lieutenant has been asking about you.\"",
+      "to": "warn"
+     },
+     {
+      "text": "\"She's furious with you. She said so.\"",
+      "to": "furious"
+     }
+    ]
+   },
+   "furious": {
+    "text": "\"Good. Furious means she still cares.\" She smiles, and it changes her whole face. Then you remember the lieutenant, and tell her that too.",
+    "choices": [
+     {
+      "text": "Tell her about the lieutenant.",
+      "to": "warn"
+     }
+    ]
+   },
+   "warn": {
+    "text": "The smile goes. \"A scar on his chin.\" She knows him. \"Lieutenant Arkady Voss. He trained with me.\" She looks out at the monastery, the wheat, the sky. \"Then I can't stay here much longer.\" A long silence. \"I'm tired of running, captain. I thought I'd run far enough.\"",
+    "choices": [
+     {
+      "text": "\"Come with me. My ship can always use a pilot.\"",
+      "to": "offer"
+     },
+     {
+      "text": "\"If Voss comes, call me. I'll come.\"",
+      "to": "promise",
+      "effects": [
+       {
+        "affinity": {
+         "who": "vesna",
+         "by": 2
+        }
+       },
+       {
+        "setFlag": "vesna-promise"
+       }
+      ]
+     }
+    ]
+   },
+   "offer": {
+    "text": "She looks at your ship for a long moment, and you can see her wanting it. Then she shakes her head. \"Not yet. If I leave, Mira has no one near. And I promised the monks one more harvest.\" She almost smiles. \"Ask me again, captain. I may say yes one day.\"",
+    "choices": [
+     {
+      "text": "\"I'll ask again.\"",
+      "to": "gift",
+      "effects": [
+       {
+        "affinity": {
+         "who": "vesna",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "promise": {
+    "text": "She studies you. \"You mean that.\" Not a question. \"People don't usually mean that.\"\n\nShe holds out her hand. When you take it, she doesn't let go right away.",
+    "choices": [
+     {
+      "text": "Hold on.",
+      "to": "gift"
+     }
+    ]
+   },
+   "gift": {
+    "text": "She unpins something from inside her coat: Academy pilot's wings, the metal worn smooth by her thumb. \"I don't need these anymore. I'd like them to fly again.\"\n\nShe presses them into your palm and folds your fingers over them.",
+    "choices": [
+     {
+      "text": "Kiss her.",
+      "to": "kiss",
+      "if": {
+       "romance": "vesna"
+      },
+      "flirt": true
+     },
+     {
+      "text": "\"I'll take good care of them.\"",
+      "to": "end"
+     }
+    ]
+   },
+   "kiss": {
+    "text": "For a moment she's very still, the way a pilot is still in the half second before a decision. Then she kisses you back, slow and sure, in the middle of the wheat, the wind wrapping her hair around both of you.\n\nWhen she steps back her eyes are bright. \"That was reckless,\" she says. \"I used to be very good at reckless.\" A pause. \"Come back, captain. Not for letters.\"",
+    "choices": [
+     {
+      "text": "\"I'll come back.\"",
+      "to": null,
+      "effects": [
+       {
+        "removeItem": "mira-reply"
+       },
+       {
+        "locker": {
+         "item": "vesna-wings",
+         "qty": 1
+        }
+       },
+       {
+        "setFlag": "vesna-done"
+       },
+       {
+        "setFlag": "vesna-kiss"
+       },
+       {
+        "affinity": {
+         "who": "vesna",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "end": {
+    "text": "\"I know you will.\" She steps back into the wheat and picks up her rake. \"Fly safe. Mind the Academy patrols near Verdance.\"",
+    "choices": [
+     {
+      "text": "Head back to the ship.",
+      "to": null,
+      "effects": [
+       {
+        "removeItem": "mira-reply"
+       },
+       {
+        "locker": {
+         "item": "vesna-wings",
+         "qty": 1
+        }
+       },
+       {
+        "setFlag": "vesna-done"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+]

@@ -1,0 +1,973 @@
+[
+ {
+  "id": "brooks-echo",
+  "title": "Chief Brooks",
+  "speaker": "Chief Anaya Brooks",
+  "role": "Survey Camp Seven",
+  "site": "survey-camp",
+  "character": "brooks",
+  "if": {
+   "notFlag": "echo-briefed"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "A dozen prefab domes, a dozen surveyors, and every one of them looks up when you walk in, like you might be the answer to something. A woman with a clipboard and a thermos pushes through them.\n\n\"Chief Brooks. You flew in, so you have a working radio. Good. Ours is haunted.\"",
+    "choices": [
+     {
+      "text": "\"Haunted?\"",
+      "to": "how"
+     },
+     {
+      "text": "\"You posted on the Jobs board?\"",
+      "to": "how",
+      "if": {
+       "flag": "lead-echo"
+      }
+     }
+    ]
+   },
+   "how": {
+    "text": "\"Every transmission we send comes back. Eleven days later, from orbit, from a patch of sky with nothing in it.\" She taps her clipboard. \"Annoying. Then last week we got one that nobody had sent yet.\"\n\nShe plays it. It's her voice, unmistakably, tired and very calm:\n\n*\"Survey Seven to anyone. Don't open the yard.\"*\n\n\"I have never said those words,\" Brooks says. \"I don't even know what yard.\"",
+    "choices": [
+     {
+      "text": "\"The consortium that built my ship had a yard here.\"",
+      "to": "yard",
+      "if": {
+       "flag": "drive-core-origin"
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "brooks",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Any old stations in orbit?\"",
+      "to": "yard"
+     }
+    ]
+   },
+   "yard": {
+    "text": "Brooks goes still. \"The Lalande consortium. Their yard's still up there, dark. We never think about it.\" She looks past you, out the dome, at your ship on the pad. \"That's one of theirs, isn't it? I wondered.\"\n\nShe writes coordinates on her clipboard and tears the sheet off. \"I'll pay twelve hundred to know what's talking to us. And if it says don't open it...\" A thin smile. \"Well. You're not me.\"",
+    "choices": [
+     {
+      "text": "\"I'll take a look.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "echo-briefed"
+       }
+      ]
+     },
+     {
+      "text": "\"Brave of you to send me instead.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "echo-briefed"
+       },
+       {
+        "affinity": {
+         "who": "brooks",
+         "by": -1
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "yard-board",
+  "title": "Consortium yard",
+  "speaker": "Consortium yard",
+  "role": "Lalande 21185",
+  "spot": {
+   "interior": "consortium-yard",
+   "id": "airlock"
+  },
+  "if": {
+   "notFlag": "yard-boarded"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "The yard's airlock cycles open on its own when you dock, the way the camp at Tallis did. Inside, dark. Your helmet light finds a vast hangar and a ceiling lost in shadow.\n\nSomewhere deeper in, a speaker is murmuring. You can't make out the words, but you know the voice. It's Chief Brooks.",
+    "choices": [
+     {
+      "text": "\"Moth, can you get the lights?\"",
+      "to": "moth",
+      "if": {
+       "crew": "moth"
+      }
+     },
+     {
+      "text": "Go in.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "yard-boarded"
+       }
+      ]
+     }
+    ]
+   },
+   "moth": {
+    "text": "\"On it.\" A pause. \"Okay, no, the lights are very much off for good. But the transmitter in here is wide awake and I didn't touch it. That's worse, right? That feels worse.\"",
+    "choices": [
+     {
+      "text": "Go in.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "yard-boarded"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "yard-berth",
+  "title": "The empty berth",
+  "speaker": "Consortium yard",
+  "role": "Main hangar",
+  "spot": {
+   "interior": "consortium-yard",
+   "id": "berth"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "A construction berth, cradles and gantries folded around an empty space. You know the shape of that space before your light finishes tracing it. It's your ship. Every curve.\n\nIn the middle of the deck, where her drive section would sit, a circle has been painted in yellow. Inside the circle, in stenciled letters: CORE ARRIVES FIRST. BUILD AROUND IT.",
+    "choices": [
+     {
+      "text": "\"She was built around it. Not the other way round.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "yard-berth"
+       }
+      ]
+     },
+     {
+      "text": "\"Ilse, are you seeing this?\"",
+      "to": "ilse",
+      "if": {
+       "crew": "ilse"
+      }
+     }
+    ]
+   },
+   "ilse": {
+    "text": "\"I am.\" Her voice is soft. \"Most ships are given a heart. Yours was given a body.\" A pause. \"I think I need to sit down for a moment. Please don't tell Moth.\"",
+    "choices": [
+     {
+      "text": "Give her a moment.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "yard-berth"
+       },
+       {
+        "affinity": {
+         "who": "ilse",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "yard-office",
+  "title": "Drafting office",
+  "speaker": "Consortium yard",
+  "role": "Drafting office",
+  "spot": {
+   "interior": "consortium-yard",
+   "id": "office"
+  },
+  "if": {
+   "notFlag": "yard-sheet"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Drafting tables under dust. Coffee mugs. A whiteboard with a deadline circled so many times it went through the board.\n\nPinned above the lead engineer's desk is the build sheet for your ship, in pencil, annotated by a dozen hands. One note, in red, has been gone over again and again:\n\nDO NOT POWER THE CORE BEFORE HULL SEAL.\nDO NOT LET IT HEAR THE OORT.",
+    "choices": [
+     {
+      "text": "Take the build sheet.",
+      "to": null,
+      "effects": [
+       {
+        "locker": {
+         "item": "consortium-buildsheet",
+         "qty": 1
+        }
+       },
+       {
+        "setFlag": "yard-sheet"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "yard-office-after",
+  "title": "Drafting office",
+  "speaker": "Consortium yard",
+  "role": "Drafting office",
+  "spot": {
+   "interior": "consortium-yard",
+   "id": "office"
+  },
+  "if": {
+   "flag": "yard-sheet"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Dust, mugs, and a pale rectangle on the wall where the build sheet hung.",
+    "choices": [
+     {
+      "text": "Move on.",
+      "to": null
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "yard-transmitter",
+  "title": "The yard transmitter",
+  "speaker": "Consortium yard",
+  "role": "Comms room",
+  "spot": {
+   "interior": "consortium-yard",
+   "id": "transmitter"
+  },
+  "if": {
+   "notFlag": "echo-source-found"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "The transmitter is the only thing in the yard with power. It's recording everything Survey Camp Seven says, holding it eleven days, and sending it back. A buffer, set by an engineer twelve years ago, never switched off.\n\nThat explains the echo. It doesn't explain the other file.\n\nIt's Brooks's voice again: *\"Don't open the yard.\"* The metadata says it didn't come from the camp. It came from a sensor in the main hangar. From the berth. From the place your ship's drive core sat for two years, listening.",
+    "choices": [
+     {
+      "text": "\"Something learned her voice and used it to warn her.\"",
+      "to": "warn"
+     },
+     {
+      "text": "Shut the transmitter down.",
+      "to": "off"
+     }
+    ]
+   },
+   "warn": {
+    "text": "Warned her off the place where it was born. The same way the Oort signal says *shh*. Your skin prickles inside your suit.",
+    "choices": [
+     {
+      "text": "Shut the transmitter down.",
+      "to": "off"
+     },
+     {
+      "text": "Leave it running. It isn't hurting anyone.",
+      "to": "on"
+     }
+    ]
+   },
+   "off": {
+    "text": "The hum dies. For the first time in twelve years, the yard is silent.",
+    "choices": [
+     {
+      "text": "Head back to the airlock.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "echo-source-found"
+       },
+       {
+        "setFlag": "yard-silenced"
+       }
+      ]
+     }
+    ]
+   },
+   "on": {
+    "text": "You leave it murmuring to itself in the dark.",
+    "choices": [
+     {
+      "text": "Head back to the airlock.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "echo-source-found"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "brooks-echo-end",
+  "title": "Chief Brooks",
+  "speaker": "Chief Anaya Brooks",
+  "role": "Survey Camp Seven",
+  "site": "survey-camp",
+  "character": "brooks",
+  "if": {
+   "flag": "echo-source-found",
+   "notFlag": "echo-done"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Brooks hears you out with her thermos held in both hands. When you get to the voice from the berth, she sets it down.",
+    "choices": [
+     {
+      "text": "\"The echo's gone. I shut it down.\"",
+      "to": "paid",
+      "if": {
+       "flag": "yard-silenced"
+      }
+     },
+     {
+      "text": "\"It's harmless. I left it running.\"",
+      "to": "paid"
+     },
+     {
+      "text": "\"Whatever made that warning was trying to protect you.\"",
+      "to": "kind",
+      "effects": [
+       {
+        "affinity": {
+         "who": "brooks",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "kind": {
+    "text": "\"Protect us.\" She turns it over. \"From what was in the yard. Which is now in your ship.\" A long look. \"I hope it likes you, captain.\"",
+    "choices": [
+     {
+      "text": "\"So do I.\"",
+      "to": "paid"
+     }
+    ]
+   },
+   "paid": {
+    "text": "\"Twelve hundred, as promised.\" She transfers it. \"And the first round at our sad little bar, forever.\" She hesitates. \"The camp's quieter now. I don't know if that's better.\"",
+    "choices": [
+     {
+      "text": "\"Take care, Chief.\"",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "echo-done"
+       },
+       {
+        "credits": 1200
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "ferro-sleep",
+  "title": "Dr. Ferro",
+  "speaker": "Dr. Tomas Ferro",
+  "role": "Darkside Camp",
+  "site": "darkside-camp",
+  "character": "ferro",
+  "if": {
+   "notFlag": "sleep-briefed"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "The infirmary at Darkside Camp is a converted ice-hauler with six cots and one exhausted doctor. He pours you coffee you didn't ask for and drinks his own like medicine.\n\n\"Dr. Ferro. Thank you for coming.\" He rubs his eyes. \"My miners sleepwalk. All of them, every night, at the same hour. They suit up in their sleep, cycle the airlocks in their sleep, and walk out onto the ice.\"",
+    "choices": [
+     {
+      "text": "\"What hour?\"",
+      "to": "hour"
+     },
+     {
+      "text": "\"Are they hurt?\"",
+      "to": "hurt"
+     }
+    ]
+   },
+   "hurt": {
+    "text": "\"Not yet. They walk a few hundred meters, stop, stand there for twenty minutes, and walk back to bed. In the morning they don't remember.\" He looks at the frost on the window. \"But it's minus a hundred and ten out there, captain. One night, someone's suit seal will fail.\"",
+    "choices": [
+     {
+      "text": "\"What hour does it happen?\"",
+      "to": "hour"
+     }
+    ]
+   },
+   "hour": {
+    "text": "\"Three in the morning, Sol standard.\" He checks his notes. \"Precisely.\"",
+    "choices": [
+     {
+      "text": "\"That's the hour of the Oort signal.\"",
+      "to": "oort",
+      "if": {
+       "motive": [
+        "the-signal"
+       ]
+      },
+      "effects": [
+       {
+        "affinity": {
+         "who": "ferro",
+         "by": 1
+        }
+       }
+      ]
+     },
+     {
+      "text": "\"Then I'll stay up with them.\"",
+      "to": "stay"
+     }
+    ]
+   },
+   "oort": {
+    "text": "Ferro sets his mug down very carefully. \"You know something.\" It isn't a question. \"Stay tonight. Please. I need a witness who isn't me.\"",
+    "choices": [
+     {
+      "text": "\"I'll stay.\"",
+      "to": "stay"
+     }
+    ]
+   },
+   "stay": {
+    "text": "\"Thank you.\" He looks, for a moment, like he might cry from sheer relief. \"I'll wake you at quarter to three. Get some sleep. Ha.\"",
+    "choices": [
+     {
+      "text": "Find a cot.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "sleep-briefed"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "sleep-night",
+  "title": "The night shift",
+  "speaker": "Darkside Camp",
+  "role": "0300, Sol standard",
+  "site": "darkside-camp",
+  "if": {
+   "flag": "sleep-briefed",
+   "notFlag": "sleep-done"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "At 0258 every bunk in Darkside Camp creaks at once.\n\nForty miners sit up, eyes open and empty. They suit up in perfect silence, helping each other with seals, and file out through the airlocks in a line.\n\nYou follow them onto the ice under a sky full of stars.",
+    "choices": [
+     {
+      "text": "Follow.",
+      "to": "b"
+     }
+    ]
+   },
+   "b": {
+    "text": "Four hundred meters out they stop, in rows, all facing the same way. Not toward the galactic core.\n\nToward Sol.\n\nThen, all together, they raise their gloved hands to their visors, over their mouths. On the open channel forty voices whisper the same thing, softly, over and over.\n\n*\"Shh.\"*",
+    "choices": [
+     {
+      "text": "\"Celeste. That's the picture.\"",
+      "to": "celeste",
+      "if": {
+       "crew": "celeste"
+      }
+     },
+     {
+      "text": "Try to wake one of them.",
+      "to": "wake"
+     },
+     {
+      "text": "Stand with them and wait.",
+      "to": "wait"
+     }
+    ]
+   },
+   "celeste": {
+    "text": "Celeste has gone very still beside you. \"The Halcyon decode. The hand over the mouth.\" Her voice shakes. \"They're not being called, captain. They're being *told*. Every night, the warning reaches them, and some part of them listens.\"",
+    "choices": [
+     {
+      "text": "\"Can we stop it hurting them?\"",
+      "to": "fix",
+      "effects": [
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "wake": {
+    "text": "You touch a shoulder. The woman flinches, gasps, and for one second her eyes focus on you, wild with fear. *\"It's listening,\"* she says. *\"Be quiet, be quiet, it's listening.\"* Then she's gone again, hand back over her visor.",
+    "choices": [
+     {
+      "text": "Wait with them.",
+      "to": "wait"
+     }
+    ]
+   },
+   "wait": {
+    "text": "Twenty minutes. Then, as one, they lower their hands, turn, and walk back to bed. Ferro is waiting at the airlock, white as the ice.\n\n\"Well?\" he whispers.",
+    "choices": [
+     {
+      "text": "\"They're not being taken. They're being warned.\"",
+      "to": "fix"
+     }
+    ]
+   },
+   "fix": {
+    "text": "You tell him all of it: the Oort signal, the picture, the beacon. He listens like a man being handed a diagnosis he'd feared and half expected.\n\n\"Then the cure is to stop the warning reaching them.\" He looks at the shielding on the barracks. \"Or to make it so they don't need it.\"",
+    "choices": [
+     {
+      "text": "\"Celeste can build a filter from the Halcyon designs.\"",
+      "to": "filter",
+      "if": {
+       "crew": "celeste"
+      }
+     },
+     {
+      "text": "\"Line the barracks with ore plating. Block the signal.\"",
+      "to": "block"
+     },
+     {
+      "text": "\"Let them listen. Just keep them safe on the ice.\"",
+      "to": "listen"
+     }
+    ]
+   },
+   "filter": {
+    "text": "Celeste works through the night with Ferro, building a small, careful filter for the barracks receiver. It doesn't block the warning. It turns it down to a whisper, enough to hear and not enough to walk.\n\nThe next night, nobody leaves their bed. Ferro sleeps for eleven hours.",
+    "choices": [
+     {
+      "text": "Head back to the ship.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "sleep-done"
+       },
+       {
+        "setFlag": "sleep-filter"
+       },
+       {
+        "affinity": {
+         "who": "celeste",
+         "by": 1
+        }
+       },
+       {
+        "affinity": {
+         "who": "ferro",
+         "by": 1
+        }
+       },
+       {
+        "locker": {
+         "item": "sleepwalker-recording",
+         "qty": 1
+        }
+       },
+       {
+        "credits": 800
+       }
+      ]
+     }
+    ]
+   },
+   "block": {
+    "text": "The miners spend two days hauling ore plate onto the barracks roofs. The next night, nobody walks.\n\nBut at 0300, Ferro tells you later, all forty of them woke up at once and lay awake until dawn, and none of them could say why.",
+    "choices": [
+     {
+      "text": "Head back to the ship.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "sleep-done"
+       },
+       {
+        "setFlag": "sleep-blocked"
+       },
+       {
+        "locker": {
+         "item": "sleepwalker-recording",
+         "qty": 1
+        }
+       },
+       {
+        "credits": 800
+       }
+      ]
+     }
+    ]
+   },
+   "listen": {
+    "text": "\"Let them listen.\" Ferro thinks about it, then nods slowly. \"Tethers on the airlocks, a heater on the ice, me on watch.\" He almost smiles. \"If something out there is warning us every night, maybe someone should be paying attention.\"",
+    "choices": [
+     {
+      "text": "Head back to the ship.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "sleep-done"
+       },
+       {
+        "setFlag": "sleep-listen"
+       },
+       {
+        "affinity": {
+         "who": "ferro",
+         "by": 1
+        }
+       },
+       {
+        "locker": {
+         "item": "sleepwalker-recording",
+         "qty": 1
+        }
+       },
+       {
+        "credits": 800
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "ness-europa",
+  "title": "Dr. Ness",
+  "speaker": "Dr. Halvard Ness",
+  "role": "Europa Deep Station",
+  "site": "europa-deep",
+  "character": "ness",
+  "if": {
+   "notFlag": "europa-done"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "Europa Deep is a drill head perched over a hole in the ice nine kilometers deep. The man who meets you at the lock has a gray beard, a parka over his lab coat, and the look of someone who has not told anyone something important for a long time.\n\n\"Halvard Ness. Thank you for coming without a camera crew.\" He leads you down. \"I want to show you the most important thing in the solar system, and then I want you to help me decide whether to tell anyone.\"",
+    "choices": [
+     {
+      "text": "\"Show me.\"",
+      "to": "show",
+      "effects": [
+       {
+        "setFlag": "europa-briefed"
+       }
+      ]
+     }
+    ]
+   },
+   "show": {
+    "text": "A monitor fed by a probe nine kilometers down. Black water. Then, scattered across the dark like a city seen from orbit, living lights: colonies of something that glows, pulsing slowly in patterns.\n\n\"Twenty years I've recorded them,\" Ness says. \"They talk, in light. Not words. But they talk.\" He switches to a second feed. Live. The water is black. Every light is out. \"The night New Horizons woke up, every colony in Europa went dark. All at once.\"",
+    "choices": [
+     {
+      "text": "\"They went quiet.\"",
+      "to": "quiet"
+     },
+     {
+      "text": "\"Are they dead?\"",
+      "to": "dead"
+     }
+    ]
+   },
+   "dead": {
+    "text": "\"No. Thermal readings say they're alive. They've just stopped glowing.\" He swallows. \"Like a village putting out its lamps when it hears something in the woods.\"",
+    "choices": [
+     {
+      "text": "\"They went quiet.\"",
+      "to": "quiet"
+     }
+    ]
+   },
+   "quiet": {
+    "text": "\"Almost all of them.\" He switches feeds again. One colony, deep in a crevasse, still glowing. Faint. Steady.\n\nSeven pulses. A rest. Eleven.\n\nYou know that rhythm. You've heard it through Ilse's stethoscope, from your own drive core.",
+    "choices": [
+     {
+      "text": "\"That's the rhythm my ship's core makes.\"",
+      "to": "core"
+     },
+     {
+      "text": "\"What does it mean?\"",
+      "to": "core"
+     }
+    ]
+   },
+   "core": {
+    "text": "Ness stares at you. Then, slowly: \"Then it isn't talking to us. It's talking to whatever your ship is.\" He turns from the screen. \"The Academy funds this station. Aurum Meridian has offered to buy it twice this month. And there's a woman at the Deep Space Network who'd tell the whole world tonight.\" He spreads his hands. \"What would you do, captain?\"",
+    "choices": [
+     {
+      "text": "\"Tell Dr. Okafor. People deserve to know.\"",
+      "to": "okafor"
+     },
+     {
+      "text": "\"Keep it secret. Quiet is what keeps them alive.\"",
+      "to": "secret"
+     },
+     {
+      "text": "\"The Academy can protect it. Report it to them.\"",
+      "to": "academy",
+      "if": {
+       "notFlag": "race-aurum"
+      }
+     },
+     {
+      "text": "\"Sell it to Aurum. Europa needs the money.\"",
+      "to": "aurum"
+     }
+    ]
+   },
+   "okafor": {
+    "text": "\"Ines.\" He laughs, once. \"Of course. She'll be careful with it, and then she'll be loud with it.\" He fills a vial from the sample line and presses it into your hand. \"For your ship. I'd like to know if they answer each other.\"",
+    "choices": [
+     {
+      "text": "Take the vial.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "europa-done"
+       },
+       {
+        "setFlag": "europa-told-okafor"
+       },
+       {
+        "locker": {
+         "item": "europa-vial",
+         "qty": 1
+        }
+       },
+       {
+        "credits": 1000
+       }
+      ]
+     }
+    ]
+   },
+   "secret": {
+    "text": "He breathes out, long and slow, like a man setting down something heavy. \"Yes. That's what I hoped you'd say.\" He fills a vial and presses it into your hand. \"Then nobody hears this from me. Take this. Keep it near your core. I'd like to know if they answer each other.\"",
+    "choices": [
+     {
+      "text": "Take the vial.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "europa-done"
+       },
+       {
+        "setFlag": "europa-secret"
+       },
+       {
+        "affinity": {
+         "who": "ness",
+         "by": 1
+        }
+       },
+       {
+        "locker": {
+         "item": "europa-vial",
+         "qty": 1
+        }
+       },
+       {
+        "credits": 1000
+       }
+      ]
+     }
+    ]
+   },
+   "academy": {
+    "text": "\"Brandt will lock it in a vault and call it safe.\" He considers. \"Perhaps it is.\" He fills a vial anyway and gives it to you. \"The Academy can have the station. This one's for you. Keep it near your core.\"",
+    "choices": [
+     {
+      "text": "Take the vial.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "europa-done"
+       },
+       {
+        "setFlag": "europa-academy"
+       },
+       {
+        "locker": {
+         "item": "europa-vial",
+         "qty": 1
+        }
+       },
+       {
+        "credits": 1000
+       }
+      ]
+     }
+    ]
+   },
+   "aurum": {
+    "text": "Something closes in his face. \"Teague would put a transmitter down that hole by the end of the week, to see if they'd talk to him.\" He shakes his head. \"No. I won't do that. But thank you for your honesty.\" He gives you a vial anyway, coolly. \"For your ship.\"",
+    "choices": [
+     {
+      "text": "Take the vial.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "europa-done"
+       },
+       {
+        "affinity": {
+         "who": "ness",
+         "by": -1
+        }
+       },
+       {
+        "locker": {
+         "item": "europa-vial",
+         "qty": 1
+        }
+       },
+       {
+        "credits": 1000
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ {
+  "id": "vega-bulkhead",
+  "title": "Names on the bulkhead",
+  "speaker": "Vega waystation",
+  "role": "The last stop before the dark",
+  "site": "vega-depot-dock",
+  "if": {
+   "notFlag": "vega-read"
+  },
+  "start": "a",
+  "nodes": {
+   "a": {
+    "text": "The dock is automated and empty. Fuel lines, a water tap, a coffee machine that still works. And the bulkhead by the outer hatch, covered from deck to ceiling in scratched names and dates: captains marking their way out past the charts.\n\nSome are fresh. Some are so old the metal has dulled over them.",
+    "choices": [
+     {
+      "text": "Look for a name you know.",
+      "to": "search",
+      "if": {
+       "motive": [
+        "searching"
+       ]
+      }
+     },
+     {
+      "text": "Read the oldest ones.",
+      "to": "old"
+     },
+     {
+      "text": "Look closer.",
+      "to": "old"
+     }
+    ]
+   },
+   "search": {
+    "text": "You find it near eye level, scratched with a familiar hand: their name, and a date eight months ago. Under it, an arrow pointing outward, and two words: GOING FURTHER.\n\nThey were here. They were alive. They went on.",
+    "choices": [
+     {
+      "text": "Touch the name. Then keep reading.",
+      "to": "old",
+      "effects": [
+       {
+        "setFlag": "vega-found-them"
+       }
+      ]
+     }
+    ]
+   },
+   "old": {
+    "text": "Low on the bulkhead, half under a weld seam, there's a string of letters and numbers you know better than your own name.\n\nYour ship's hull number.\n\nThe date beside it is forty-one years ago. Before the consortium existed. Before her hull was laid. Someone came through Vega in a ship with her number, or something that wore it, and scratched it here on their way out into the dark.",
+    "choices": [
+     {
+      "text": "\"Your inheritance...\"",
+      "to": "heir",
+      "if": {
+       "moment": [
+        "the-inheritance"
+       ]
+      }
+     },
+     {
+      "text": "Take a rubbing of it.",
+      "to": "rub"
+     }
+    ]
+   },
+   "heir": {
+    "text": "Next to the hull number, smaller, three initials. Your relative's initials. The one who left you the hangar, and the key, and the letter that said *go further than I did.*\n\nThey were here. Forty-one years ago. With her.",
+    "choices": [
+     {
+      "text": "Take a rubbing.",
+      "to": "rub",
+      "effects": [
+       {
+        "setFlag": "vega-heir"
+       }
+      ]
+     }
+    ]
+   },
+   "rub": {
+    "text": "You press paper to the metal and rub charcoal over it until the number stands out, white on black. Then, because everyone else did, you take out a knife and scratch your own name beside it, with today's date.\n\nThe bulkhead hums faintly under your hand. Or maybe that's your ship, through the docking clamps.",
+    "choices": [
+     {
+      "text": "Head back to the ship.",
+      "to": null,
+      "effects": [
+       {
+        "setFlag": "vega-read"
+       },
+       {
+        "locker": {
+         "item": "bulkhead-rubbing",
+         "qty": 1
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+]
